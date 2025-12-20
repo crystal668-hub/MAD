@@ -1,0 +1,90 @@
+# ===================================
+# 多Agent化学反应过电势预测系统配置文件
+# ===================================
+
+# ===== LLM配置 =====
+llm:
+  # Agent 1: OpenAI GPT模型
+  agent1:
+    provider: "openai"
+    model: "gpt-4"
+    api_key: "${OPENAI_API_KEY}"  # 从环境变量读取
+    temperature: 0.7
+    max_tokens: 2000
+    embedding_model: "text-embedding-ada-002"
+  
+  # Agent 2: Anthropic Claude模型
+  agent2:
+    provider: "anthropic"
+    model: "claude-3-opus-20240229"
+    api_key: "${ANTHROPIC_API_KEY}"  # 从环境变量读取
+    temperature: 0.7
+    max_tokens: 2000
+    embedding_model: "voyage-large-2"  # 或使用其他embedding模型
+  
+  # Agent 3: Google Gemini模型
+  agent3:
+    provider: "google"
+    model: "gemini-pro"
+    api_key: "${GOOGLE_API_KEY}"  # 从环境变量读取
+    temperature: 0.7
+    max_tokens: 2000
+    embedding_model: "models/embedding-001"
+
+# ===== 向量数据库配置 =====
+vector_store:
+  type: "chroma"
+  persist_directory: "./data/chroma_db"
+  collection_name: "chemical_reactions"
+  distance_metric: "cosine"  # cosine, l2, ip
+  
+# ===== RAG系统配置 =====
+rag:
+  chunk_size: 512  # 文本分块大小
+  chunk_overlap: 50  # 分块重叠大小
+  top_k: 5  # 检索返回的top-k结果
+  similarity_threshold: 0.7  # 相似度阈值
+  
+# ===== AutoGen辩论配置 =====
+debate:
+  max_rounds: 10  # 最大辩论轮数
+  consensus_threshold: 3  # 连续相同答案次数视为达成共识
+  timeout: 300  # 单轮辩论超时时间(秒)
+  speaker_selection_method: "round_robin"  # round_robin, auto, manual
+  
+# ===== 经验库配置 =====
+experience:
+  storage_path: "./data/experience_db.json"
+  max_experiences: 1000  # 最大存储经验数量
+  relevance_threshold: 0.8  # 经验相关性阈值
+  enable_experience_reuse: true  # 是否启用经验重用
+  
+# ===== 化学反应配置 =====
+chemistry:
+  num_components: 5  # 组分数量
+  num_reaction_types: 9  # 反应类型数量
+  reaction_types:
+    - "氢氧化反应"
+    - "氧化还原反应"
+    - "酸碱中和反应"
+    - "电解反应"
+    - "腐蚀反应"
+    - "催化反应"
+    - "络合反应"
+    - "沉淀反应"
+    - "氧化电解反应"
+    
+# ===== 日志配置 =====
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_file: "./logs/system.log"
+  log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  max_file_size: 10485760  # 10MB
+  backup_count: 5
+  
+# ===== 数据路径配置 =====
+paths:
+  raw_data: "./data/raw"
+  processed_data: "./data/processed"
+  models: "./models"
+  outputs: "./outputs"
