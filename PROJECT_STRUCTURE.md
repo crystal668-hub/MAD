@@ -8,9 +8,10 @@ MAD/
 │   └── config.yaml                 # 主配置文件
 │
 ├── data/                           # 数据目录
-│   ├── raw/                        # 原始化学文献数据
-│   │   └── sample_literature.txt  # 示例文献
-│   ├── processed/                  # 处理后的数据
+│   ├── raw/                        # 原始TSV数据文件
+│   │   └── *.tsv                  # TSV格式的化学文献数据
+│   ├── processed/                  # 切分后的chunks（txt格式）
+│   │   └── *_chunks.txt           # 处理后的chunks文件
 │   └── chroma_db/                  # Chroma向量数据库（运行时生成）
 │
 ├── database/                       # 数据库模块
@@ -46,10 +47,13 @@ MAD/
 ├── outputs/                        # 输出目录（运行时生成）
 │   └── result_*.json              # 辩论结果文件
 │
+├── process_abstracts.py            # TSV数据预处理脚本
 ├── main.py                         # 主程序入口
+├── examples.py                     # 使用示例脚本
 ├── requirements.txt                # Python依赖列表
 ├── README.md                       # 项目说明文档
 ├── QUICKSTART.md                   # 快速开始指南
+├── PROJECT_STRUCTURE.md            # 项目结构详解
 ├── .env.example                    # 环境变量示例
 └── .gitignore                      # Git忽略文件
 ```
@@ -60,21 +64,28 @@ MAD/
 
 **config.yaml**: 系统主配置文件
 - LLM配置：三个Agent的模型、API密钥、参数
+  - Agent1: OpenAI GPT-4o-mini
+  - Agent2: xAI Grok-4.1-fast
+  - Agent3: Google Gemini-3-pro
+  - 每个Agent配置独立的embedding模型
 - 向量数据库配置：Chroma设置
-- RAG配置：文本分块、检索参数
-- 辩论配置：轮数、共识阈值
-- 经验库配置：存储路径、相关性阈值
-- 化学配置：反应类型列表
+- RAG配置：检索参数（top_k、相似度阈值）
+  - 注意：chunk_size和chunk_overlap已废弃，因数据已预切分
+- 辩论配置：轮数、共识阈值、超时设置
+- 经验库配置：存储路径、容量、相关性阈值
+- 化学配置：11种反应类型列表（AOR, CO2RR, HER, OER等）
 
 ### 2. data/ - 数据模块
 
-**raw/**: 原始数据
-- 存放化学文献（txt, pdf, docx, md格式）
-- 用于构建RAG索引
+**raw/**: 原始TSV数据
+- 存放TSV格式的化学文献数据
+- 必须包含`abstract`列
+- 使用Tab（\t）分隔字段
 
-**processed/**: 处理后的数据
-- 中间处理结果
-- 可选的数据预处理输出
+**processed/**: 切分后的chunks
+- 由process_abstracts.py生成的txt文件
+- 格式：每行一个chunk，`索引\t内容`
+- 直接用于RAG系统索引构建
 
 **chroma_db/**: 向量数据库
 - 自动生成的Chroma数据库文件
@@ -87,10 +98,15 @@ MAD/
 - 功能：文档添加、查询、更新、删除
 - 支持相似度搜索和元数据过滤
 
-**rag_system.py** (400行)
+**rag_system.py** (约300行)
 - `RAGSystem`类：实现完整的RAG流程
 - 集成LlamaIndex和Chroma
-- 功能：索引构建、文档加载、检索增强查询
+- 功能：
+  - 加载预切分的chunks（从data/processed/）
+  - 构建向量索引（无需再次切分）
+  - 检索增强查询
+  - 索引持久化和加载
+- 注意：已移除SentenceSplitter，直接使用预处理的chunks
 
 ### 4. agents/ - Agent模块
 
@@ -151,22 +167,42 @@ MAD/
 - 组分解析和验证
 - 格式化和转换工具
 
-### 8. main.py - 主程序
+### 8. process_abstracts.py - 数据预处理脚本
 
-**MADSystem类** (300行)
+**功能** (约100行)
+- 从TSV文件提取abstract列内容
+- 为每个abstract添加索引序号
+- 每行abstract作为一个独立chunk
+- 保存为txt格式到data/processed/
+- 支持批量处理多个TSV文件
+
+**主要函数：**
+- `process_tsv_to_chunks()`: 处理单个TSV文件
+- `process_all_tsv_files()`: 批量处理所有TSV文件
+- 输出格式：`索引\t内容`（每行）
+
+### 9. main.py - 主程序
+
+**MADSystem类** (约400行)
 - 系统整合和初始化
 - 组件管理（RAG、Agent、经验库、辩论）
 - 辩论执行和结果保存
-- 命令行接口
+- 命令行接口（支持多种参数）
 
 ## 数据流程
 
 ```
+0. 数据预处理阶段
+   └─> 读取TSV文件 (data/raw/*.tsv)
+   └─> 提取abstract列
+   └─> 添加索引并切分chunks
+   └─> 保存到processed (data/processed/*_chunks.txt)
+
 1. 初始化阶段
    └─> 加载配置 (config.yaml)
    └─> 初始化日志系统
-   └─> 构建RAG索引 (data/raw → chroma_db)
-   └─> 创建三个LLM Agent
+   └─> 构建RAG索引 (data/processed → chroma_db)
+   └─> 创建三个LLM Agent（各配独立embedding）
    └─> 加载经验库 (experience_db.json)
 
 2. 辩论阶段
@@ -233,19 +269,22 @@ MADSystem
 ## 运行时生成的文件
 
 ```
-logs/
-├── system.log                    # 系统运行日志
-└── debates/
-    └── debate_20251220_143052.log  # 每次辩论的详细日志
-
 data/
+├── processed/                    # 预处理后的chunks
+│   └── *_chunks.txt             # 由process_abstracts.py生成
 ├── chroma_db/                    # 向量数据库文件
 │   ├── chroma.sqlite3
+│   ├── docstore.json            # 文档存储
 │   └── ...
 └── experience_db.json            # 经验库（JSON格式）
 
+logs/
+├── system.log                    # 系统运行日志
+└── debates/
+    └── debate_20251221_*.log     # 每次辩论的详细日志
+
 outputs/
-└── result_20251220_143052.json   # 辩论结果
+└── result_20251221_*.json        # 辩论结果文件
 ```
 
 ## 代码规范

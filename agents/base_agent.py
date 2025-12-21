@@ -182,15 +182,17 @@ class BaseAgent(ABC):
 你的任务是分析给定的化学组分，预测产生最低过电势的反应类型。
 
 可选的反应类型有：
-1. 氢氧化反应
-2. 氧化还原反应
-3. 酸碱中和反应
-4. 电解反应
-5. 腐蚀反应
-6. 催化反应
-7. 络合反应
-8. 沉淀反应
-9. 氧化电解反应
+1. AOR (Alcohol Oxidation Reaction)
+2. CO2RR (CO2 Reduction Reaction)
+3. EOR (Ethanol Oxidation Reaction)
+4. HER (Hydrogen Evolution Reaction)
+5. HOR (Hydrogen Oxidation Reaction)
+6. HZOR (Hydrazine Oxidation Reaction)
+7. O5H (Oxygen Reduction 5-electron)
+8. OER (Oxygen Evolution Reaction)
+9. ORR (Oxygen Reduction Reaction)
+10. SAC (Single Atom Catalyst)
+11. UOR (Urea Oxidation Reaction)
 
 请基于以下信息进行分析：
 1. 化学文献中的相关知识

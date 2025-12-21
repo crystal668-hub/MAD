@@ -36,7 +36,32 @@ GOOGLE_API_KEY=your-actual-google-key
 
 ### 3. 准备数据
 
-将化学文献数据（txt、pdf、docx或md格式）放入 `data/raw/` 目录。
+将化学文献数据（TSV格式）放入 `data/raw/` 目录。
+
+**TSV文件要求：**
+- 必须包含 `abstract` 列
+- 使用Tab（\t）分隔
+
+### 4. 处理数据
+
+运行数据处理脚本，提取abstract并切分chunks：
+
+```bash
+python process_abstracts.py
+```
+
+此脚本会：
+- 读取 `data/raw/` 下的所有TSV文件
+- 提取每行的 `abstract` 列内容
+- 为每个chunk添加索引序号
+- 将结果保存到 `data/processed/` （格式：`索引\t内容`）
+
+**输出示例：**
+```
+0	This is the first abstract content...
+1	This is the second abstract content...
+2	This is the third abstract content...
+```
 
 ## 基本使用
 
@@ -83,19 +108,24 @@ print(f"过电势: {result['final_overpotential']}")
 ```python
 from database import RAGSystem
 
-# 初始化RAG系统
+# 初始化RAG系统（使用处理后的chunks）
 rag = RAGSystem(
-    data_dir="./data/raw",
+    data_dir="./data/processed",  # 注意：使用processed目录
     persist_dir="./data/chroma_db",
     collection_name="chemical_reactions"
 )
 
 # 构建索引（首次运行）
+# chunks已经切分好，直接加载，无需再分割
 rag.build_index()
 
 # 查询
 result = rag.query("什么是氧化还原反应的过电势？")
 print(result['answer'])
+
+# 查看索引统计
+stats = rag.get_index_stats()
+print(f"索引chunks数量: {stats['document_count']}")
 ```
 
 ### 单独使用Agent
@@ -153,12 +183,34 @@ results = store.query_experiences(
 
 主要配置位于 `config/config.yaml`：
 
-- **llm**: 三个Agent的LLM配置（模型、API密钥、参数）
+- **llm**: 三个Agent的LLM配置
+  - agent1: OpenAI GPT-4o-mini
+  - agent2: xAI Grok-4.1-fast  
+  - agent3: Google Gemini-3-pro
+  - 每个均配置独立的embedding模型
+
 - **vector_store**: Chroma向量数据库配置
-- **rag**: RAG系统参数（chunk大小、top-k等）
-- **debate**: 辩论配置（最大轮数、共识阈值等）
+  - persist_directory: 持久化目录
+  - collection_name: 集合名称
+  - distance_metric: 距离度量（cosine/l2/ip）
+
+- **rag**: RAG系统参数
+  - 注意：chunk_size和chunk_overlap已不使用，因为chunks已预切分
+  - top_k: 检索返回数量
+  - similarity_threshold: 相似度阈值
+
+- **debate**: 辩论配置
+  - max_rounds: 最大辩论轮数
+  - consensus_threshold: 共识阈值
+  - timeout: 超时时间
+
 - **experience**: 经验库配置
+  - storage_path: 存储路径
+  - max_experiences: 最大存储数量
+  - relevance_threshold: 相关性阈值
+
 - **chemistry**: 化学反应相关配置
+  - 支持11种反应类型（AOR, CO2RR, HER, OER, ORR等）
 
 ## 常见问题
 
@@ -166,19 +218,26 @@ results = store.query_experiences(
 
 确保在 `.env` 文件中正确配置了所有API密钥，且格式正确。
 
-### 2. RAG系统初始化失败
+### 2. 数据处理失败
 
-- 检查 `data/raw/` 目录是否包含文档
+- 检查TSV文件是否包含 `abstract` 列
+- 确保使用Tab（\t）分隔
+- 查看 `process_abstracts.py` 输出的错误信息
+
+### 3. RAG系统初始化失败
+
+- 确保已运行 `process_abstracts.py` 处理数据
+- 检查 `data/processed/` 目录是否包含txt文件
 - 首次运行需要时间构建索引
 - 使用 `--skip-rag` 跳过RAG初始化进行快速测试
 
-### 3. 内存不足
+### 4. 内存不足
 
 - 减少 `max_tokens` 配置
 - 减少 `top_k` 检索数量
-- 使用更小的chunk_size
+- 分批处理数据
 
-### 4. 辩论不收敛
+### 5. 辩论不收敛
 
 - 增加 `max_rounds` 配置
 - 降低 `consensus_threshold`

@@ -11,8 +11,9 @@ MAD/
 ├── config/              # 配置文件目录
 │   └── config.yaml     # 主配置文件
 ├── data/               # 数据目录
-│   ├── raw/           # 原始化学文献数据
-│   └── processed/     # 处理后的数据
+│   ├── raw/           # 原始TSV数据文件
+│   ├── processed/     # 切分后的chunks（txt格式）
+│   └── chroma_db/     # 向量数据库（运行时生成）
 ├── database/          # 数据库模块
 │   ├── rag_system.py  # RAG系统实现
 │   └── vector_store.py # 向量数据库管理
@@ -29,30 +30,39 @@ MAD/
 ├── utils/             # 工具模块
 │   ├── logger.py      # 日志工具
 │   └── helpers.py     # 辅助函数
+├── process_abstracts.py  # TSV数据处理脚本
 ├── main.py            # 主程序入口
+├── examples.py        # 使用示例
 ├── requirements.txt   # 依赖列表
 └── README.md         # 项目说明
 ```
 
 ## 核心功能
 
-### 1. 数据库建立（database/）
-- 使用LlamaIndex对化学文献数据进行索引构建
+### 1. 数据预处理（process_abstracts.py）
+- 从TSV文件提取abstract列内容
+- 自动添加索引序号
+- 每行abstract作为一个独立chunk
+- 输出为txt格式供RAG系统使用
+
+### 2. 数据库建立（database/）
+- 使用LlamaIndex对处理后的chunks进行索引构建
 - 采用Chroma向量数据库存储嵌入向量
 - 支持三个不同的embedding模型
+- 直接加载预切分的chunks，无需二次分割
 
-### 2. Agent定义（agents/）
-- **Agent 1**: 基于OpenAI GPT-4
-- **Agent 2**: 基于Anthropic Claude
-- **Agent 3**: 基于Google Gemini
+### 3. Agent定义（agents/）
+- **Agent 1**: 基于OpenAI GPT-4o-mini
+- **Agent 2**: 基于xAI Grok-4.1-fast
+- **Agent 3**: 基于Google Gemini-3-pro
 - 每个Agent配备独立的RAG系统用于检索增强
 
-### 3. 多Agent辩论（debate/）
+### 4. 多Agent辩论（debate/）
 - 基于Microsoft AutoGen框架实现
 - 三个Agent自由辩论直至达成共识
 - 确保最终结果和推理轨迹保持一致
 
-### 4. 经验提取（experience/）
+### 5. 经验提取（experience/）
 - 提取辩论过程中的统一答案和推理轨迹
 - 构建经验库用于后续推理辅助
 - 支持经验检索和上下文增强
@@ -94,27 +104,47 @@ GOOGLE_API_KEY=your_google_api_key
 ```
 
 5. 准备数据
-将化学文献数据放入 `data/raw/` 目录
+将TSV格式的化学文献数据放入 `data/raw/` 目录，确保包含`abstract`列
+
+6. 处理数据
+```bash
+# 提取abstract并切分chunks
+python process_abstracts.py
+```
+这会在 `data/processed/` 目录生成处理后的txt文件。
 
 ## 使用方法
 
 ### 基本使用
 
+### 完整流程
+
+1. **数据预处理**
 ```bash
-python main.py --components "组分1,组分2,组分3,组分4,组分5"
+# 处理data/raw下的TSV文件，提取abstract列
+python process_abstracts.py
+```
+
+2. **运行辩论系统**
+```bash
+# 指定五种化学组分进行辩论
+python main.py --components "硫酸,氢氧化钠,氯化钠,硝酸,碳酸钙"
 ```
 
 ### 高级选项
 
 ```bash
 # 指定配置文件
-python main.py --config config/custom_config.yaml
+python main.py --config config/custom_config.yaml --components "组分1,组分2,组分3"
 
-# 启用详细日志
-python main.py --verbose
+# 跳过RAG初始化（快速测试）
+python main.py --components "硫酸,氢氧化钠,氯化钠" --skip-rag
 
-# 使用已有经验库
-python main.py --use-experience
+# 查看系统状态
+python main.py --status
+
+# 使用示例脚本
+python examples.py
 ```
 
 ## 配置说明

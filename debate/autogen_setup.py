@@ -74,23 +74,23 @@ class AutoGenSetup:
             return {
                 "model": model_config.get('model', 'gpt-4'),
                 "api_key": model_config.get('api_key'),
+                "base_url": model_config.get('base_url', 'https://openrouter.ai/api/v1'),
                 "temperature": model_config.get('temperature', 0.7),
                 "max_tokens": model_config.get('max_tokens', 2000)
             }
-        elif provider == 'anthropic':
-            # AutoGen可能需要特殊配置来支持Anthropic
-            # 这里提供一个基本框架
+        elif provider == 'xai':
             return {
-                "model": model_config.get('model', 'claude-3-opus-20240229'),
+                "model": model_config.get('model', 'x-ai/grok-beta'),
                 "api_key": model_config.get('api_key'),
+                "base_url": model_config.get('base_url', 'https://openrouter.ai/api/v1'),
                 "temperature": model_config.get('temperature', 0.7),
-                "max_tokens": model_config.get('max_tokens', 2000),
-                "api_type": "anthropic"
+                "max_tokens": model_config.get('max_tokens', 2000)
             }
         elif provider == 'google':
             return {
                 "model": model_config.get('model', 'gemini-pro'),
                 "api_key": model_config.get('api_key'),
+                "base_url": model_config.get('base_url', 'https://openrouter.ai/api/v1'),
                 "temperature": model_config.get('temperature', 0.7),
                 "max_tokens": model_config.get('max_tokens', 2000),
                 "api_type": "google"
@@ -157,26 +157,25 @@ class AutoGenSetup:
 # 自定义终止条件
 # ===================================
 
-def create_termination_function(consensus_threshold: int = 3):
+def create_termination_function(num_agents: int = 3, required_consensus: int = 3):
     """
     创建自定义终止函数
-    当连续达成共识指定次数时终止辩论
+    当所有agent达成共识时终止辩论（必须三方答案完全一致）
     
     Args:
-        consensus_threshold: 连续相同答案次数阈值
+        num_agents: Agent总数（默认3个）
+        required_consensus: 达成共识所需的agent数量（默认3个，即全部一致）
     
     Returns:
         function: 终止判断函数
     """
-    # 记录连续相同答案的计数器
-    consensus_tracker = {
-        'last_reaction': None,
-        'count': 0
-    }
+    # 记录每个agent的最新答案
+    agent_answers = {}
     
     def is_termination_msg(msg: Dict) -> bool:
         """
         判断是否应该终止辩论
+        检查是否有足够数量的agent给出了相同答案（反应类型+过电势）
         
         Args:
             msg: 消息字典
@@ -184,12 +183,14 @@ def create_termination_function(consensus_threshold: int = 3):
         Returns:
             bool: 是否终止
         """
-        content = msg.get('content', '').lower()
+        content = msg.get('content', '').upper()
+        content_lower = msg.get('content', '').lower()
+        sender = msg.get('name', 'unknown')
         
         # 提取反应类型
         reaction_types = [
-            "氢氧化反应", "氧化还原反应", "酸碱中和反应", "电解反应",
-            "腐蚀反应", "催化反应", "络合反应", "沉淀反应", "氧化电解反应"
+            "AOR", "CO2RR", "EOR", "HER", "HOR", 
+            "HZOR", "O5H", "OER", "ORR", "SAC", "UOR"
         ]
         
         current_reaction = None
@@ -198,20 +199,37 @@ def create_termination_function(consensus_threshold: int = 3):
                 current_reaction = reaction
                 break
         
-        if current_reaction is None:
+        # 提取过电势值
+        import re
+        current_overpotential = None
+        potential_pattern = r'(\d+\.?\d*)\s*(v|伏|volt)'
+        matches = re.findall(potential_pattern, content_lower)
+        if matches:
+            try:
+                current_overpotential = round(float(matches[0][0]), 2)  # 保留2位小数
+            except (ValueError, IndexError):
+                pass
+        
+        # 如果提取到反应类型和过电势，记录该agent的答案（元组：反应类型+过电势）
+        if current_reaction is not None and current_overpotential is not None:
+            agent_answers[sender] = (current_reaction, current_overpotential)
+        
+        # 如果还没有足够的agent给出答案，继续辩论
+        if len(agent_answers) < num_agents:
             return False
         
-        # 检查是否与上一次相同
-        if current_reaction == consensus_tracker['last_reaction']:
-            consensus_tracker['count'] += 1
-        else:
-            consensus_tracker['last_reaction'] = current_reaction
-            consensus_tracker['count'] = 1
+        # 统计每种答案（反应类型+过电势组合）的支持者数量
+        from collections import Counter
+        answer_counts = Counter(agent_answers.values())
         
-        # 达到阈值则终止
-        if consensus_tracker['count'] >= consensus_threshold:
-            print(f"\n✓ 达成共识: {current_reaction} (连续{consensus_tracker['count']}次)")
-            return True
+        # 检查是否有任何答案达到了共识阈值
+        for answer, count in answer_counts.items():
+            if count >= required_consensus:
+                reaction, overpotential = answer
+                print(f"\n✓ 达成共识: {reaction}, 过电势: {overpotential}V ({count}/{num_agents}个agent支持)")
+                # 重置计数器以便下次使用
+                agent_answers.clear()
+                return True
         
         return False
     

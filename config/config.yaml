@@ -7,29 +7,35 @@ llm:
   # Agent 1: OpenAI GPT模型
   agent1:
     provider: "openai"
-    model: "gpt-4"
+    model: "openai/gpt-4o-mini"
     api_key: "${OPENAI_API_KEY}"  # 从环境变量读取
-    temperature: 0.7
+    base_url: "https://openrouter.ai/api/v1"
+    temperature: 0.9
     max_tokens: 2000
-    embedding_model: "text-embedding-ada-002"
+    embedding_model: "openai/text-embedding-3-large"
+    emb_url: "https://openrouter.ai/api/v1/embeddings"
   
-  # Agent 2: Anthropic Claude模型
+  # Agent 2: xAI Grok模型
   agent2:
-    provider: "anthropic"
-    model: "claude-3-opus-20240229"
-    api_key: "${ANTHROPIC_API_KEY}"  # 从环境变量读取
-    temperature: 0.7
+    provider: "xai"
+    model: "x-ai/grok-4.1-fast"
+    api_key: "${XAI_API_KEY}"  
+    base_url: "https://openrouter.ai/api/v1"
+    temperature: 0.9
     max_tokens: 2000
-    embedding_model: "voyage-large-2"  # 或使用其他embedding模型
+    embedding_model: "baai/bge-m3" 
+    emb_url: "https://openrouter.ai/api/v1/embeddings" 
   
   # Agent 3: Google Gemini模型
   agent3:
     provider: "google"
-    model: "gemini-pro"
-    api_key: "${GOOGLE_API_KEY}"  # 从环境变量读取
-    temperature: 0.7
+    model: "google/gemini-3-pro-preview"
+    api_key: "${GOOGLE_API_KEY}"  
+    base_url: "https://openrouter.ai/api/v1"
+    temperature: 0.9
     max_tokens: 2000
-    embedding_model: "models/embedding-001"
+    embedding_model: "google/gemini-embedding-001"
+    emb_url: "https://openrouter.ai/api/v1/embeddings"
 
 # ===== 向量数据库配置 =====
 vector_store:
@@ -40,10 +46,10 @@ vector_store:
   
 # ===== RAG系统配置 =====
 rag:
-  chunk_size: 512  # 文本分块大小
-  chunk_overlap: 50  # 分块重叠大小
-  top_k: 5  # 检索返回的top-k结果
-  similarity_threshold: 0.7  # 相似度阈值
+  #chunk_size: 512  
+  #chunk_overlap: 50  
+  top_k: 5  
+  similarity_threshold: 0.7  
   
 # ===== AutoGen辩论配置 =====
 debate:
@@ -61,18 +67,20 @@ experience:
   
 # ===== 化学反应配置 =====
 chemistry:
-  num_components: 5  # 组分数量
-  num_reaction_types: 9  # 反应类型数量
+  num_components: 5  
+  num_reaction_types: 11  
   reaction_types:
-    - "氢氧化反应"
-    - "氧化还原反应"
-    - "酸碱中和反应"
-    - "电解反应"
-    - "腐蚀反应"
-    - "催化反应"
-    - "络合反应"
-    - "沉淀反应"
-    - "氧化电解反应"
+    - "AOR"    # Alcohol Oxidation Reaction
+    - "CO2RR"  # CO2 Reduction Reaction
+    - "EOR"    # Ethanol Oxidation Reaction
+    - "HER"    # Hydrogen Evolution Reaction
+    - "HOR"    # Hydrogen Oxidation Reaction
+    - "HZOR"   # Hydrazine Oxidation Reaction
+    - "O5H"    # Oxygen Reduction (5-electron)
+    - "OER"    # Oxygen Evolution Reaction
+    - "ORR"    # Oxygen Reduction Reaction
+    - "SAC"    # Single Atom Catalyst
+    - "UOR"    # Urea Oxidation Reaction
     
 # ===== 日志配置 =====
 logging:

@@ -138,20 +138,22 @@ class DebateManager:
 **化学组分**: {components_str}
 
 **可选反应类型**:
-1. 氢氧化反应
-2. 氧化还原反应
-3. 酸碱中和反应
-4. 电解反应
-5. 腐蚀反应
-6. 催化反应
-7. 络合反应
-8. 沉淀反应
-9. 氧化电解反应
+1. AOR (Alcohol Oxidation Reaction)
+2. CO2RR (CO2 Reduction Reaction)
+3. EOR (Ethanol Oxidation Reaction)
+4. HER (Hydrogen Evolution Reaction)
+5. HOR (Hydrogen Oxidation Reaction)
+6. HZOR (Hydrazine Oxidation Reaction)
+7. O5H (Oxygen Reduction 5-electron)
+8. OER (Oxygen Evolution Reaction)
+9. ORR (Oxygen Reduction Reaction)
+10. SAC (Single Atom Catalyst)
+11. UOR (Urea Oxidation Reaction)
 
 **要求**:
-1. 基于化学原理和文献知识进行分析
+1. 基于化学原理和检索到的文献知识进行分析
 2. 给出具体的反应类型推荐
-3. 如可能，估算过电势值
+3. 估算过电势值
 4. 提供详细的推理过程
 5. 引用支持你观点的证据
 

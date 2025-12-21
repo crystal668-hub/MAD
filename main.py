@@ -125,39 +125,81 @@ class MADSystem:
         self.logger.info("经验库初始化完成")
     
     def _init_rag_systems(self) -> None:
-        """初始化RAG系统"""
+        """初始化RAG系统 - 为每个Agent创建独立的RAG系统"""
         print("正在初始化RAG系统...")
         rag_config = self.config.get('rag', {})
         vector_config = self.config.get('vector_store', {})
+        llm_config = self.config.get('llm', {})
         
-        # 为每个Agent创建独立的RAG系统
-        # 简化版：这里使用相同的RAG系统，实际可以为每个Agent定制
         data_dir = self.config.get('paths', {}).get('raw_data', './data/raw')
-        persist_dir = vector_config.get('persist_directory', './data/chroma_db')
+        base_persist_dir = vector_config.get('persist_directory', './data/chroma_db')
         
         # 检查数据目录是否有文件
         if not any(Path(data_dir).iterdir()):
             self.logger.warning(f"数据目录为空: {data_dir}，RAG系统可能无法正常工作")
             print(f"  警告：数据目录为空，请将化学文献数据放入 {data_dir}")
         
-        # 创建共享的RAG系统
-        self.shared_rag = RAGSystem(
-            data_dir=data_dir,
-            persist_dir=persist_dir,
-            collection_name=vector_config.get('collection_name', 'chemical_reactions'),
-            chunk_size=rag_config.get('chunk_size', 512),
-            chunk_overlap=rag_config.get('chunk_overlap', 50),
-            top_k=rag_config.get('top_k', 5)
+        # 为每个Agent创建独立的RAG系统，使用各自的embedding模型
+        self.rag_systems = {}
+        
+        for agent_key in ['agent1', 'agent2', 'agent3']:
+            agent_config = llm_config.get(agent_key, {})
+            embedding_model_name = agent_config.get('embedding_model', 'text-embedding-ada-002')
+            
+            # 为每个agent创建独立的持久化目录
+            agent_persist_dir = f"{base_persist_dir}_{agent_key}"
+            
+            # 创建embedding模型实例
+            embedding_model = self._create_embedding_model(embedding_model_name, agent_config)
+            
+            print(f"  正在为{agent_key}创建RAG系统（embedding: {embedding_model_name}）...")
+            
+            # 创建RAG系统
+            rag_system = RAGSystem(
+                data_dir=data_dir,
+                persist_dir=agent_persist_dir,
+                collection_name=f"{vector_config.get('collection_name', 'chemical_reactions')}_{agent_key}",
+                embedding_model=embedding_model,
+                chunk_size=rag_config.get('chunk_size', 512),
+                chunk_overlap=rag_config.get('chunk_overlap', 50),
+                top_k=rag_config.get('top_k', 5)
+            )
+            
+            self.rag_systems[agent_key] = rag_system
+            self.logger.info(f"{agent_key}的RAG系统初始化完成（embedding: {embedding_model_name}）")
+        
+        print(f"✓ 成功为3个Agent创建独立的RAG系统")
+        self.logger.info("所有RAG系统初始化完成")
+    
+    def _create_embedding_model(self, model_name: str, agent_config: dict):
+        """
+        根据模型名称创建embedding模型实例
+        
+        Args:
+            model_name: embedding模型名称
+            agent_config: agent配置
+        
+        Returns:
+            embedding模型实例
+        """
+        from llama_index.embeddings.openai import OpenAIEmbedding
+        
+        # 获取API配置
+        api_key = agent_config.get('api_key', '')
+        if api_key.startswith("${") and api_key.endswith("}"):
+            env_var = api_key[2:-1]
+            api_key = os.getenv(env_var, '')
+        
+        emb_url = agent_config.get('emb_url', 'https://openrouter.ai/api/v1/embeddings')
+        
+        # 所有embedding模型都通过OpenRouter的OpenAI兼容接口
+        embedding_model = OpenAIEmbedding(
+            model=model_name,
+            api_key=api_key,
+            api_base=emb_url
         )
         
-        # 为每个Agent分配RAG系统
-        self.rag_systems = {
-            'agent1': self.shared_rag,
-            'agent2': self.shared_rag,
-            'agent3': self.shared_rag
-        }
-        
-        self.logger.info("RAG系统初始化完成")
+        return embedding_model
     
     def _init_agents(self) -> None:
         """初始化Agent"""
@@ -185,7 +227,7 @@ class MADSystem:
         self.debate_manager = DebateManager(
             agents=self.agents,
             config=debate_config,
-            use_autogen=False  # 默认使用手动模式，更容易调试
+            use_autogen=True  
         )
         
         self.logger.info("辩论管理器初始化完成")

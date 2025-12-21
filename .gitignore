@@ -42,6 +42,7 @@ logs/
 # 数据和模型
 data/chroma_db/
 data/processed/
+data/raw/
 data/experience_db.json
 models/
 *.db

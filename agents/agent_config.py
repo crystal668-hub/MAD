@@ -85,7 +85,7 @@ class AgentConfig:
         # Agent配置映射
         agent_configs = [
             ("agent1", "GPT-4 Agent", "agent1"),
-            ("agent2", "Claude Agent", "agent2"),
+            ("agent2", "Grok Agent", "agent2"),
             ("agent3", "Gemini Agent", "agent3")
         ]
         
