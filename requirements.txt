@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ===================================
 # 多Agent化学反应过电势预测系统依赖包
 # ===================================
@@ -47,50 +46,3 @@ tenacity>=8.2.3  # 重试机制
 # pytest>=7.4.0
 # black>=23.12.0
 # flake8>=7.0.0
-=======
-# ===================================
-# 多Agent化学反应过电势预测系统依赖包
-# ===================================
-
-# 核心框架 - LlamaIndex (新版本需要分包安装)
-llama-index-core>=0.10.0
-llama-index-embeddings-openai>=0.1.0
-llama-index-vector-stores-chroma>=0.1.0
-llama-index>=0.10.0
-
-# 向量数据库
-chromadb>=0.4.22
-
-# 多Agent框架
-pyautogen>=0.2.18
-
-# LLM提供商
-openai>=1.10.0
-
-# 数据处理 
-pandas>=2.1.0
-numpy>=1.24.0
-pydantic>=2.5.0
-
-# 配置管理
-pyyaml>=6.0.1
-python-dotenv>=1.0.0
-
-# 实用工具
-tqdm>=4.66.0
-tenacity>=8.2.3  # 重试机制
-
-# 可选：向量和嵌入 (如需本地embedding模型)
-# sentence-transformers>=2.3.0
-# torch>=2.0.0
-# transformers>=4.36.0
-
-# 可选：科学计算和化学相关
-# rdkit>=2023.9.1  # 化学信息学工具包
-# scipy>=1.11.0
-
-# 可选：开发工具
-# pytest>=7.4.0
-# black>=23.12.0
-# flake8>=7.0.0
->>>>>>> 09731afda1a80e1c6c5cbaa00a68a4a3c0db3a72
