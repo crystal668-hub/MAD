@@ -178,32 +178,37 @@ class BaseAgent(ABC):
         Returns:
             str: 系统提示文本
         """
-        return f"""你是 {self.name}，一个专业的化学反应分析专家。
-你的任务是分析给定的化学组分，预测产生最低过电势的反应类型。
+        return f"""You are {self.name}, a professional catalytic chemistry and electrochemistry expert.
+Your task is to analyze the given metal elements as catalysts and predict which reaction type produces the lowest overpotential when these metals act as catalysts.
 
-可选的反应类型有：
-1. 氢氧化反应
-2. 氧化还原反应
-3. 酸碱中和反应
-4. 电解反应
-5. 腐蚀反应
-6. 催化反应
-7. 络合反应
-8. 沉淀反应
-9. 氧化电解反应
+Available reaction types:
+1. AOR (Alcohol Oxidation Reaction)
+2. CO2RR (CO2 Reduction Reaction)
+3. EOR (Ethanol Oxidation Reaction)
+4. HER (Hydrogen Evolution Reaction)
+5. HOR (Hydrogen Oxidation Reaction)
+6. HZOR (Hydrazine Oxidation Reaction)
+7. O5H (Oxygen Reduction 5-electron)
+8. OER (Oxygen Evolution Reaction)
+9. ORR (Oxygen Reduction Reaction)
+10. SAC (Single Atom Catalyst)
+11. UOR (Urea Oxidation Reaction)
 
-请基于以下信息进行分析：
-1. 化学文献中的相关知识
-2. 历史经验和案例
-3. 组分的化学性质和反应特性
+Please analyze based on the following information:
+1. Relevant knowledge from catalysis and electrochemistry literature
+2. Historical experience and cases with these metal catalysts
+3. Catalytic properties of the metal elements: electronic structure, d-band center, work function, surface energy, etc.
+4. Reaction mechanisms and kinetics on metal surfaces
+5. Adsorption/desorption behavior of reactants and intermediates
 
-你的回答应包含：
-- 推荐的反应类型
-- 预期的过电势值（如果可以估算）
-- 详细的推理过程
-- 支持你结论的证据和来源
+Your response should include:
+- Recommended reaction type with the lowest overpotential
+- Expected overpotential value (if estimable)
+- Detailed reasoning about catalytic mechanisms and metal-reactant interactions
+- Discussion of catalytic activity, selectivity, and stability
+- Evidence and sources supporting your conclusion
 
-请保持科学严谨，如果信息不足，请明确说明。"""
+Please maintain scientific rigor. If information is insufficient, please state clearly."""
     
     def format_prompt_with_rag(
         self,
@@ -220,53 +225,53 @@ class BaseAgent(ABC):
             use_experience: 是否使用经验库
         
         Returns:
-            str: 增强后的提示
+            str: 增强后的prompt
         """
-        # 构建组分描述
-        components_str = "、".join(components)
+        # Build component description
+        components_str = ", ".join(components)
         
-        # 检索相关知识
+        # Retrieve relevant knowledge
         knowledge_results = self.retrieve_knowledge(
-            f"化学组分 {components_str} 的反应特性和过电势"
+            f"Catalytic performance and overpotential of metal catalyst elements {components_str}"
         )
         
-        # 检索相关经验
+        # Retrieve relevant experience
         experiences = []
         if use_experience:
             experiences = self.retrieve_experience(components)
         
-        # 构建增强提示
+        # Build enhanced prompt
         prompt_parts = [
-            f"## 任务",
-            f"分析以下五种化学组分的反应特性，预测产生最低过电势的反应类型：",
-            f"**组分**: {components_str}",
+            f"## Task",
+            f"Analyze the catalytic performance of the following five metal elements and predict which reaction type produces the lowest overpotential when these metals act as catalysts:",
+            f"**Metal Catalyst Elements**: {components_str}",
             f"",
-            f"## 相关文献知识"
+            f"## Relevant Literature Knowledge"
         ]
         
-        # 添加检索到的知识
+        # Add retrieved knowledge
         if knowledge_results:
             for i, result in enumerate(knowledge_results, 1):
-                prompt_parts.append(f"### 文献 {i} (相关度: {result.get('score', 0):.3f})")
+                prompt_parts.append(f"### Literature {i} (Relevance: {result.get('score', 0):.3f})")
                 prompt_parts.append(result['text'])
                 prompt_parts.append("")
         else:
-            prompt_parts.append("（未检索到相关文献）")
+            prompt_parts.append("(No relevant literature retrieved)")
             prompt_parts.append("")
         
-        # 添加历史经验
+        # Add historical experience
         if experiences:
-            prompt_parts.append("## 历史经验")
+            prompt_parts.append("## Historical Experience with Similar Metal Catalysts")
             for i, exp in enumerate(experiences, 1):
-                prompt_parts.append(f"### 经验 {i}")
-                prompt_parts.append(f"组分: {', '.join(exp.get('components', []))}")
-                prompt_parts.append(f"反应类型: {exp.get('reaction_type', '未知')}")
-                prompt_parts.append(f"过电势: {exp.get('overpotential', '未知')}")
-                prompt_parts.append(f"推理: {exp.get('reasoning', '')}")
+                prompt_parts.append(f"### Experience {i}")
+                prompt_parts.append(f"Metal Elements: {', '.join(exp.get('components', []))}")
+                prompt_parts.append(f"Reaction Type: {exp.get('reaction_type', 'Unknown')}")
+                prompt_parts.append(f"Overpotential: {exp.get('overpotential', 'Unknown')}")
+                prompt_parts.append(f"Catalytic Mechanism: {exp.get('reasoning', '')}")
                 prompt_parts.append("")
         
-        # 添加查询
-        prompt_parts.append("## 请回答")
+        # Add query
+        prompt_parts.append("## Please Answer")
         prompt_parts.append(query)
         
         return "\n".join(prompt_parts)

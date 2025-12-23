@@ -17,7 +17,6 @@ from llama_index.core import (
     load_index_from_storage,
     Settings
 )
-from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.embeddings.openai import OpenAIEmbedding
@@ -38,27 +37,21 @@ class RAGSystem:
         persist_dir: str,
         collection_name: str,
         embedding_model: Optional[Any] = None,
-        chunk_size: int = 512,
-        chunk_overlap: int = 50,
         top_k: int = 5
     ):
         """
         初始化RAG系统
         
         Args:
-            data_dir: 原始数据目录
+            data_dir: 已切分的chunk数据目录（data/processed）
             persist_dir: 索引持久化目录
             collection_name: 向量数据库集合名称
             embedding_model: 嵌入模型（可选）
-            chunk_size: 文本分块大小
-            chunk_overlap: 分块重叠大小
             top_k: 检索返回的top-k结果
         """
         self.data_dir = data_dir
         self.persist_dir = persist_dir
         self.collection_name = collection_name
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
         self.top_k = top_k
         
         # 创建必要的目录
@@ -144,23 +137,16 @@ class RAGSystem:
             print("警告：没有找到文档，无法构建索引")
             return
         
-        # 配置文本分割器
-        text_splitter = SentenceSplitter(
-            chunk_size=self.chunk_size,
-            chunk_overlap=self.chunk_overlap
-        )
-        
         # 创建存储上下文（使用Chroma向量存储）
         chroma_collection = self.vector_store.collection
         vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
         
-        # 构建索引
-        print(f"开始构建索引，共 {len(documents)} 个文档...")
+        # 构建索引（文档已经是切分好的chunks，无需再分割）
+        print(f"开始构建索引，共 {len(documents)} 个chunks...")
         self.index = VectorStoreIndex.from_documents(
             documents,
             storage_context=storage_context,
-            transformations=[text_splitter],
             show_progress=True
         )
         
@@ -174,27 +160,47 @@ class RAGSystem:
     
     def _load_documents(self) -> List[Document]:
         """
-        从数据目录加载文档
+        从数据目录加载文档（已切分的chunks）
+        每个txt文件格式：索引\t内容
         
         Returns:
-            List[Document]: 文档列表
+            List[Document]: 文档列表（每个chunk作为一个Document）
         """
         # 检查数据目录是否存在文件
         data_path = Path(self.data_dir)
-        if not any(data_path.iterdir()):
-            print(f"警告：数据目录 {self.data_dir} 为空")
+        if not data_path.exists() or not any(data_path.iterdir()):
+            print(f"警告：数据目录 {self.data_dir} 不存在或为空")
             return []
         
-        # 使用SimpleDirectoryReader加载文档
-        reader = SimpleDirectoryReader(
-            input_dir=self.data_dir,
-            recursive=True,
-            required_exts=[".txt", ".pdf", ".docx", ".md"]
-        )
+        documents = []
         
-        documents = reader.load_data()
-        print(f"成功加载 {len(documents)} 个文档")
+        # 遍历所有txt文件
+        for txt_file in data_path.glob('*.txt'):
+            try:
+                with open(txt_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        
+                        # 解析格式：索引\t内容
+                        parts = line.split('\t', 1)
+                        if len(parts) == 2:
+                            chunk_id, content = parts
+                            # 创建Document对象
+                            doc = Document(
+                                text=content,
+                                metadata={
+                                    'source_file': txt_file.name,
+                                    'chunk_id': chunk_id
+                                }
+                            )
+                            documents.append(doc)
+            except Exception as e:
+                print(f"警告：读取文件 {txt_file.name} 时出错: {e}")
+                continue
         
+        print(f"成功加载 {len(documents)} 个chunks")
         return documents
     
     def _create_query_engine(self) -> None:
@@ -319,7 +325,6 @@ class RAGSystem:
             "status": "已初始化",
             "collection_name": self.collection_name,
             "document_count": doc_count,
-            "chunk_size": self.chunk_size,
             "top_k": self.top_k
         }
 
@@ -330,15 +335,14 @@ class RAGSystem:
 if __name__ == "__main__":
     # 初始化RAG系统
     rag = RAGSystem(
-        data_dir="./data/raw",
+        data_dir="./data/processed",
         persist_dir="./data/chroma_db",
         collection_name="chemical_reactions",
-        chunk_size=512,
         top_k=5
     )
     
     # 构建索引（首次运行）
-    # rag.build_index()
+    rag.build_index()
     
     # 执行查询
     if rag.query_engine:

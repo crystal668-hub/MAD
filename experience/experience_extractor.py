@@ -6,7 +6,7 @@
 """
 
 from typing import Dict, List, Optional
-from debate.debate_manager import DebateResult
+from debate.autogen_coordinator import DebateResult
 
 
 class ExperienceExtractor:
@@ -172,30 +172,30 @@ class ExperienceExtractor:
     
     def format_experience_summary(self, experience: Dict) -> str:
         """
-        格式化经验摘要（用于显示）
+        Format experience summary (for display)
         
         Args:
-            experience: 经验字典
+            experience: Experience dictionary
         
         Returns:
-            str: 格式化的摘要文本
+            str: Formatted summary text
         """
         summary_parts = [
             "=" * 60,
-            "经验摘要",
+            "Experience Summary",
             "=" * 60,
             "",
-            f"**化学组分**: {', '.join(experience.get('components', []))}",
-            f"**反应类型**: {experience.get('reaction_type', '未知')}",
-            f"**过电势**: {experience.get('overpotential', '未估算')}",
-            f"**置信度**: {experience.get('confidence', 0):.2f}",
-            f"**辩论轮数**: {experience.get('debate_rounds', 0)}",
-            f"**共识达成**: {'是' if experience.get('consensus_reached') else '否'}",
+            f"**Metal Catalyst Elements**: {', '.join(experience.get('components', []))}",
+            f"**Reaction Type**: {experience.get('reaction_type', 'Unknown')}",
+            f"**Overpotential**: {experience.get('overpotential', 'Not Estimated')}",
+            f"**Confidence**: {experience.get('confidence', 0):.2f}",
+            f"**Debate Rounds**: {experience.get('debate_rounds', 0)}",
+            f"**Consensus Reached**: {'Yes' if experience.get('consensus_reached') else 'No'}",
             "",
-            "**关键论据**:"
+            "**Key Arguments**:"
         ]
         
-        # 添加关键论据
+        # Add key arguments
         for i, arg in enumerate(experience.get('key_arguments', []), 1):
             summary_parts.append(f"{i}. {arg}")
         
@@ -371,7 +371,7 @@ class ExperienceExtractor:
 # 使用示例
 # ===================================
 if __name__ == "__main__":
-    from debate.debate_manager import DebateResult
+    from debate.autogen_coordinator import DebateResult
     
     # 创建模拟辩论结果
     mock_result = DebateResult(

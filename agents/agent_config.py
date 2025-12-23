@@ -7,7 +7,7 @@ Agent配置模块
 
 import yaml
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 from agents.llm_agents import create_agent
 from agents.base_agent import BaseAgent
 
@@ -18,15 +18,21 @@ class AgentConfig:
     负责从配置文件加载Agent设置并创建Agent实例
     """
     
-    def __init__(self, config_path: str):
+    def __init__(self, config: Union[str, Dict]):
         """
         初始化Agent配置
         
         Args:
-            config_path: 配置文件路径
+            config: 配置文件路径（str）或配置字典（Dict）
         """
-        self.config_path = Path(config_path)
-        self.config = self._load_config()
+        if isinstance(config, dict):
+            # 如果传入的是字典，直接使用
+            self.config = config
+            self.config_path = None
+        else:
+            # 如果传入的是路径，加载配置文件
+            self.config_path = Path(config)
+            self.config = self._load_config()
         
     def _load_config(self) -> Dict:
         """
@@ -85,8 +91,9 @@ class AgentConfig:
         # Agent配置映射
         agent_configs = [
             ("agent1", "GPT-4 Agent", "agent1"),
-            ("agent2", "Claude Agent", "agent2"),
-            ("agent3", "Gemini Agent", "agent3")
+            ("agent2", "Grok Agent", "agent2"),
+            ("agent3", "Gemini Agent", "agent3"),
+            ("agent4", "DeepSeek Agent", "agent4")
         ]
         
         for agent_key, agent_name, agent_id in agent_configs:

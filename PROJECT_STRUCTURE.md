@@ -8,26 +8,28 @@ MAD/
 │   └── config.yaml                 # 主配置文件
 │
 ├── data/                           # 数据目录
-│   ├── raw/                        # 原始化学文献数据
-│   │   └── sample_literature.txt  # 示例文献
-│   ├── processed/                  # 处理后的数据
+│   ├── raw/                        # 原始TSV数据文件
+│   │   └── *.tsv                  # TSV格式的化学文献数据
+│   ├── processed/                  # 切分后的chunks（txt格式）
+│   │   └── *_chunks.txt           # 处理后的chunks文件
 │   └── chroma_db/                  # Chroma向量数据库（运行时生成）
 │
 ├── database/                       # 数据库模块
 │   ├── __init__.py                # 模块初始化
+│   ├── openai_embedder.py         # OpenAI Embedding封装
+│   ├── text_processor.py          # 文本预处理器
 │   ├── vector_store.py            # 向量数据库管理
 │   └── rag_system.py              # RAG系统实现
 │
 ├── agents/                         # Agent模块
 │   ├── __init__.py                # 模块初始化
 │   ├── base_agent.py              # Agent基类
-│   ├── llm_agents.py              # 三个LLM Agent实现
+│   ├── llm_agents.py              # 四个LLM Agent实现
 │   └── agent_config.py            # Agent配置管理
 │
 ├── debate/                         # 辩论模块
 │   ├── __init__.py                # 模块初始化
-│   ├── autogen_setup.py           # AutoGen框架配置
-│   └── debate_manager.py          # 辩论管理器
+│   └── autogen_coordinator.py     # AutoGen辩论协调器
 │
 ├── experience/                     # 经验库模块
 │   ├── __init__.py                # 模块初始化
@@ -46,10 +48,13 @@ MAD/
 ├── outputs/                        # 输出目录（运行时生成）
 │   └── result_*.json              # 辩论结果文件
 │
+├── process_abstracts.py            # [已废弃] TSV数据预处理功能已整合到database/text_processor.py
 ├── main.py                         # 主程序入口
+├── examples.py                     # 使用示例脚本
 ├── requirements.txt                # Python依赖列表
 ├── README.md                       # 项目说明文档
 ├── QUICKSTART.md                   # 快速开始指南
+├── PROJECT_STRUCTURE.md            # 项目结构详解
 ├── .env.example                    # 环境变量示例
 └── .gitignore                      # Git忽略文件
 ```
@@ -59,22 +64,30 @@ MAD/
 ### 1. config/ - 配置模块
 
 **config.yaml**: 系统主配置文件
-- LLM配置：三个Agent的模型、API密钥、参数
+- LLM配置：四个Agent的模型、API密钥、参数
+  - Agent1: OpenAI GPT-4o-mini
+  - Agent2: xAI Grok-4.1-fast
+  - Agent3: Google Gemini-3-pro
+  - Agent4: DeepSeek V3.2
+  - 每个Agent配置独立的embedding模型
 - 向量数据库配置：Chroma设置
-- RAG配置：文本分块、检索参数
-- 辩论配置：轮数、共识阈值
-- 经验库配置：存储路径、相关性阈值
-- 化学配置：反应类型列表
+- RAG配置：检索参数（top_k、相似度阈值）
+  - 注意：chunk_size和chunk_overlap已废弃，因数据已预切分
+- 辩论配置：轮数、共识阈值、超时设置
+- 经验库配置：存储路径、容量、相关性阈值
+- 化学配置：11种反应类型列表（AOR, CO2RR, HER, OER等）
 
 ### 2. data/ - 数据模块
 
-**raw/**: 原始数据
-- 存放化学文献（txt, pdf, docx, md格式）
-- 用于构建RAG索引
+**raw/**: 原始TSV数据
+- 存放TSV格式的化学文献数据
+- 必须包含`abstract`列
+- 使用Tab（\t）分隔字段
 
-**processed/**: 处理后的数据
-- 中间处理结果
-- 可选的数据预处理输出
+**processed/**: 切分后的chunks
+- 由database/text_processor.py生成的txt文件
+- 格式：每行一个chunk，`索引\t内容`
+- 直接用于RAG系统索引构建
 
 **chroma_db/**: 向量数据库
 - 自动生成的Chroma数据库文件
@@ -82,15 +95,37 @@ MAD/
 
 ### 3. database/ - 数据库模块
 
-**vector_store.py** (580行)
+**openai_embedder.py** (约150行)
+- `OpenAIEmbedder`类：OpenAI Embedding API封装
+- 支持批量文本嵌入
+- 自动处理API限流和重试
+- 缓存机制优化性能
+
+**text_processor.py** (约200行)
+- `TextProcessor`类：文本预处理工具
+- 功能：
+  - 从TSV文件提取abstract列
+  - 自动文本清洗（去除HTML标签、多余空格等）
+  - 添加索引序号
+  - 输出为txt格式供RAG系统使用
+- 注意：已整合process_abstracts.py的功能
+
+**vector_store.py** (约350行)
 - `VectorStore`类：管理Chroma向量数据库
 - 功能：文档添加、查询、更新、删除
 - 支持相似度搜索和元数据过滤
+- 多集合管理和持久化
 
-**rag_system.py** (400行)
+**rag_system.py** (约350行)
 - `RAGSystem`类：实现完整的RAG流程
 - 集成LlamaIndex和Chroma
-- 功能：索引构建、文档加载、检索增强查询
+- 功能：
+  - 加载预切分的chunks（从data/processed/）
+  - 构建向量索引（无需再次切分）
+  - 检索增强查询
+  - 索引持久化和加载
+  - 支持4个Agent的独立RAG系统
+- 注意：已移除SentenceSplitter，直接使用预处理的chunks
 
 ### 4. agents/ - Agent模块
 
@@ -99,11 +134,13 @@ MAD/
 - `AgentResponse`数据类：封装响应
 - 提供RAG检索、经验查询、提示增强等通用功能
 
-**llm_agents.py** (450行)
-- `OpenAIAgent`: 基于GPT-4的Agent
-- `AnthropicAgent`: 基于Claude的Agent
-- `GoogleAgent`: 基于Gemini的Agent
+**llm_agents.py** (约450行)
+- `OpenAIAgent`: 基于OpenAI GPT5.2的Agent
+- `XAIAgent`: 基于xAI Grok-4的Agent  
+- `GoogleAgent`: 基于Google Gemini-3-pro的Agent
+- `DeepSeekAgent`: 基于DeepSeek V3.2的Agent
 - `create_agent()`: Agent工厂函数
+- 所有Agent通过OpenRouter的OpenAI兼容API调用
 
 **agent_config.py** (200行)
 - `AgentConfig`类：配置管理
@@ -112,17 +149,16 @@ MAD/
 
 ### 5. debate/ - 辩论模块
 
-**autogen_setup.py** (300行)
-- `AutoGenSetup`类：AutoGen框架配置
-- 将自定义Agent包装为AutoGen Agent
-- 创建群组聊天和管理器
-- `create_termination_function()`: 自定义终止条件
-
-**debate_manager.py** (550行)
-- `DebateManager`类：辩论流程管理
+**autogen_coordinator.py** (约520行)
+- `AutoGenDebateCoordinator`类：完全基于AutoGen的辩论协调器
 - `DebateResult`数据类：封装辩论结果
-- 支持AutoGen和手动两种辩论模式
-- 监控共识达成、提取推理轨迹
+- 功能：
+  - 为每个Agent准备RAG增强提示
+  - 创建AutoGen GroupChat和ConversableAgent
+  - 使用round_robin发言模式（无需Manager LLM）
+  - 自定义终止条件检测（基于共识）
+  - 提取完整LLM推理链条（包括thinking过程）
+  - 分析辩论结果并达成共识
 
 ### 6. experience/ - 经验库模块
 
@@ -153,27 +189,34 @@ MAD/
 
 ### 8. main.py - 主程序
 
-**MADSystem类** (300行)
+**MADSystem类** (约400行)
 - 系统整合和初始化
 - 组件管理（RAG、Agent、经验库、辩论）
 - 辩论执行和结果保存
-- 命令行接口
+- 命令行接口（支持多种参数）
 
 ## 数据流程
 
 ```
+0. 数据预处理阶段
+   └─> 读取TSV文件 (data/raw/*.tsv)
+   └─> 提取abstract列
+   └─> 添加索引并切分chunks
+   └─> 保存到processed (data/processed/*_chunks.txt)
+
 1. 初始化阶段
    └─> 加载配置 (config.yaml)
    └─> 初始化日志系统
-   └─> 构建RAG索引 (data/raw → chroma_db)
-   └─> 创建三个LLM Agent
+   └─> 构建RAG索引 (data/processed → chroma_db)
+   └─> 创建四个LLM Agent（各配独立embedding）
    └─> 加载经验库 (experience_db.json)
 
 2. 辩论阶段
-   └─> 输入化学组分
+   └─> 输入金属催化剂元素
    └─> Agent检索知识 (RAG系统)
    └─> Agent检索经验 (经验库)
-   └─> 多轮辩论 (DebateManager)
+   └─> 多轮辩论 (AutoGenDebateCoordinator)
+   └─> 轮流发言模式 (round_robin)
    └─> 监控共识达成
 
 3. 结果处理阶段
@@ -192,10 +235,13 @@ MADSystem
 │   └── VectorStore
 ├── BaseAgent (agents/)
 │   ├── OpenAIAgent
-│   ├── AnthropicAgent
-│   └── GoogleAgent
-├── DebateManager (debate/)
-│   └── AutoGenSetup
+│   ├── XAIAgent
+│   ├── GoogleAgent
+│   └── DeepSeekAgent
+├── AutoGenDebateCoordinator (debate/)
+│   ├── ConversableAgent (AutoGen)
+│   ├── GroupChat (AutoGen)
+│   └── GroupChatManager (AutoGen, 无LLM配置)
 ├── ExperienceStore (experience/)
 └── ExperienceExtractor (experience/)
 ```
@@ -233,19 +279,22 @@ MADSystem
 ## 运行时生成的文件
 
 ```
-logs/
-├── system.log                    # 系统运行日志
-└── debates/
-    └── debate_20251220_143052.log  # 每次辩论的详细日志
-
 data/
+├── processed/                    # 预处理后的chunks
+   │   └── *_chunks.txt             # 由database/text_processor.py生成
 ├── chroma_db/                    # 向量数据库文件
 │   ├── chroma.sqlite3
+│   ├── docstore.json            # 文档存储
 │   └── ...
 └── experience_db.json            # 经验库（JSON格式）
 
+logs/
+├── system.log                    # 系统运行日志
+└── debates/
+    └── debate_20251221_*.log     # 每次辩论的详细日志
+
 outputs/
-└── result_20251220_143052.json   # 辩论结果
+└── result_20251221_*.json        # 辩论结果文件
 ```
 
 ## 代码规范

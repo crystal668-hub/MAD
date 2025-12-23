@@ -18,22 +18,22 @@ def example_full_system():
     # 创建系统实例
     system = MADSystem(config_path="./config/config.yaml")
     
-    # 初始化（跳过RAG以加快演示）
+    # Initialize (skip RAG for faster demonstration)
     system.initialize(skip_rag=True)
     
-    # 定义化学组分
-    components = ["硫酸", "氢氧化钠", "氯化钠", "硝酸", "碳酸钙"]
+    # Define metal catalyst elements
+    components = ["Pt", "Pd", "Ru", "Ir", "Rh"]
     
-    # 运行辩论
-    print(f"\n分析组分: {', '.join(components)}\n")
+    # Run debate
+    print(f"\nAnalyzing metal catalyst elements: {', '.join(components)}\n")
     result = system.run_debate(components)
     
-    # 打印结果
-    print("\n辩论结果:")
-    print(f"  共识达成: {result['consensus_reached']}")
-    print(f"  反应类型: {result['final_reaction_type']}")
-    print(f"  过电势: {result['final_overpotential']}")
-    print(f"  辩论轮数: {result['debate_rounds']}")
+    # Print results
+    print("\nDebate Results:")
+    print(f"  Consensus Reached: {result['consensus_reached']}")
+    print(f"  Reaction Type: {result['final_reaction_type']}")
+    print(f"  Overpotential: {result['final_overpotential']}")
+    print(f"  Debate Rounds: {result['debate_rounds']}")
 
 
 # ============================================================
@@ -57,23 +57,23 @@ def example_rag_system():
         top_k=3
     )
     
-    # 如果索引不存在，构建它
+    # If index doesn't exist, build it
     if not rag._index_exists():
-        print("\n构建RAG索引...")
+        print("\nBuilding RAG index...")
         rag.build_index()
     
-    # 执行查询
-    query = "氧化还原反应的过电势是多少？"
-    print(f"\n查询: {query}")
+    # Execute query
+    query = "What is the overpotential for redox reactions?"
+    print(f"\nQuery: {query}")
     
     result = rag.query(query)
-    print(f"\n答案: {result['answer']}")
+    print(f"\nAnswer: {result['answer']}")
     
-    # 打印来源文档
+    # Print source documents
     if result['source_nodes']:
-        print("\n来源文档:")
+        print("\nSource Documents:")
         for i, node in enumerate(result['source_nodes'][:2], 1):
-            print(f"\n{i}. (相关度: {node['score']:.3f})")
+            print(f"\n{i}. (Relevance: {node['score']:.3f})")
             print(f"   {node['text'][:150]}...")
 
 
@@ -111,12 +111,12 @@ def example_agent():
         }
     )
     
-    # 生成响应
-    prompt = "请简要解释什么是化学反应的过电势？（50字以内）"
-    print(f"\n提示: {prompt}")
+    # Generate response
+    prompt = "Please briefly explain the role of platinum (Pt) as a catalyst in hydrogen evolution reaction (HER). (Within 100 words)"
+    print(f"\nPrompt: {prompt}")
     
     response = agent.generate_response(prompt)
-    print(f"\nAgent响应:\n{response.content}")
+    print(f"\nAgent Response:\n{response.content}")
 
 
 # ============================================================
