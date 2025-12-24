@@ -372,8 +372,8 @@ def _parse_llm_response(content: str) -> Dict:
     
     # 提取反应类型
     reaction_types = [
-        "AOR", "CO2RR", "EOR", "HER", "HOR", 
-        "HZOR", "O5H", "OER", "ORR", "SAC", "UOR"
+        "CO2RR", "EOR", "HER", "HOR", 
+        "HZOR", "O5H", "OER", "ORR", "UOR"
     ]
     for reaction in reaction_types:
         if reaction in content_upper:

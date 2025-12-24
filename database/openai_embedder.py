@@ -1,26 +1,35 @@
 """
 ===================================
 OpenAI向量化模块
-功能：使用OpenRouter API将文本转换为向量
+功能：使用OpenRouter API或Voyage AI SDK将文本转换为向量
 ===================================
 """
 
 import os
 import time
-from typing import List, Dict
+from typing import List, Dict, Optional
 import requests
 from tqdm import tqdm
 
+# Voyage AI SDK（可选导入）
+try:
+    import voyageai
+    VOYAGE_AVAILABLE = True
+except ImportError:
+    VOYAGE_AVAILABLE = False
 
-class OpenAIEmbedder:
+
+class MultiModelEmbedder:
     """
-    OpenAI文本向量化器
+    多模型文本向量化器
     支持根据agent配置动态切换嵌入模型
+    支持使用OpenRouter API或Voyage AI官方SDK
+    支持OpenAI、Voyage AI、Google Gemini等多种嵌入模型
     """
     
     def __init__(self, model_config: Dict, agent_configs: Dict = None):
         """
-        初始化OpenAI向量化器
+        初始化多模型向量化器
         
         Args:
             model_config: 默认模型配置字典
@@ -34,20 +43,23 @@ class OpenAIEmbedder:
         self.agent_configs = agent_configs or {}
         self.current_agent = None
         
+        # Voyage AI客户端（懒加载）
+        self.voyage_clients: Dict[str, 'voyageai.Client'] = {}
+        
         # 从环境变量获取API Key
         if self.api_key and self.api_key.startswith('${') and self.api_key.endswith('}'):
             env_var = self.api_key[2:-1]
             self.api_key = os.environ.get(env_var)
         
         if not self.api_key:
-            raise ValueError("OpenAI API Key未设置，请设置环境变量 OPENAI_API_KEY")
+            raise ValueError("API Key未设置，请设置环境变量 xxxx_API_KEY")
         
         self.headers = {
             'Authorization': f'Bearer {self.api_key}',
             'Content-Type': 'application/json'
         }
         
-        print(f"[OK] 初始化OpenAI向量化器")
+        print(f"[OK] 初始化多模型向量化器")
         print(f"  默认模型: {self.default_model}")
         print(f"  API地址: {self.base_url}")
         if self.agent_configs:
@@ -68,6 +80,54 @@ class OpenAIEmbedder:
             model = self.agent_configs[agent_name].get('embedding_model', self.default_model)
             return model
         return self.default_model
+    
+    def _get_voyage_client(self, agent_name: str) -> Optional['voyageai.Client']:
+        """
+        获取或创建Voyage AI客户端
+        
+        Args:
+            agent_name: agent名称
+            
+        Returns:
+            voyageai.Client或None
+        """
+        if not VOYAGE_AVAILABLE:
+            return None
+            
+        if agent_name not in self.voyage_clients:
+            agent_config = self.agent_configs.get(agent_name, {})
+            voyage_api_key = agent_config.get('VOYAGE_API_KEY')
+            
+            # 从环境变量获取API Key
+            if voyage_api_key and voyage_api_key.startswith('${') and voyage_api_key.endswith('}'):
+                env_var = voyage_api_key[2:-1]
+                voyage_api_key = os.environ.get(env_var)
+            
+            if voyage_api_key:
+                self.voyage_clients[agent_name] = voyageai.Client(api_key=voyage_api_key)
+                print(f"[INFO] 为 {agent_name} 创建Voyage AI客户端")
+            else:
+                return None
+                
+        return self.voyage_clients.get(agent_name)
+    
+    def _is_voyage_model(self, agent_name: str = None) -> bool:
+        """
+        判断指定agent是否使用Voyage AI模型
+        
+        Args:
+            agent_name: agent名称
+            
+        Returns:
+            bool: 是否使用Voyage AI
+        """
+        if not agent_name or agent_name not in self.agent_configs:
+            return False
+            
+        agent_config = self.agent_configs[agent_name]
+        embedding_provider = agent_config.get('embedding_provider', '')
+        
+        return embedding_provider.lower() == 'voyage'
     
     def set_agent(self, agent_name: str) -> None:
         """
@@ -96,11 +156,72 @@ class OpenAIEmbedder:
         Returns:
             List[float]: 向量
         """
+        # 确定使用的agent
+        use_agent = agent_name if agent_name else self.current_agent
+        
+        # 检查是否使用Voyage AI
+        if use_agent and self._is_voyage_model(use_agent):
+            return self._embed_text_voyage(text, retry, use_agent)
+        else:
+            return self._embed_text_openrouter(text, retry, use_agent)
+    
+    def _embed_text_voyage(self, text: str, retry: int, agent_name: str) -> List[float]:
+        """
+        使用Voyage AI SDK进行文本向量化
+        
+        Args:
+            text: 输入文本
+            retry: 重试次数
+            agent_name: agent名称
+            
+        Returns:
+            List[float]: 向量
+        """
+        if not VOYAGE_AVAILABLE:
+            raise ImportError("Voyage AI SDK未安装，请运行: pip install voyageai")
+        
+        voyage_client = self._get_voyage_client(agent_name)
+        if not voyage_client:
+            raise ValueError(f"无法为 {agent_name} 创建Voyage AI客户端，请检查API密钥配置")
+        
+        model = self.get_model_for_agent(agent_name)
+        
+        for attempt in range(retry):
+            try:
+                # 使用Voyage AI SDK
+                result = voyage_client.embed(
+                    texts=[text],
+                    model=model,
+                    input_type="document"  # 可以是 "document" 或 "query"
+                )
+                
+                if result and result.embeddings:
+                    return result.embeddings[0]
+                else:
+                    raise Exception("Voyage AI返回空结果")
+                    
+            except Exception as e:
+                print(f"[ERROR] Voyage AI向量化失败 (尝试 {attempt + 1}/{retry}): {str(e)}")
+                if attempt < retry - 1:
+                    time.sleep(2 ** attempt)
+        
+        raise Exception(f"Voyage AI向量化失败，已重试{retry}次")
+    
+    def _embed_text_openrouter(self, text: str, retry: int, agent_name: str = None) -> List[float]:
+        """
+        使用OpenRouter API进行文本向量化
+        
+        Args:
+            text: 输入文本
+            retry: 重试次数
+            agent_name: agent名称
+            
+        Returns:
+            List[float]: 向量
+        """
         # 确定使用的模型：优先使用agent_name指定的，其次使用set_agent设置的，最后使用默认模型
         if agent_name:
             model = self.get_model_for_agent(agent_name)
-        elif self.current_agent:
-            model = self.get_model_for_agent(self.current_agent)
         else:
             model = self.default_model
         
@@ -196,15 +317,18 @@ class OpenAIEmbedder:
         """
         use_model = model if model else self.default_model
         
-        # text-embedding-3-large维度为3072
-        if 'large' in use_model.lower() or '3-large' in use_model.lower():
+        if 'voyage-3' in use_model.lower():
+            return 1024
+        elif 'voyage-2' in use_model.lower():
+            return 1024
+        elif 'voyage-large' in use_model.lower() or 'voyage-law' in use_model.lower() or 'voyage-code' in use_model.lower():
+            return 1536
+        elif 'large' in use_model.lower() or '3-large' in use_model.lower():
             return 3072
         elif 'small' in use_model.lower() or '3-small' in use_model.lower():
             return 1536
         elif 'ada' in use_model.lower():
             return 1536
-        elif 'bge-m3' in use_model.lower():
-            return 1024
         elif 'gemini-embedding' in use_model.lower():
             return 768
         else:
@@ -229,8 +353,9 @@ if __name__ == "__main__":
             'emb_url': 'https://openrouter.ai/api/v1/embeddings'
         },
         'agent2': {
-            'embedding_model': 'baai/bge-m3',
-            'emb_url': 'https://openrouter.ai/api/v1/embeddings'
+            'embedding_model': 'voyage-3-large',
+            'embedding_provider': 'voyage',
+            'voyage_api_key': '${VOYAGE_API_KEY}'
         },
         'agent3': {
             'embedding_model': 'google/gemini-embedding-001',
@@ -243,7 +368,7 @@ if __name__ == "__main__":
     }
     
     try:
-        embedder = OpenAIEmbedder(test_config, agent_configs)
+        embedder = MultiModelEmbedder(test_config, agent_configs)
         
         # 测试1: 使用默认模型
         print("\n=== 测试1: 默认模型 ===")

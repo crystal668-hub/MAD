@@ -6,7 +6,6 @@
 ===================================
 """
 
-import json
 import csv
 import re
 from pathlib import Path
@@ -166,60 +165,6 @@ class TextProcessor:
                 print(f"✓ 从文件加载 {len(lines)} 个chunks: {file_path.name}")
             except Exception as e:
                 print(f"✗ 加载文件失败 ({file_path.name}): {str(e)}")
-        
-        return documents
-    
-    def load_json_data(self, json_file: str, text_field: str = 'text') -> List[Dict]:
-        """
-        从JSON文件加载数据
-        
-        Args:
-            json_file: JSON文件路径
-            text_field: 文本字段名
-        
-        Returns:
-            List[Dict]: 文档列表
-        """
-        documents = []
-        json_path = self.data_dir / json_file
-        
-        if not json_path.exists():
-            print(f"✗ JSON文件不存在: {json_path}")
-            return documents
-        
-        try:
-            with open(json_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            
-            # 处理JSON数组
-            if isinstance(data, list):
-                for idx, item in enumerate(data):
-                    if isinstance(item, dict) and text_field in item:
-                        text = str(item[text_field]).strip()
-                        if text:
-                            metadata = {k: v for k, v in item.items() if k != text_field}
-                            metadata['source'] = json_file
-                            metadata['item_id'] = idx
-                            
-                            documents.append({
-                                'text': text,
-                                'metadata': metadata
-                            })
-            # 处理单个JSON对象
-            elif isinstance(data, dict) and text_field in data:
-                text = str(data[text_field]).strip()
-                if text:
-                    metadata = {k: v for k, v in data.items() if k != text_field}
-                    metadata['source'] = json_file
-                    
-                    documents.append({
-                        'text': text,
-                        'metadata': metadata
-                    })
-            
-            print(f"✓ 从JSON加载 {len(documents)} 条数据: {json_file}")
-        except Exception as e:
-            print(f"✗ 加载JSON失败 ({json_file}): {str(e)}")
         
         return documents
     

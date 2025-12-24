@@ -366,32 +366,3 @@ def merge_dicts(dict1: Dict, dict2: Dict) -> Dict:
     return result
 
 
-# ===================================
-# 使用示例
-# ===================================
-if __name__ == "__main__":
-    # 测试组分解析
-    component_str = "硫酸、氢氧化钠、氯化钠、硝酸、碳酸钙"
-    components = parse_component_string(component_str)
-    print(f"解析组分: {components}")
-    
-    # 验证组分
-    is_valid, msg = validate_components(components)
-    print(f"验证结果: {msg}")
-    
-    # 格式化时长
-    duration = format_duration(125.5)
-    print(f"时长: {duration}")
-    
-    # 创建实验ID
-    exp_id = create_experiment_id(components)
-    print(f"实验ID: {exp_id}")
-    
-    # 字典转表格
-    test_dict = {
-        "反应类型": "氧化还原反应",
-        "过电势": "0.45V",
-        "置信度": "0.92"
-    }
-    table = dict_to_table(test_dict)
-    print(f"\n数据表格:\n{table}")

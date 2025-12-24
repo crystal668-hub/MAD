@@ -162,17 +162,15 @@ class AutoGenDebateCoordinator:
 **Metal Catalyst Elements**: {components_str}
 
 **Available Reaction Types**:
-1. AOR (Alcohol Oxidation Reaction)
-2. CO2RR (CO2 Reduction Reaction)
-3. EOR (Ethanol Oxidation Reaction)
-4. HER (Hydrogen Evolution Reaction)
-5. HOR (Hydrogen Oxidation Reaction)
-6. HZOR (Hydrazine Oxidation Reaction)
-7. O5H (Oxygen Reduction 5-electron)
-8. OER (Oxygen Evolution Reaction)
-9. ORR (Oxygen Reduction Reaction)
-10. SAC (Single Atom Catalyst)
-11. UOR (Urea Oxidation Reaction)
+1. CO2RR (CO2 Reduction Reaction)
+2. EOR (Ethanol Oxidation Reaction)
+3. HER (Hydrogen Evolution Reaction)
+4. HOR (Hydrogen Oxidation Reaction)
+5. HZOR (Hydrazine Oxidation Reaction)
+6. O5H (Oxidation of 5-hydroxymethylfurfural)
+7. OER (Oxygen Evolution Reaction)
+8. ORR (Oxygen Reduction Reaction)
+9. UOR (Urea Oxidation Reaction)
 
 **Requirements**:
 1. Analyze based on catalytic principles, metal properties, and retrieved literature knowledge
@@ -303,8 +301,8 @@ Experts, please share your opinions and reach consensus through debate."""
             
             # 提取反应类型
             reaction_types = [
-                "AOR", "CO2RR", "EOR", "HER", "HOR", 
-                "HZOR", "O5H", "OER", "ORR", "SAC", "UOR"
+                "CO2RR", "EOR", "HER", "HOR", 
+                "HZOR", "O5H", "OER", "ORR", "UOR"
             ]
             
             current_reaction = None
@@ -443,8 +441,8 @@ Experts, please share your opinions and reach consensus through debate."""
     def _extract_reaction_type(self, content: str) -> Optional[str]:
         """提取反应类型"""
         reaction_types = [
-            "AOR", "CO2RR", "EOR", "HER", "HOR", 
-            "HZOR", "O5H", "OER", "ORR", "SAC", "UOR"
+            "CO2RR", "EOR", "HER", "HOR", 
+            "HZOR", "O5H", "OER", "ORR", "UOR"
         ]
         
         content_upper = content.upper()

@@ -182,17 +182,15 @@ class BaseAgent(ABC):
 Your task is to analyze the given metal elements as catalysts and predict which reaction type produces the lowest overpotential when these metals act as catalysts.
 
 Available reaction types:
-1. AOR (Alcohol Oxidation Reaction)
-2. CO2RR (CO2 Reduction Reaction)
-3. EOR (Ethanol Oxidation Reaction)
-4. HER (Hydrogen Evolution Reaction)
-5. HOR (Hydrogen Oxidation Reaction)
-6. HZOR (Hydrazine Oxidation Reaction)
-7. O5H (Oxygen Reduction 5-electron)
-8. OER (Oxygen Evolution Reaction)
-9. ORR (Oxygen Reduction Reaction)
-10. SAC (Single Atom Catalyst)
-11. UOR (Urea Oxidation Reaction)
+1. CO2RR (CO2 Reduction Reaction)
+2. EOR (Ethanol Oxidation Reaction)
+3. HER (Hydrogen Evolution Reaction)
+4. HOR (Hydrogen Oxidation Reaction)
+5. HZOR (Hydrazine Oxidation Reaction)
+6. O5H (Oxidation of 5-hydroxymethylfurfural)
+7. OER (Oxygen Evolution Reaction)
+8. ORR (Oxygen Reduction Reaction)
+9. UOR (Urea Oxidation Reaction)
 
 Please analyze based on the following information:
 1. Relevant knowledge from catalysis and electrochemistry literature

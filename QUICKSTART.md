@@ -211,7 +211,7 @@ results = store.query_experiences(
   - relevance_threshold: 相关性阈值
 
 - **chemistry**: 化学反应相关配置
-  - 支持11种反应类型（AOR, CO2RR, HER, OER, ORR等）
+  - 支持9种反应类型（CO2RR, EOR, HER, HOR, HZOR, O5H, OER, ORR, UOR）
 
 ## 常见问题
 

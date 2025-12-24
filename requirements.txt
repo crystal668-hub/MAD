@@ -25,6 +25,9 @@ pydantic>=2.5.0
 # HTTP请求
 requests>=2.31.0
 
+# Voyage AI Embedding
+voyageai>=0.2.0
+
 # 配置管理
 pyyaml>=6.0.1
 python-dotenv>=1.0.0

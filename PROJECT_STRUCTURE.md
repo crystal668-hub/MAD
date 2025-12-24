@@ -75,7 +75,7 @@ MAD/
   - 注意：chunk_size和chunk_overlap已废弃，因数据已预切分
 - 辩论配置：轮数、共识阈值、超时设置
 - 经验库配置：存储路径、容量、相关性阈值
-- 化学配置：11种反应类型列表（AOR, CO2RR, HER, OER等）
+- 化学配置：9种反应类型列表（CO2RR, EOR, HER, HOR, HZOR, O5H, OER, ORR, UOR）
 
 ### 2. data/ - 数据模块
 
@@ -95,11 +95,13 @@ MAD/
 
 ### 3. database/ - 数据库模块
 
-**openai_embedder.py** (约150行)
-- `OpenAIEmbedder`类：OpenAI Embedding API封装
+**openai_embedder.py** (约400行)
+- `MultiModelEmbedder`类：多模型嵌入API封装
+- 支持OpenAI、Voyage AI、Google Gemini等多种嵌入模型
+- 根据agent配置动态切换嵌入模型
 - 支持批量文本嵌入
 - 自动处理API限流和重试
-- 缓存机制优化性能
+- 支持OpenRouter API和Voyage AI官方SDK两种调用方式
 
 **text_processor.py** (约200行)
 - `TextProcessor`类：文本预处理工具
