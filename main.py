@@ -137,31 +137,32 @@ class MADSystem:
         vector_config = self.config.get('vector_store', {})
         
         # 为每个Agent创建独立的RAG系统
-        # 简化版：这里使用相同的RAG系统，实际可以为每个Agent定制
         data_dir = self.config.get('paths', {}).get('raw_data', './data/raw')
         persist_dir = vector_config.get('persist_directory', './data/chroma_db')
+        base_collection_name = vector_config.get('collection_name', 'chemical_reactions')
         
         # 检查数据目录是否有文件
         if not any(Path(data_dir).iterdir()):
             self.logger.warning(f"数据目录为空: {data_dir}，RAG系统可能无法正常工作")
             print(f"  警告：数据目录为空，请将化学文献数据放入 {data_dir}")
         
-        # 创建共享的RAG系统
-        self.shared_rag = RAGSystem(
-            data_dir=data_dir,
-            persist_dir=persist_dir,
-            collection_name=vector_config.get('collection_name', 'chemical_reactions'),
-            chunk_size=rag_config.get('chunk_size', 512),
-            chunk_overlap=rag_config.get('chunk_overlap', 50),
-            top_k=rag_config.get('top_k', 5)
-        )
+        # 为每个Agent创建独立的RAG系统，使用不同的collection_name
+        self.rag_systems = {}
+        agent_names = ['agent1', 'agent2', 'agent3', 'agent4']
         
-        # 为每个Agent分配RAG系统
-        self.rag_systems = {
-            'agent1': self.shared_rag,
-            'agent2': self.shared_rag,
-            'agent3': self.shared_rag
-        }
+        for agent_name in agent_names:
+            collection_name = f"{base_collection_name}_{agent_name}"
+            print(f"  为 {agent_name} 创建RAG系统，使用集合: {collection_name}")
+            
+            rag_system = RAGSystem(
+                data_dir=data_dir,
+                persist_dir=persist_dir,
+                collection_name=collection_name,
+                chunk_size=rag_config.get('chunk_size', 512),
+                chunk_overlap=rag_config.get('chunk_overlap', 50),
+                top_k=rag_config.get('top_k', 5)
+            )
+            self.rag_systems[agent_name] = rag_system
         
         self.logger.info("RAG系统初始化完成")
     

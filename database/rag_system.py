@@ -96,8 +96,13 @@ class RAGSystem:
         从磁盘加载已存在的索引
         """
         try:
+            # 使用ChromaDB向量存储创建存储上下文
+            chroma_collection = self.vector_store.collection
+            vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+            
             # 创建存储上下文
             storage_context = StorageContext.from_defaults(
+                vector_store=vector_store,
                 persist_dir=self.persist_dir
             )
             
@@ -110,6 +115,7 @@ class RAGSystem:
             print(f"成功加载索引: {self.collection_name}")
         except Exception as e:
             print(f"加载索引失败: {str(e)}")
+            print(f"将需要重新构建索引")
             self.index = None
     
     def build_index(

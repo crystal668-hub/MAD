@@ -67,7 +67,7 @@ class VectorStore:
                     name=self.collection_name,
                     metadata={"hnsw:space": self.distance_metric}
                 )
-                print(f"[OK] 初始化向量数据库 (使用自定义向量)")
+                print(f"[OK] 初始化向量数据库 (使用自定义向量模型)")
             else:
                 # 使用提供的embedding_function
                 collection = self.client.get_or_create_collection(
@@ -319,37 +319,3 @@ class VectorStore:
         return self.collection.get()
 
 
-# ===================================
-# 使用示例
-# ===================================
-if __name__ == "__main__":
-    # 初始化向量数据库
-    vector_store = VectorStore(
-        persist_directory="./data/chroma_db",
-        collection_name="test_collection"
-    )
-    
-    # 添加测试文档
-    test_docs = [
-        "氢氧化反应是一种常见的电化学反应",
-        "氧化还原反应涉及电子转移",
-        "酸碱中和反应会释放或吸收热量"
-    ]
-    
-    test_metadata = [
-        {"reaction_type": "氢氧化反应", "category": "电化学"},
-        {"reaction_type": "氧化还原反应", "category": "电化学"},
-        {"reaction_type": "酸碱中和", "category": "热化学"}
-    ]
-    
-    vector_store.add_documents(
-        documents=test_docs,
-        metadatas=test_metadata
-    )
-    
-    # 相似度搜索
-    results = vector_store.similarity_search("电化学反应的特点", top_k=2)
-    
-    print("\n搜索结果:")
-    for doc in results:
-        print(f"- {doc['document']} (距离: {doc['distance']:.4f})")

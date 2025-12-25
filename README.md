@@ -12,7 +12,7 @@ MAD/
 │   └── config.yaml     # 主配置文件
 ├── data/               # 数据目录
 │   ├── raw/           # 原始TSV数据文件
-│   ├── processed/     # 切分后的chunks（txt格式）
+│   ├── processed/     # 提取出来的abstract chunks（txt格式）
 │   └── chroma_db/     # 向量数据库（运行时生成）
 ├── database/          # 数据库模块
 │   ├── rag_system.py  # RAG系统实现
@@ -51,8 +51,8 @@ MAD/
 - 直接加载预切分的chunks，无需二次分割
 
 ### 3. Agent Definition (agents/)
-- **Agent 1**: Based on OpenAI GPT-4o-mini
-- **Agent 2**: Based on xAI Grok-4.1-fast
+- **Agent 1**: Based on OpenAI GPT-5.2
+- **Agent 2**: Based on xAI Grok-4
 - **Agent 3**: Based on Google Gemini-3-pro
 - **Agent 4**: Based on DeepSeek V3.2
 - Each Agent is equipped with an independent RAG system for retrieval augmentation
@@ -74,7 +74,6 @@ MAD/
 ### 环境要求
 - Python 3.9+
 - 至少8GB RAM
-- 推荐使用GPU（用于本地embedding模型）
 
 ### 安装步骤
 

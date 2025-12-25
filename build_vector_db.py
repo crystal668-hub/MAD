@@ -1,8 +1,8 @@
 """
-===================================
+======================================================
 向量数据库构建脚本
-功能：使用OpenAI Agent构建Chroma向量数据库
-===================================
+功能：使用对应Agent的embedding模型配置构建Chroma向量数据库
+======================================================
 """
 
 import sys
@@ -55,9 +55,14 @@ def build_vector_database(
         'agent4': config.get_llm_config('agent4')
     }
     
+    # 根据agent名称设置不同的collection_name
+    base_collection_name = vector_config.get('collection_name', 'chemical_reactions_recommendation')
+    collection_name = f"{base_collection_name}_{agent_name}"
+    
     print(f"✓ 使用Agent: {agent_name}")
     print(f"✓ LLM模型: {llm_config.get('model')}")
     print(f"✓ 向量模型: {llm_config.get('embedding_model')}")
+    print(f"✓ 向量数据库集合: {collection_name}")
     
     # 2. 初始化文本处理器
     print("\n[步骤 2/5] 加载文本数据...")
@@ -149,6 +154,7 @@ def build_vector_database(
         print("    3. API额度是否充足")
         return
     
+    
     print(f"\n✓ 成功生成 {len(embeddings)} 个向量")
     print(f"✓ 向量维度: {len(embeddings[0]) if embeddings else 0}")
     
@@ -157,7 +163,7 @@ def build_vector_database(
     
     vector_store = VectorStore(
         persist_directory=vector_config.get('persist_directory', './data/chroma_db'),
-        collection_name=vector_config.get('collection_name', 'chemical_reactions'),
+        collection_name=collection_name,  # 使用根据agent_name生成的collection_name
         embedding_function=None  # 使用自定义向量
     )
     
@@ -181,7 +187,7 @@ def build_vector_database(
         return
     
     print(f"✓ 成功存储到Chroma数据库")
-    print(f"✓ 集合名称: {vector_config.get('collection_name')}")
+    print(f"✓ 集合名称: {collection_name}")
     print(f"✓ 存储路径: {vector_config.get('persist_directory')}")
     print(f"✓ 文档总数: {vector_store.get_collection_count()}")
     

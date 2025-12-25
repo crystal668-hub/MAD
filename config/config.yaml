@@ -53,7 +53,7 @@ llm:
 vector_store:
   type: "chroma"
   persist_directory: "./data/chroma_db"
-  collection_name: "chemical_reactions"
+  collection_name: "chemical_reactions_recommendation"
   distance_metric: "cosine"  # cosine, l2, ip
   
 # ===== RAG系统配置 =====
