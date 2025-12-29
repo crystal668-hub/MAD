@@ -65,7 +65,7 @@ python -m database.text_processor
 
 ## 基本使用
 
-### 方式一：命令行运行
+### 方式一：命令行运行 - 多Agent辩论
 
 ```bash
 # 运行辩论（指定金属催化剂元素）
@@ -81,7 +81,30 @@ python main.py --status
 python main.py --config ./config/custom_config.yaml --components "硫酸,氢氧化钠,氯化钠"
 ```
 
-### 方式二：Python脚本调用
+### 方式二：ReAct推理模式 🆕
+
+使用新的ReAct推理能力，获得透明的推理过程：
+
+```bash
+# 运行ReAct示例
+python example_react.py
+
+# 测试ReAct功能
+python test_react.py
+```
+
+**ReAct推理的优势：**
+- 💭 **Thought**: 查看Agent的思考过程
+- 🎯 **Action**: 了解Agent采取的动作
+- 👁️ **Observation**: 观察检索和查询结果
+- 📝 **Trajectory**: 完整的推理轨迹记录
+
+详细文档：
+- 快速入门: `REACT_QUICKSTART.md`
+- 完整文档: `REACT_CAPABILITY.md`
+- 示例代码: `example_react.py`
+
+### 方式三：Python脚本调用
 
 ```python
 from main import MADSystem
@@ -133,7 +156,7 @@ print(f"索引chunks数量: {stats['document_count']}")
 ```python
 from agents import create_agent
 
-# 创建Agent
+# 创建Agent（自动具备ReAct能力）
 agent = create_agent(
     agent_type="openai",
     agent_id="test_agent",
@@ -146,9 +169,24 @@ agent = create_agent(
     }
 )
 
-# 生成响应
+# 传统方式：生成响应
 response = agent.generate_response("分析这个化学反应...")
 print(response.content)
+
+# 🆕 ReAct方式：使用推理轨迹
+response, trajectory = agent.generate_response_with_react(
+    query="分析催化剂性能",
+    components=["Pt", "Pd", "Ru"]
+)
+
+# 查看推理过程
+for step in trajectory.steps:
+    print(f"步骤{step.step_number}: {step.thought}")
+    print(f"  动作: {step.action.value}")
+    print(f"  观察: {step.observation[:100]}...")
+
+# 保存轨迹
+agent.save_trajectory("outputs/trajectory.json")
 ```
 
 ### 单独使用经验库
@@ -252,24 +290,53 @@ results = store.query_experiences(
 - `logs/debates/debate_*.log`: 辩论详细日志
 - `data/experience_db.json`: 经验库
 - `outputs/result_*.json`: 辩论结果
+- `outputs/react_trajectory_*.json`: 🆕 ReAct推理轨迹
 
 ## 进阶使用
 
 ### 自定义Agent
 
-创建新的Agent类继承 `BaseAgent`：
+创建新的Agent类继承 `ReActAgent`（自动具备ReAct能力）：
 
 ```python
-from agents.base_agent import BaseAgent, AgentResponse
+from agents.react_agent import ReActAgent
+from agents.base_agent import AgentResponse
 
-class CustomAgent(BaseAgent):
+class CustomAgent(ReActAgent):
     def _init_llm_client(self):
         # 初始化你的LLM客户端
         pass
     
-    def generate_response(self, prompt, context=None):
-        # 实现响应生成逻辑
+    def _call_llm(self, prompt: str) -> str:
+        # 实现LLM调用逻辑（用于ReAct推理）
         pass
+    
+    def generate_response(self, prompt, context=None):
+        # 实现响应生成逻辑（传统方式）
+        pass
+```
+
+### 扩展ReAct工具 🆕
+
+添加自定义工具到ReAct推理：
+
+```python
+from agents.react_reasoning import ActionType
+
+# 定义新的动作类型
+class CustomActionType(ActionType):
+    CUSTOM_TOOL = "custom_tool"
+
+# 实现工具函数
+def custom_tool_function(**kwargs):
+    # 工具逻辑
+    return result
+
+# 注册到Agent
+agent.react_engine.register_tool(
+    CustomActionType.CUSTOM_TOOL,
+    custom_tool_function
+)
 ```
 
 ### 自定义辩论策略

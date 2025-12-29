@@ -19,8 +19,10 @@ MAD/
 │   └── vector_store.py # 向量数据库管理
 ├── agents/            # Agent模块
 │   ├── base_agent.py  # Agent基类
-│   ├── llm_agents.py  # 四个LLM Agent实现
-│   └── agent_config.py # Agent配置
+│   ├── llm_agents.py  # 四个LLM Agent实现（支持ReAct）
+│   ├── agent_config.py # Agent配置
+│   ├── react_reasoning.py # 🆕 ReAct推理引擎
+│   └── react_agent.py # 🆕 ReAct Agent基类
 ├── debate/            # 辩论模块
 │   └── autogen_coordinator.py  # AutoGen辩论协调器
 ├── experience/        # 经验库模块
@@ -31,8 +33,13 @@ MAD/
 │   └── helpers.py     # 辅助函数
 ├── main.py            # 主程序入口
 ├── examples.py        # 使用示例
+├── example_react.py   # 🆕 ReAct功能示例
+├── test_react.py      # 🆕 ReAct功能测试
 ├── requirements.txt   # 依赖列表
-└── README.md         # 项目说明
+├── README.md         # 项目说明
+├── REACT_QUICKSTART.md # 🆕 ReAct快速入门
+├── REACT_CAPABILITY.md # 🆕 ReAct功能详解
+└── REACT_SUMMARY.md   # 🆕 ReAct改造总结
 ```
 
 ## 核心功能
@@ -57,6 +64,11 @@ MAD/
 - **Agent 4**: Based on DeepSeek V3.2
 - Each Agent is equipped with an independent RAG system for retrieval augmentation
 - Specialized in analyzing metal catalyst performance and electrochemical reactions
+- **🆕 ReAct Capability**: All Agents support ReAct (Reasoning + Acting) reasoning mode
+  - Thought: Analysis and sub-goal decomposition
+  - Action: Tool selection (RAG search, experience query, analysis, conclusion)
+  - Observation: Retrieval results and experience data
+  - Complete reasoning trajectory tracking
 
 ### 4. 多Agent辩论（debate/）
 - 基于Microsoft AutoGen框架实现
@@ -119,6 +131,50 @@ python -m database.text_processor
 
 ### 基本使用
 
+```bash
+# 传统方式：使用多Agent辩论
+python main.py --components "Pt,Pd,Ru,Ir,Rh"
+
+# 🆕 ReAct方式：使用ReAct推理
+python example_react.py
+```
+
+### ReAct推理模式 🆕
+
+使用新的ReAct推理能力，获得透明的推理过程：
+
+```python
+from agents import create_agent
+
+# 创建具备ReAct能力的Agent
+agent = create_agent(
+    agent_type="openai",
+    agent_id="agent_1",
+    name="Catalyst Expert",
+    model_config=config,
+    rag_system=rag_system,
+    experience_store=experience_store
+)
+
+# 使用ReAct推理
+response, trajectory = agent.generate_response_with_react(
+    query="分析这些金属的催化性能",
+    components=["Pt", "Pd", "Ru"]
+)
+
+# 查看完整推理过程
+for step in trajectory.steps:
+    print(f"步骤{step.step_number}:")
+    print(f"  思考: {step.thought}")
+    print(f"  动作: {step.action.value}")
+    print(f"  观察: {step.observation}")
+```
+
+详细文档：
+- 快速入门: `REACT_QUICKSTART.md`
+- 完整文档: `REACT_CAPABILITY.md`
+- 改造说明: `REACT_SUMMARY.md`
+
 ### 完整流程
 
 1. **数据预处理**
@@ -147,6 +203,12 @@ python main.py --status
 
 # 使用示例脚本
 python examples.py
+
+# 🆕 运行ReAct示例
+python example_react.py
+
+# 🆕 测试ReAct功能
+python test_react.py
 ```
 
 ## 配置说明
@@ -191,6 +253,8 @@ python examples.py
 ✅ **鲁棒性强**: 异常处理和错误恢复机制  
 ✅ **可配置性**: 灵活的YAML配置系统  
 ✅ **可扩展性**: 易于添加新的LLM或Agent  
+✅ **🆕 ReAct推理**: 透明的思考-行动-观察推理过程  
+✅ **🆕 轨迹追踪**: 完整记录推理链条，可解释AI  
 
 ## 注意事项
 

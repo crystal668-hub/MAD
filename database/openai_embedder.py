@@ -96,7 +96,7 @@ class MultiModelEmbedder:
             
         if agent_name not in self.voyage_clients:
             agent_config = self.agent_configs.get(agent_name, {})
-            voyage_api_key = agent_config.get('VOYAGE_API_KEY')
+            voyage_api_key = agent_config.get('voyage_api_key')
             
             # 从环境变量获取API Key
             if voyage_api_key and voyage_api_key.startswith('${') and voyage_api_key.endswith('}'):

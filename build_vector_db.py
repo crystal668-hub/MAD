@@ -220,7 +220,7 @@ def build_vector_database(
 
 
 if __name__ == "__main__":
-    # 运行构建脚本
+    
     build_vector_database(
         config_path="./config/config.yaml",
         use_processed_data=True,  # 优先使用processed目录的数据

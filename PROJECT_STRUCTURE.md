@@ -24,8 +24,10 @@ MAD/
 ├── agents/                         # Agent模块
 │   ├── __init__.py                # 模块初始化
 │   ├── base_agent.py              # Agent基类
-│   ├── llm_agents.py              # 四个LLM Agent实现
-│   └── agent_config.py            # Agent配置管理
+│   ├── llm_agents.py              # 四个LLM Agent实现（支持ReAct）
+│   ├── agent_config.py            # Agent配置管理
+│   ├── react_reasoning.py         # 🆕 ReAct推理引擎和数据结构
+│   └── react_agent.py             # 🆕 ReAct Agent基类
 │
 ├── debate/                         # 辩论模块
 │   ├── __init__.py                # 模块初始化
@@ -46,15 +48,21 @@ MAD/
 │   └── debates/                   # 辩论日志
 │
 ├── outputs/                        # 输出目录（运行时生成）
-│   └── result_*.json              # 辩论结果文件
+│   ├── result_*.json              # 辩论结果文件
+│   └── react_trajectory_*.json    # 🆕 ReAct推理轨迹文件
 │
 ├── process_abstracts.py            # [已废弃] TSV数据预处理功能已整合到database/text_processor.py
 ├── main.py                         # 主程序入口
 ├── examples.py                     # 使用示例脚本
+├── example_react.py                # 🆕 ReAct功能示例脚本
+├── test_react.py                   # 🆕 ReAct功能测试脚本
 ├── requirements.txt                # Python依赖列表
 ├── README.md                       # 项目说明文档
 ├── QUICKSTART.md                   # 快速开始指南
-├── PROJECT_STRUCTURE.md            # 项目结构详解
+├── REACT_QUICKSTART.md             # 🆕 ReAct快速入门指南
+├── REACT_CAPABILITY.md             # 🆕 ReAct功能详细文档
+├── REACT_SUMMARY.md                # 🆕 ReAct改造总结
+├── PROJECT_STRUCTURE.md            # 项目结构详解（本文档）
 ├── .env.example                    # 环境变量示例
 └── .gitignore                      # Git忽略文件
 ```
@@ -136,11 +144,40 @@ MAD/
 - `AgentResponse`数据类：封装响应
 - 提供RAG检索、经验查询、提示增强等通用功能
 
-**llm_agents.py** (约450行)
-- `OpenAIAgent`: 基于OpenAI GPT5.2的Agent
-- `XAIAgent`: 基于xAI Grok-4的Agent  
-- `GoogleAgent`: 基于Google Gemini-3-pro的Agent
-- `DeepSeekAgent`: 基于DeepSeek V3.2的Agent
+**react_reasoning.py** 🆕 (约400行)
+- `ActionType`枚举：定义4种动作类型
+  - `SEARCH_RAG`: 从RAG系统检索知识
+  - `QUERY_EXPERIENCE`: 查询经验库
+  - `ANALYZE`: 分析当前信息
+  - `CONCLUDE`: 得出最终结论
+- `ReActStep`数据类：单步推理（Thought→Action→Observation）
+- `ReActTrajectory`数据类：完整推理轨迹
+- `ReActEngine`类：推理引擎
+  - 工具注册与管理
+  - 动作执行与观察
+  - LLM响应解析
+  - 推理流程控制
+- `create_react_prompt()`: 生成ReAct风格提示
+
+**react_agent.py** 🆕 (约350行)
+- `ReActAgent`基类：具备ReAct推理能力的Agent
+- 继承自`BaseAgent`，集成`ReActEngine`
+- 实现4个工具函数：
+  - `_tool_search_rag()`: RAG检索工具
+  - `_tool_query_experience()`: 经验查询工具
+  - `_tool_analyze()`: 分析工具
+  - `_tool_conclude()`: 结论工具
+- `generate_response_with_react()`: ReAct推理主方法
+- `_smart_default_action()`: 智能默认策略
+- `save_trajectory()`: 保存推理轨迹
+
+**llm_agents.py** (约500行，已升级)
+- `OpenAIAgent`: 基于OpenAI GPT的Agent（支持ReAct）
+- `XAIAgent`: 基于xAI Grok的Agent（支持ReAct）
+- `GoogleAgent`: 基于Google Gemini的Agent（支持ReAct）
+- `DeepSeekAgent`: 基于DeepSeek的Agent（支持ReAct）
+- 所有Agent继承自`ReActAgent`
+- 每个Agent实现`_call_llm()`方法支持ReAct循环
 - `create_agent()`: Agent工厂函数
 - 所有Agent通过OpenRouter的OpenAI兼容API调用
 

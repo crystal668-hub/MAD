@@ -3,21 +3,24 @@
 LLM Agent实现模块
 功能：实现四个不同LLM的Agent（OpenAI、xAI Grok、Google、DeepSeek）
 所有Agent统一通过OpenRouter使用OpenAI兼容API格式调用
+支持ReAct推理能力
 ===================================
 """
 
 import os
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 import openai
 
 from agents.base_agent import BaseAgent, AgentResponse
+from agents.react_agent import ReActAgent
+from agents.react_reasoning import ReActTrajectory
 
 
-class OpenAIAgent(BaseAgent):
+class OpenAIAgent(ReActAgent):
     """
     基于OpenAI GPT的Agent
-    使用GPT模型进行推理和分析
+    使用GPT模型进行推理和分析，支持ReAct推理
     """
     
     def _init_llm_client(self) -> None:
@@ -111,12 +114,39 @@ class OpenAIAgent(BaseAgent):
             Dict: 解析后的信息
         """
         return _parse_llm_response(content)
+    
+    def _call_llm(self, prompt: str) -> str:
+        """
+        调用OpenAI LLM
+        
+        Args:
+            prompt: 输入提示
+        
+        Returns:
+            str: LLM响应文本
+        """
+        try:
+            messages = [
+                {"role": "system", "content": self.get_system_prompt()},
+                {"role": "user", "content": prompt}
+            ]
+            
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens
+            )
+            
+            return response.choices[0].message.content
+        except Exception as e:
+            return f"LLM调用失败: {str(e)}"
 
 
-class XAIAgent(BaseAgent):
+class XAIAgent(ReActAgent):
     """
     基于xAI Grok的Agent
-    使用Grok模型进行推理和分析
+    使用Grok模型进行推理和分析，支持ReAct推理
     """
     
     def _init_llm_client(self) -> None:
@@ -190,12 +220,39 @@ class XAIAgent(BaseAgent):
     def _parse_response(self, content: str) -> Dict:
         """解析响应（使用统一的解析函数）"""
         return _parse_llm_response(content)
+    
+    def _call_llm(self, prompt: str) -> str:
+        """
+        调用xAI Grok LLM
+        
+        Args:
+            prompt: 输入提示
+        
+        Returns:
+            str: LLM响应文本
+        """
+        try:
+            messages = [
+                {"role": "system", "content": self.get_system_prompt()},
+                {"role": "user", "content": prompt}
+            ]
+            
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens
+            )
+            
+            return response.choices[0].message.content
+        except Exception as e:
+            return f"LLM调用失败: {str(e)}"
 
 
-class GoogleAgent(BaseAgent):
+class GoogleAgent(ReActAgent):
     """
     基于Google Gemini的Agent
-    使用Gemini模型进行推理和分析
+    使用Gemini模型进行推理和分析，支持ReAct推理
     """
     
     def _init_llm_client(self) -> None:
@@ -269,12 +326,39 @@ class GoogleAgent(BaseAgent):
     def _parse_response(self, content: str) -> Dict:
         """解析响应（使用统一的解析函数）"""
         return _parse_llm_response(content)
+    
+    def _call_llm(self, prompt: str) -> str:
+        """
+        调用Google Gemini LLM
+        
+        Args:
+            prompt: 输入提示
+        
+        Returns:
+            str: LLM响应文本
+        """
+        try:
+            messages = [
+                {"role": "system", "content": self.get_system_prompt()},
+                {"role": "user", "content": prompt}
+            ]
+            
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens
+            )
+            
+            return response.choices[0].message.content
+        except Exception as e:
+            return f"LLM调用失败: {str(e)}"
 
 
-class DeepSeekAgent(BaseAgent):
+class DeepSeekAgent(ReActAgent):
     """
     基于DeepSeek的Agent
-    使用DeepSeek模型进行推理和分析
+    使用DeepSeek模型进行推理和分析，支持ReAct推理
     """
     
     def _init_llm_client(self) -> None:
@@ -348,6 +432,33 @@ class DeepSeekAgent(BaseAgent):
     def _parse_response(self, content: str) -> Dict:
         """解析响应（使用统一的解析函数）"""
         return _parse_llm_response(content)
+    
+    def _call_llm(self, prompt: str) -> str:
+        """
+        调用DeepSeek LLM
+        
+        Args:
+            prompt: 输入提示
+        
+        Returns:
+            str: LLM响应文本
+        """
+        try:
+            messages = [
+                {"role": "system", "content": self.get_system_prompt()},
+                {"role": "user", "content": prompt}
+            ]
+            
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens
+            )
+            
+            return response.choices[0].message.content
+        except Exception as e:
+            return f"LLM调用失败: {str(e)}"
 
 
 # ===================================

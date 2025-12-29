@@ -158,7 +158,7 @@ def main():
     
     # 3. 测试RAG检索功能
     print_section("3. 测试RAG检索功能")
-    test_rag_retrieval(shared_rag, "metal catalyst AOR overpotential")
+    test_rag_retrieval(shared_rag, "overpotential for AOR reaction")
     
     # 4. 为所有4个Agent绑定相同的RAG系统
     print_section("4. 初始化Agent并绑定RAG")
