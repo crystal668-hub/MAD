@@ -76,9 +76,6 @@ def test_embedding_selection():
         print(f"  向量前5个值: {embedding2[:5]}")
     except Exception as e:
         print(f"✗ 失败: {str(e)}")
-        print(f"  提示: 如需使用Voyage AI，请确保:")
-        print(f"    1. 已安装voyageai SDK: pip install voyageai")
-        print(f"    2. 已设置环境变量: VOYAGE_API_KEY")
     
     # 测试3: 使用agent3的嵌入模型
     print("\n" + "=" * 60)
@@ -94,7 +91,7 @@ def test_embedding_selection():
     
     # 测试4: 使用agent4的嵌入模型
     print("\n" + "=" * 60)
-    print("测试4: 使用agent4 (openai/text-embedding-3-large via OpenRouter)")
+    print("测试4: 使用agent4 (text-embedding-v4 via 云百炼平台的OpenAI兼容方法)")
     print("=" * 60)
     try:
         embedding4 = embedder.embed_text(test_text, agent_name='agent4')
@@ -126,8 +123,9 @@ def test_embedding_selection():
     print("=" * 60)
     print("\n总结:")
     print("✓ MultiModelEmbedder已支持根据agent_name动态选择嵌入模型")
-    print("✓ agent1/agent3/agent4使用OpenRouter API")
+    print("✓ agent1/agent3使用OpenRouter API")
     print("✓ agent2使用Voyage AI官方SDK")
+    print("✓ agent4使用")
     print("✓ 可以在build_vector_db.py中指定agent_name来选择对应的嵌入模型")
 
 

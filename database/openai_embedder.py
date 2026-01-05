@@ -128,6 +128,17 @@ class MultiModelEmbedder:
         embedding_provider = agent_config.get('embedding_provider', '')
         
         return embedding_provider.lower() == 'voyage'
+
+    def _is_bailian_model(self, agent_name: str = None) -> bool:
+        """判断是否使用百炼/通义千问向量接口"""
+        if not agent_name or agent_name not in self.agent_configs:
+            return False
+        provider = self.agent_configs[agent_name].get('embedding_provider', '')
+        return provider.lower() in ['bailian', 'aliyun', 'qwen']
+
+    def _get_bailian_base_url(self, agent_name: str) -> str:
+        agent_config = self.agent_configs.get(agent_name, {})
+        return agent_config.get('emb_url', 'https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings')
     
     def set_agent(self, agent_name: str) -> None:
         """
@@ -159,11 +170,12 @@ class MultiModelEmbedder:
         # 确定使用的agent
         use_agent = agent_name if agent_name else self.current_agent
         
-        # 检查是否使用Voyage AI
+        # 检查是否使用百炼或Voyage AI
+        if use_agent and self._is_bailian_model(use_agent):
+            return self._embed_text_bailian(text, retry, use_agent)
         if use_agent and self._is_voyage_model(use_agent):
             return self._embed_text_voyage(text, retry, use_agent)
-        else:
-            return self._embed_text_openrouter(text, retry, use_agent)
+        return self._embed_text_openrouter(text, retry, use_agent)
     
     def _embed_text_voyage(self, text: str, retry: int, agent_name: str) -> List[float]:
         """
@@ -206,6 +218,53 @@ class MultiModelEmbedder:
                     time.sleep(2 ** attempt)
         
         raise Exception(f"Voyage AI向量化失败，已重试{retry}次")
+
+    def _embed_text_bailian(self, text: str, retry: int, agent_name: str) -> List[float]:
+        """使用百炼OpenAI兼容HTTP接口进行文本向量化"""
+        agent_config = self.agent_configs.get(agent_name, {})
+        api_key = agent_config.get('bailian_api_key') or agent_config.get('api_key') or self.api_key
+        if api_key and api_key.startswith('${') and api_key.endswith('}'):
+            env_var = api_key[2:-1]
+            api_key = os.environ.get(env_var)
+        if not api_key:
+            raise ValueError("百炼 API Key 未配置")
+        
+        base_url = self._get_bailian_base_url(agent_name)
+        model = self.get_model_for_agent(agent_name)
+        payload = {
+            'model': model,
+            'input': text
+        }
+        headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        }
+        
+        for attempt in range(retry):
+            try:
+                response = requests.post(
+                    base_url,
+                    headers=headers,
+                    json=payload,
+                    timeout=30
+                )
+                if response.status_code == 200:
+                    result = response.json()
+                    embedding = result['data'][0]['embedding']
+                    return embedding
+                else:
+                    error_msg = f"API请求失败 (状态码: {response.status_code})"
+                    if response.text:
+                        error_msg += f", 响应: {response.text[:200]}"
+                    print(f"[ERROR] {error_msg}")
+                    if attempt < retry - 1:
+                        time.sleep(2 ** attempt)
+            except Exception as e:
+                print(f"[ERROR] 百炼向量化失败 (尝试 {attempt + 1}/{retry}): {str(e)}")
+                if attempt < retry - 1:
+                    time.sleep(2 ** attempt)
+        
+        raise Exception(f"百炼向量化失败，已重试{retry}次")
     
     def _embed_text_openrouter(self, text: str, retry: int, agent_name: str = None) -> List[float]:
         """
@@ -331,6 +390,8 @@ class MultiModelEmbedder:
             return 1536
         elif 'gemini-embedding' in use_model.lower():
             return 768
+        elif 'embedding-v4' in use_model.lower():
+            return 1536
         else:
             return 1536  # 默认维度
 
@@ -362,8 +423,10 @@ if __name__ == "__main__":
             'emb_url': 'https://openrouter.ai/api/v1/embeddings'
         },
         'agent4': {
-            'embedding_model': 'openai/text-embedding-3-large',
-            'emb_url': 'https://openrouter.ai/api/v1/embeddings'
+            'embedding_model': 'text-embedding-v4',
+            'embedding_provider': 'bailian',
+            'bailian_api_key': '${QWEN_API_KEY}',
+            'emb_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings'
         }
     }
     

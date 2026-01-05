@@ -90,10 +90,10 @@ class AgentConfig:
         
         # Agent配置映射
         agent_configs = [
-            ("agent1", "GPT-4 Agent", "agent1"),
-            ("agent2", "Grok Agent", "agent2"),
-            ("agent3", "Gemini Agent", "agent3"),
-            ("agent4", "DeepSeek Agent", "agent4")
+            ("agent1", "GPT-5.2 Agent", "agent1"),
+            ("agent2", "Grok4.1 Agent", "agent2"),
+            ("agent3", "Gemini 3.0 Agent", "agent3"),
+            ("agent4", "Qwen3 Agent", "agent4")
         ]
         
         for agent_key, agent_name, agent_id in agent_configs:

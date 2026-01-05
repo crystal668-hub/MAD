@@ -1,9 +1,8 @@
 """
 ===================================
 LLM Agent实现模块
-功能：实现四个不同LLM的Agent（OpenAI、xAI Grok、Google、DeepSeek）
-所有Agent统一通过OpenRouter使用OpenAI兼容API格式调用
-支持ReAct推理能力
+功能：实现四个不同LLM的Agent（OpenAI、xAI Grok、Google、Qwen）
+所有Agent通过OpenAI兼容接口调用（OpenRouter或百炼兼容端点），支持ReAct推理能力
 ===================================
 """
 
@@ -461,6 +460,82 @@ class DeepSeekAgent(ReActAgent):
             return f"LLM调用失败: {str(e)}"
 
 
+class QwenAgent(ReActAgent):
+    """
+    基于通义千问的Agent
+    使用阿里云百炼OpenAI兼容端点调用Qwen模型
+    """
+    
+    def _init_llm_client(self) -> None:
+        """初始化Qwen/百炼客户端（OpenAI兼容模式）"""
+        api_key = self.model_config.get('api_key')
+        if api_key and api_key.startswith("${") and api_key.endswith("}"):
+            env_var = api_key[2:-1]
+            api_key = os.getenv(env_var)
+        if not api_key:
+            raise ValueError("百炼 API key未配置")
+        
+        base_url = self.model_config.get('base_url', 'https://dashscope.aliyuncs.com/compatible-mode/v1')
+        self.client = openai.OpenAI(api_key=api_key, base_url=base_url)
+        self.model = self.model_config.get('model', 'qwen3-max')
+        self.temperature = self.model_config.get('temperature', 0.9)
+        self.max_tokens = self.model_config.get('max_tokens', 2000)
+        
+        print(f"{self.name} (Qwen {self.model}) 初始化成功 [base_url: {base_url}]")
+    
+    def generate_response(self, prompt: str, context: Optional[Dict] = None) -> AgentResponse:
+        """生成响应"""
+        messages = [
+            {"role": "system", "content": self.get_system_prompt()}
+        ]
+        messages.extend(self.conversation_history)
+        messages.append({"role": "user", "content": prompt})
+        
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens
+            )
+            content = response.choices[0].message.content
+            
+            self.add_to_history("user", prompt)
+            self.add_to_history("assistant", content)
+            
+            parsed_info = self._parse_response(content)
+            return AgentResponse(
+                content=content,
+                reaction_type=parsed_info.get('reaction_type'),
+                overpotential=parsed_info.get('overpotential'),
+                reasoning=parsed_info.get('reasoning'),
+                confidence=parsed_info.get('confidence')
+            )
+        except Exception as e:
+            error_msg = f"Qwen API调用失败: {str(e)}"
+            print(error_msg)
+            return AgentResponse(content=error_msg)
+    
+    def _parse_response(self, content: str) -> Dict:
+        return _parse_llm_response(content)
+    
+    def _call_llm(self, prompt: str) -> str:
+        try:
+            messages = [
+                {"role": "system", "content": self.get_system_prompt()},
+                {"role": "user", "content": prompt}
+            ]
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            return f"LLM调用失败: {str(e)}"
+
+
 # ===================================
 # 辅助函数
 # ===================================
@@ -537,7 +612,8 @@ def create_agent(
         "openai": OpenAIAgent,
         "xai": XAIAgent,
         "google": GoogleAgent,
-        "deepseek": DeepSeekAgent
+        "deepseek": DeepSeekAgent,
+        "qwen": QwenAgent
     }
     
     agent_class = agent_classes.get(agent_type.lower())
