@@ -2,7 +2,7 @@
 ===================================
 LLM Agent实现模块
 功能：实现四个不同LLM的Agent（OpenAI、xAI Grok、Google、Qwen）
-所有Agent通过OpenAI兼容接口调用（OpenRouter或百炼兼容端点），支持ReAct推理能力
+所有Agent通过OpenAI兼容调用（OpenRouter或百炼兼容端点），支持ReAct推理能力
 ===================================
 """
 
@@ -354,112 +354,6 @@ class GoogleAgent(ReActAgent):
             return f"LLM调用失败: {str(e)}"
 
 
-class DeepSeekAgent(ReActAgent):
-    """
-    基于DeepSeek的Agent
-    使用DeepSeek模型进行推理和分析，支持ReAct推理
-    """
-    
-    def _init_llm_client(self) -> None:
-        """初始化DeepSeek客户端"""
-        api_key = self.model_config.get('api_key')
-        if not api_key:
-            raise ValueError("DeepSeek API key未配置")
-        
-        # 替换环境变量占位符
-        if api_key.startswith("${") and api_key.endswith("}"):
-            env_var = api_key[2:-1]
-            api_key = os.getenv(env_var)
-            if not api_key:
-                raise ValueError(f"环境变量 {env_var} 未设置")
-        
-        # 获取base_url配置，默认使用OpenRouter
-        base_url = self.model_config.get('base_url', 'https://openrouter.ai/api/v1')
-        
-        # OpenRouter使用OpenAI兼容接口
-        self.client = openai.OpenAI(
-            api_key=api_key,
-            base_url=base_url
-        )
-        self.model = self.model_config.get('model', 'deepseek/deepseek-chat')
-        self.temperature = self.model_config.get('temperature', 0.9)
-        self.max_tokens = self.model_config.get('max_tokens', 2000)
-        
-        print(f"{self.name} (DeepSeek {self.model}) 初始化成功 [base_url: {base_url}]")
-    
-    def generate_response(self, prompt: str, context: Optional[Dict] = None) -> AgentResponse:
-        """生成响应"""
-        try:
-            # 构建消息列表（使用OpenAI兼容格式）
-            messages = [
-                {"role": "system", "content": self.get_system_prompt()}
-            ]
-            messages.extend(self.conversation_history)
-            messages.append({"role": "user", "content": prompt})
-            
-            # 调用OpenRouter API（OpenAI兼容接口）
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens
-            )
-            
-            # 提取响应内容
-            content = response.choices[0].message.content
-            
-            # 添加到历史记录
-            self.add_to_history("user", prompt)
-            self.add_to_history("assistant", content)
-            
-            # 解析响应
-            parsed_info = self._parse_response(content)
-            
-            return AgentResponse(
-                content=content,
-                reaction_type=parsed_info.get('reaction_type'),
-                overpotential=parsed_info.get('overpotential'),
-                reasoning=parsed_info.get('reasoning'),
-                confidence=parsed_info.get('confidence')
-            )
-        
-        except Exception as e:
-            error_msg = f"DeepSeek API调用失败: {str(e)}"
-            print(error_msg)
-            return AgentResponse(content=error_msg)
-    
-    def _parse_response(self, content: str) -> Dict:
-        """解析响应（使用统一的解析函数）"""
-        return _parse_llm_response(content)
-    
-    def _call_llm(self, prompt: str) -> str:
-        """
-        调用DeepSeek LLM
-        
-        Args:
-            prompt: 输入提示
-        
-        Returns:
-            str: LLM响应文本
-        """
-        try:
-            messages = [
-                {"role": "system", "content": self.get_system_prompt()},
-                {"role": "user", "content": prompt}
-            ]
-            
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens
-            )
-            
-            return response.choices[0].message.content
-        except Exception as e:
-            return f"LLM调用失败: {str(e)}"
-
-
 class QwenAgent(ReActAgent):
     """
     基于通义千问的Agent
@@ -598,7 +492,7 @@ def create_agent(
     Agent工厂函数，根据类型创建相应的Agent
     
     Args:
-        agent_type: Agent类型 ("openai", "xai", "google", "deepseek")
+        agent_type: Agent类型 ("openai", "xai", "google", "qwen")
         agent_id: Agent ID
         name: Agent名称
         model_config: 模型配置
@@ -612,7 +506,6 @@ def create_agent(
         "openai": OpenAIAgent,
         "xai": XAIAgent,
         "google": GoogleAgent,
-        "deepseek": DeepSeekAgent,
         "qwen": QwenAgent
     }
     

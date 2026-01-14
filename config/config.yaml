@@ -4,7 +4,7 @@
 
 # ===== LLM配置 =====
 llm:
-  # Agent 1: OpenRouter GPT-5.2 Thinking + OpenAI embedding
+  # Agent 1: OpenRouter GPT-5.2 Thinking + text-embedding-3-large
   agent1:
     provider: "openai"
     model: "openai/gpt-5.2-thinking"
@@ -16,7 +16,7 @@ llm:
     emb_url: "https://openrouter.ai/api/v1/embeddings"
     embedding_provider: "openrouter"
   
-  # Agent 2: Grok 4.1 Thinking + Voyage embedding（LLM走OpenRouter，Embedding走Voyage官方SDK）
+  # Agent 2: Grok 4.1 Thinking + voyage-3-large（Grok走OpenRouter，voyage走Voyage SDK）
   agent2:
     provider: "xai"
     model: "x-ai/grok-4.1-thinking"
@@ -28,7 +28,7 @@ llm:
     embedding_provider: "voyage"  # 使用Voyage AI官方SDK
     voyage_api_key: "${VOYAGE_API_KEY}" 
   
-  # Agent 3: Gemini 3.0 Pro Preview + Gemini Embedding（OpenRouter客户端）
+  # Agent 3: Gemini 3.0 Pro Preview + gemini-embedding-001
   agent3:
     provider: "google"
     model: "google/gemini-3.0-pro-preview"
@@ -40,7 +40,7 @@ llm:
     emb_url: "https://openrouter.ai/api/v1/embeddings"
     embedding_provider: "openrouter"
   
-  # Agent 4: Qwen3-Max + text-embedding-v4（百炼客户端）
+  # Agent 4: Qwen3-Max + text-embedding-v4 (阿里云百炼OpenAI兼容模式)
   agent4:
     provider: "qwen"
     model: "qwen3-max"
@@ -62,8 +62,8 @@ vector_store:
   
 # ===== RAG系统配置 =====
 rag:
-  #chunk_size: 512  # 文本分块大小
-  #chunk_overlap: 50  # 分块重叠大小
+  chunk_size: 512  
+  chunk_overlap: 100  
   top_k: 5  # 检索返回的top-k结果
   similarity_threshold: 0.7  # 相似度阈值
   
