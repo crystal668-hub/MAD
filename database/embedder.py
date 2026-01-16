@@ -1,7 +1,7 @@
 """
 ===================================
 OpenAI向量化模块
-功能：使用OpenRouter API或Voyage AI SDK将文本转换为向量
+功能：使用OpenRouter或Voyage AI SDK调用api进行文本向量化
 ===================================
 """
 
@@ -11,7 +11,6 @@ from typing import List, Dict, Optional
 import requests
 from tqdm import tqdm
 
-# Voyage AI SDK（可选导入）
 try:
     import voyageai
     VOYAGE_AVAILABLE = True
@@ -33,7 +32,7 @@ class MultiModelEmbedder:
         
         Args:
             model_config: 默认模型配置字典
-            agent_configs: 所有agent的配置字典 (例如从config.yaml的llm节点传入)
+            agent_configs: 所有agent的配置字典 
         """
         self.default_model = model_config.get('embedding_model', 'text-embedding-3-large')
         self.api_key = model_config.get('api_key')

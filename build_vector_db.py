@@ -1,7 +1,8 @@
 """
 ======================================================
 向量数据库构建脚本
-功能：使用对应Agent的embedding模型配置构建Chroma向量数据库
+功能：使用LlamaIndex解析Markdown文件，构建Chroma向量数据库
+支持九种电化学反应类型的文献数据存储
 ======================================================
 """
 
@@ -19,25 +20,49 @@ sys.path.insert(0, str(project_root))
 from agents.agent_config import AgentConfig
 from database.vector_store import VectorStore
 from database.text_processor import TextProcessor
-from database.openai_embedder import MultiModelEmbedder
+from database.embedder import MultiModelEmbedder
+
+REACTION_CONFIGS = {
+    "CO2RR": {"path": "CO2RR", "type": "fulltext"},   # CO2 Reduction Reaction
+    "EOR": {"path": "EOR", "type": "fulltext"},       # Ethanol Oxidation Reaction
+    "HER": {"path": "HER", "type": "fulltext"},       # Hydrogen Evolution Reaction
+    "HOR": {"path": "HOR", "type": "fulltext"},       # Hydrogen Oxidation Reaction
+    "HZOR": {"path": "HZOR", "type": "fulltext"},     # Hydrazine Oxidation Reaction
+    "O5H": {"path": "O5H", "type": "fulltext"},       # Oxidation of 5-hydroxymethylfurfural
+    "OER": {"path": "OER", "type": "fulltext"},       # Oxygen Evolution Reaction
+    "ORR": {"path": "ORR", "type": "fulltext"},       # Oxygen Reduction Reaction
+    "UOR": {"path": "UOR", "type": "fulltext"},       # Urea Oxidation Reaction
+}
 
 
 def build_vector_database(
     config_path: str = "./config/config.yaml",
-    use_processed_data: bool = True,
-    agent_name: str = "agent1"
+    data_dir: str = "./data/raw",
+    reaction_configs: dict = None,
+    agent_name: str = "agent2",
+    chunk_size: int = 256,
+    chunk_overlap: int = 50
 ):
     """
     构建向量数据库
+    使用LlamaIndex解析Markdown，创建Document对象并进行chunk和索引构建
+    使用Chromadb存储持久化向量数据
     
     Args:
         config_path: 配置文件路径
-        use_processed_data: 是否使用processed目录的数据
-        agent_name: 使用的Agent配置名称(默认agent1——OpenAI)
+        data_dir: 原始数据目录（包含各反应类型子目录）
+        reaction_configs: 反应类型配置字典，None则使用默认配置
+        agent_name: 使用的Agent配置名称(默认agent2——voyage-embedding)
+        chunk_size: 分块大小
+        chunk_overlap: 分块重叠大小
     """
     print("=" * 60)
     print("开始构建Chroma向量数据库")
     print("=" * 60)
+    
+    # 构建反应类型配置
+    if reaction_configs is None:
+        reaction_configs = REACTION_CONFIGS
     
     # 1. 加载配置
     print("\n[步骤 1/5] 加载配置...")
@@ -46,6 +71,11 @@ def build_vector_database(
     # 获取对应Agent配置
     llm_config = config.get_llm_config(agent_name)
     vector_config = config.get_vector_store_config()
+    rag_config = config.get_rag_config()
+    
+    # 使用配置文件中的chunk参数
+    chunk_size = rag_config.get('chunk_size', chunk_size)
+    chunk_overlap = rag_config.get('chunk_overlap', chunk_overlap)
     
     # 获取所有agent的配置字典（用于MultiModelEmbedder动态切换模型）
     all_agent_configs = {
@@ -59,73 +89,56 @@ def build_vector_database(
     base_collection_name = vector_config.get('collection_name', 'chemical_reactions_recommendation')
     collection_name = f"{base_collection_name}_{agent_name}"
     
-    print(f"✓ 使用Agent: {agent_name}")
-    print(f"✓ LLM模型: {llm_config.get('model')}")
-    print(f"✓ 向量模型: {llm_config.get('embedding_model')}")
-    print(f"✓ 向量数据库集合: {collection_name}")
+    print(f"✓ Agent_used: {agent_name}")
+    print(f"✓ base_model: {llm_config.get('model')}")
+    print(f"✓ embedding_model: {llm_config.get('embedding_model')}")
+    print(f"✓ collection_name: {collection_name}")
+    print(f"✓ chunk_size: {chunk_size}, chunk_overlap: {chunk_overlap}")
     
-    # 2. 初始化文本处理器
-    print("\n[步骤 2/5] 加载文本数据...")
-    processor = TextProcessor()
+    # 2. 使用LlamaIndex加载文档
+    print("\n[步骤 2/5] 加载文献数据...")
+    processor = TextProcessor(data_dir)
     
-    # 加载数据
-    documents = []
-    
-    if use_processed_data:
-        # 优先加载processed目录的预处理好的chunks数据
-        print("  从processed目录加载数据...")
-        processed_docs = processor.load_processed_chunks("*chunks.txt")
-        documents.extend(processed_docs)
-    
-    if len(documents) == 0:
-        # 如果没有processed数据，尝试从raw目录加载并预处理TSV文件
-        print("  processed目录无数据，尝试从raw目录加载TSV文件...")
-        processor_raw = TextProcessor("./data/raw")
-        
-        # 查找TSV文件
-        raw_path = Path("./data/raw")
-        tsv_files = list(raw_path.glob('*.tsv')) if raw_path.exists() else []
-        
-        if tsv_files:
-            print(f"  找到 {len(tsv_files)} 个TSV文件，开始预处理...")
-            # 处理所有TSV文件，生成chunks.txt到processed目录
-            results = processor_raw.process_all_tsv_files(
-                raw_dir="./data/raw",
-                processed_dir="./data/processed"
-            )
-            
-            if sum(results.values()) > 0:
-                # 预处理成功，重新加载processed目录的数据
-                print("\n  预处理完成，加载生成的chunks文件...")
-                processed_docs = processor.load_processed_chunks("*chunks.txt")
-                documents.extend(processed_docs)
-            else:
-                print("\n✗ TSV文件预处理失败，未生成有效数据")
-        else:
-            # 如果也没有TSV文件，尝试加载txt文件
-            print("  未找到TSV文件，尝试加载txt文件...")
-            txt_docs = processor_raw.load_text_files("*.txt")
-            documents.extend(txt_docs)
-    
-    print(f"✓ 共加载 {len(documents)} 个文档")
-    
-    if len(documents) == 0:
-        print("\n✗ 未找到任何文档,请检查数据目录")
-        print("  可尝试:")
-        print("    1. 将TSV文件放入 ./data/raw 目录（自动预处理）")
-        print("    2. 将文本文件放入 ./data/raw 目录")
-        print("    3. 或确保 ./data/processed 目录有 *chunks.txt 文件")
+    # 检查数据目录结构
+    data_path = Path(data_dir)
+    if not data_path.exists():
+        print(f"\n✗ 数据目录不存在: {data_dir}")
+        print("  请确保数据目录结构如下:")
+        for _, cfg in reaction_configs.items():
+            file_type = "*.md"
+            print(f"    {data_dir}/{cfg['path']}/{file_type}")
         return
     
-    # 3. 处理文档
-    print("\n[步骤 3/5] 处理文档...")
-    processed_docs = processor.process_documents(
-        documents,
-        enable_chunking=False,  # processed数据已经分块，无需额外chunk
-        chunk_size=512,
-        overlap=50
+    # 加载所有反应类型的文档
+    documents = processor.load_reaction_documents(
+        base_dir=data_dir,
+        reaction_configs=reaction_configs
     )
-    print(f"✓ 处理后文档数: {len(processed_docs)}")
+    
+    # 如果按反应目录没有找到，尝试直接从data_dir加载所有md文件
+    if len(documents) == 0:
+        print("\n  未找到按反应类型组织的数据，尝试直接加载data_dir中的文件...")
+        documents = processor.load_documents(
+            data_dir=data_dir
+        )
+    
+    print(f"\n✓ 共加载 {len(documents)} 个Document对象")
+    
+    if len(documents) == 0:
+        print("\n✗ 未找到任何文档，请检查数据目录")
+        print("  支持的文件格式: .md")
+        print(f" 数据目录: {data_dir}")
+        return
+    
+    # 3. 对Document进行chunk分块
+    print("\n[步骤 3/5] 对Document进行chunk切分...")
+    chunked_documents = processor.chunk_documents(
+        documents=documents,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap
+    )
+
+    print(f"✓ 分块后文档数: {len(chunked_documents)}")
     
     # 4. 初始化向量化器
     print("\n[步骤 4/5] 初始化向量化器并生成向量...")
@@ -133,12 +146,11 @@ def build_vector_database(
         embedder = MultiModelEmbedder(llm_config, agent_configs=all_agent_configs)
     except ValueError as e:
         print(f"\n✗ 初始化失败: {str(e)}")
-        print("  请设置环境变量: set OPENAI_API_KEY=your_api_key")
         return
     
-    # 提取文本和元数据
-    texts = [doc['text'] for doc in processed_docs]
-    metadatas = [doc['metadata'] for doc in processed_docs]
+    # 利用doc属性获取文本和元数据
+    texts = [doc.text for doc in chunked_documents]
+    metadatas = [doc.metadata for doc in chunked_documents]
     
     print(f"✓ 准备向量化 {len(texts)} 个文本")
     
@@ -154,17 +166,16 @@ def build_vector_database(
         print("    3. API额度是否充足")
         return
     
-    
     print(f"\n✓ 成功生成 {len(embeddings)} 个向量")
     print(f"✓ 向量维度: {len(embeddings[0]) if embeddings else 0}")
     
     # 5. 存储到Chroma向量数据库
-    print("\n[步骤 5/5] 存储到向量数据库...")
+    print("\n[步骤 5/5] 存储到Chroma向量数据库...")
     
     vector_store = VectorStore(
         persist_directory=vector_config.get('persist_directory', './data/chroma_db'),
-        collection_name=collection_name,  # 使用根据agent_name生成的collection_name
-        embedding_function=None  # 使用自定义向量
+        collection_name=collection_name,  
+        embedding_function=None  
     )
     
     # 清空已有数据（可选）
@@ -177,8 +188,8 @@ def build_vector_database(
     
     # 批量添加文档和向量
     try:
-        vector_store.add_documents_with_embeddings(
-            texts=texts,
+        vector_store.add_documents(
+            documents=texts,
             embeddings=embeddings,
             metadatas=metadatas
         )
@@ -197,9 +208,8 @@ def build_vector_database(
     print(f"测试查询: {test_query}")
     
     try:
-        # 向量化查询文本
         query_embedding = embedder.embed_text(test_query, agent_name=agent_name)
-        results = vector_store.similarity_search_with_embedding(
+        results = vector_store.similarity_search(
             query_embedding=query_embedding,
             top_k=3
         )
@@ -220,9 +230,11 @@ def build_vector_database(
 
 
 if __name__ == "__main__":
-    
     build_vector_database(
         config_path="./config/config.yaml",
-        use_processed_data=True,  # 优先使用processed目录的数据
-        agent_name="agent1"  # 使用对应agent配置
+        data_dir="./data/raw",              
+        reaction_configs=REACTION_CONFIGS,  
+        agent_name="agent2",                
+        chunk_size=512,                     
+        chunk_overlap=50                    
     )

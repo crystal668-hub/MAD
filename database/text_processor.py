@@ -3,6 +3,7 @@
 文本预处理模块
 功能：处理原始文本数据,准备向量化
 包含TSV文件处理、文本加载、分块等功能
+支持LlamaIndex解析Markdown和txt文件
 ===================================
 """
 
@@ -11,16 +12,20 @@ import re
 from pathlib import Path
 from typing import List, Dict, Optional
 
+from llama_index.core import Document, SimpleDirectoryReader
+from llama_index.core.node_parser import SentenceSplitter, MarkdownNodeParser
+from llama_index.core.ingestion import IngestionPipeline
+
 
 class TextProcessor:
     """
-    文本预处理器
-    负责加载和处理原始文本数据
+    文档预处理器
+    负责加载和处理原始文档数据
     """
     
     def __init__(self, data_dir: str = "./data/raw"):
         """
-        初始化文本处理器
+        初始化文档处理器
         
         Args:
             data_dir: 原始数据目录
@@ -30,17 +35,11 @@ class TextProcessor:
     
     def clean_text(self, text: str) -> str:
         """
-        清洗文本内容，提升存储效率和可读性
+        清洗文本内容，删除Acknowledgement和Reference部分
         
-        清洗操作包括：
-        - 去除HTML标签
-        - 去除控制字符和特殊Unicode字符
-        - 统一换行符为空格
-        - 去除多余空格
-        - 去除无意义符号组合
-        - 去除引用标记
-        - 修复常见编码错误
-        - 规范化标点符号
+        清洗操作：
+        - 删除Acknowledgement部分及其后的所有内容
+        - 删除Reference/References部分及其后的所有内容
         
         Args:
             text: 原始文本
@@ -51,323 +50,236 @@ class TextProcessor:
         if not text:
             return ""
         
-        # 1. 去除HTML标签
-        text = re.sub(r'<[^>]+>', '', text)
+        # 删除Acknowledgement部分及其后的内容
+        # 匹配各种可能的写法：Acknowledgement, Acknowledgements, ACKNOWLEDGEMENT等
+        text = re.sub(
+            r'(?i)(##?\s*)?Acknowledgements?.*$',
+            '',
+            text,
+            flags=re.DOTALL
+        )
         
-        # 2. 去除特殊Unicode字符和控制字符
-        text = re.sub(r'[\x00-\x08\x0b-\x0c\x0e-\x1f\x7f-\x9f]', '', text)
-        
-        # 3. 统一换行符为空格
-        text = re.sub(r'[\r\n]+', ' ', text)
-        
-        # 4. 去除多余的空格（包括tab）
-        text = re.sub(r'\s+', ' ', text)
-        
-        # 5. 去除常见的无意义符号组合
-        text = re.sub(r'[_]{3,}', '', text)  # 连续下划线
-        text = re.sub(r'[-]{3,}', '', text)  # 连续破折号
-        text = re.sub(r'[=]{3,}', '', text)  # 连续等号
-        text = re.sub(r'[*]{3,}', '', text)  # 连续星号
-        
-        # 6. 去除特殊的引用标记
-        text = re.sub(r'\[\d+\]', '', text)  # [1], [2] 等引用标记
-        text = re.sub(r'\(\d+\)', '', text)  # (1), (2) 等引用标记
-        
-        # 7. 处理常见的编码错误字符
-        replacements = {
-            'â€™': "'",  # 右单引号
-            'â€œ': '"',  # 左双引号
-            'â€': '"',   # 右双引号
-            'â€"': '-',  # 长破折号
-            'â€"': '-',  # 短破折号
-            'Â°': '°',   # 度数符号
-            'Î±': 'α',   # alpha
-            'Î²': 'β',   # beta
-            'Î³': 'γ',   # gamma
-        }
-        for old, new in replacements.items():
-            text = text.replace(old, new)
-        
-        # 8. 规范化标点符号周围的空格
-        text = re.sub(r'\s*([,.;:!?])\s*', r'\1 ', text)
-        
-        # 9. 去除首尾空格
-        text = text.strip()
+        # 删除Reference/References部分及其后的内容
+        # 匹配各种可能的写法：Reference, References, REFERENCE, REFERENCES等
+        text = re.sub(
+            r'(?i)(##?\s*)?References?.*$',
+            '',
+            text,
+            flags=re.DOTALL
+        )
         
         return text
     
-    def load_text_files(self, file_pattern: str = "*.txt") -> List[Dict]:
+    def extract_doi_from_content(self, content: str, filename: str = "") -> str:
         """
-        加载文本文件
+        从文本内容或文件名中提取DOI号
         
         Args:
-            file_pattern: 文件匹配模式
-        
-        Returns:
-            List[Dict]: 文档列表,每个文档包含text和metadata
-        """
-        documents = []
-        
-        for file_path in self.data_dir.glob(file_pattern):
-            try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    text = f.read().strip()
-                
-                if text:
-                    documents.append({
-                        'text': text,
-                        'metadata': {
-                            'source': str(file_path.name),
-                            'file_path': str(file_path)
-                        }
-                    })
-                    print(f"✓ 加载文件: {file_path.name}")
-            except Exception as e:
-                print(f"✗ 加载文件失败 ({file_path.name}): {str(e)}")
-        
-        return documents
-    
-    def load_processed_chunks(self, file_pattern: str = "*chunks.txt") -> List[Dict]:
-        """
-        加载已处理的数据块文件（如processed目录下的文件）
-        
-        Args:
-            file_pattern: 文件匹配模式
-        
-        Returns:
-            List[Dict]: 文档列表
-        """
-        documents = []
-        processed_dir = Path("./data/processed")
-        
-        if not processed_dir.exists():
-            print(f"✗ processed目录不存在: {processed_dir}")
-            return documents
-        
-        for file_path in processed_dir.glob(file_pattern):
-            try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    # 按行读取，每行作为一个chunk
-                    lines = f.readlines()
-                    
-                for idx, line in enumerate(lines):
-                    text = line.strip()
-                    if text:
-                        documents.append({
-                            'text': text,
-                            'metadata': {
-                                'source': str(file_path.name),
-                                'file_path': str(file_path),
-                                'line_number': idx + 1
-                            }
-                        })
-                
-                print(f"✓ 从文件加载 {len(lines)} 个chunks: {file_path.name}")
-            except Exception as e:
-                print(f"✗ 加载文件失败 ({file_path.name}): {str(e)}")
-        
-        return documents
-    
-    def chunk_text(self, text: str, chunk_size: int = 512, overlap: int = 50) -> List[str]:
-        """
-        将长文本分块
-        
-        Args:
-            text: 输入文本
-            chunk_size: 分块大小(字符数)
-            overlap: 重叠大小
-        
-        Returns:
-            List[str]: 文本块列表
-        """
-        if len(text) <= chunk_size:
-            return [text]
-        
-        chunks = []
-        start = 0
-        
-        while start < len(text):
-            end = start + chunk_size
-            chunk = text[start:end]
-            chunks.append(chunk)
-            start = end - overlap
-        
-        return chunks
-    
-    def process_documents(self, documents: List[Dict], enable_chunking: bool = False, 
-                         chunk_size: int = 512, overlap: int = 50) -> List[Dict]:
-        """
-        处理文档列表(可选分块)
-        
-        Args:
-            documents: 文档列表
-            enable_chunking: 是否启用分块
-            chunk_size: 分块大小
-            overlap: 重叠大小
-        
-        Returns:
-            List[Dict]: 处理后的文档列表
-        """
-        processed_docs = []
-        
-        for doc in documents:
-            text = doc['text']
-            metadata = doc['metadata']
-            
-            if enable_chunking and len(text) > chunk_size: #如果允许进行chunk操作且文本长度超过chunk_size则分块
-                chunks = self.chunk_text(text, chunk_size, overlap)
-                for idx, chunk in enumerate(chunks):
-                    chunk_metadata = metadata.copy()
-                    chunk_metadata['chunk_id'] = idx
-                    chunk_metadata['total_chunks'] = len(chunks)
-                    
-                    processed_docs.append({
-                        'text': chunk,
-                        'metadata': chunk_metadata
-                    })
-            else:
-                processed_docs.append(doc)
-        
-        return processed_docs
-    
-    def process_tsv_to_chunks(self, input_file: str, output_file: str) -> int:
-        """
-        从TSV文件中提取abstract列，添加索引并保存为txt文件
-        
-        Args:
-            input_file: 输入的TSV文件路径
-            output_file: 输出的TXT文件路径
+            content: 文本内容
+            filename: 文件名
             
         Returns:
-            int: 提取的chunks数量
+            str: DOI号，如果未找到则返回"unknown"
         """
-        chunks = []
-        original_count = 0
-        cleaned_count = 0
+        # DOI的正则表达式模式
+        # 标准DOI格式: 10.xxxx/yyyy
+        doi_patterns = [
+            r'10\.\d{4,9}/[-._;()/:A-Za-z0-9]+',  # 标准DOI格式
+            r'doi:?\s*10\.\d{4,9}/[-._;()/:A-Za-z0-9]+',  # 带doi:前缀
+            r'DOI:?\s*10\.\d{4,9}/[-._;()/:A-Za-z0-9]+'   # 带DOI:前缀
+        ]
+        
+        # 首先尝试从文件名中提取
+        if filename:
+            for pattern in doi_patterns:
+                match = re.search(pattern, filename, re.IGNORECASE)
+                if match:
+                    doi = match.group(0)
+                    # 清理前缀
+                    doi = re.sub(r'^(doi:?|DOI:?)\s*', '', doi, flags=re.IGNORECASE)
+                    return doi.strip()
+        
+        # 从内容中提取（通常在文章开头）
+        # 只检查前5000个字符以提高效率
+        content_head = content[:5000] if len(content) > 5000 else content
+        
+        for pattern in doi_patterns:
+            match = re.search(pattern, content_head, re.IGNORECASE)
+            if match:
+                doi = match.group(0)
+                # 清理前缀
+                doi = re.sub(r'^(doi:?|DOI:?)\s*', '', doi, flags=re.IGNORECASE)
+                return doi.strip()
+        
+        return "unknown"
+    
+    def load_documents(
+        self,
+        data_dir: str,
+        reaction_type: Optional[str] = None
+    ) -> List[Document]:
+        """
+        使用SimpleDirectoryReader加载Markdown文件，创建Document对象并添加metadata
+        
+        Args:
+            data_dir: 数据目录路径
+            reaction_type: 反应类型
+        
+        Returns:
+            List[Document]: Document对象列表
+            metadata包含：
+                - reaction_type: 反应类型
+                - doc_id: 文献DOI号
+        """
+        data_path = Path(data_dir)
+        if not data_path.exists():
+            print(f"✗ 目录不存在: {data_dir}")
+            return []
         
         try:
-            # 读取TSV文件
-            with open(input_file, 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f, delimiter='\t')
+            reader = SimpleDirectoryReader(
+                input_dir=str(data_path),
+                required_exts=[".md"],  
+                recursive=False  # 不递归读取子目录
+            )
+            documents = reader.load_data()
+            
+            if not documents:
+                print(f"✗ 未找到任何Markdown文件: {data_dir}")
+                return []
+            
+            # 为每个文档添加自定义metadata
+            processed_documents = []
+            for doc in documents:
+                # 获取文件名（从原始metadata中）
+                file_name = doc.metadata.get('file_name', '')
+                file_path_str = doc.metadata.get('file_path', '')
                 
-                # 检查是否有abstract列
-                if 'abstract' not in reader.fieldnames:
-                    print(f"✗ 警告: {input_file} 中没有找到 'abstract' 列")
-                    print(f"  可用的列: {reader.fieldnames}")
-                    return 0
+                # 从文件名推断反应类型（如果未指定）
+                inferred_reaction = reaction_type
+                if inferred_reaction is None and file_name:
+                    # 尝试从文件名中提取反应类型
+                    filename_upper = Path(file_name).stem.upper()
+                    reaction_types = ["CO2RR", "EOR", "HER", "HOR", "HZOR", "O5H", "OER", "ORR", "UOR"]
+                    for rt in reaction_types:
+                        if rt in filename_upper:
+                            inferred_reaction = rt
+                            break
                 
-                # 提取abstract内容并清洗
-                for row in reader:
-                    abstract = (row.get('abstract') or '').strip()  # 处理None情况
-                    if abstract:
-                        original_count += 1
-                        # 清洗文本
-                        cleaned_abstract = self.clean_text(abstract)
-                        if cleaned_abstract:  # 只保存非空的清洗后文本
-                            chunks.append(cleaned_abstract)
-                            cleaned_count += 1
+                # 提取DOI号
+                doc_id = self.extract_doi_from_content(doc.text, file_name)
+                
+                # 重置metadata为只包含reaction_type和doc_id
+                doc.metadata = {
+                    "reaction_type": inferred_reaction or "unknown",
+                    "doc_id": doc_id
+                }
+                
+                processed_documents.append(doc)
+                
+                print(f"✓ 加载 {file_name}")
+                print(f"  反应类型: {doc.metadata['reaction_type']}")
+                print(f"  DOI: {doc.metadata['doc_id']}")
             
-            # 写入txt文件，每行一个chunk，带索引
-            with open(output_file, 'w', encoding='utf-8') as f:
-                for idx, chunk in enumerate(chunks):
-                    # 格式：索引\t内容
-                    f.write(f"{idx}\t{chunk}\n")
+            print(f"\n共加载 {len(processed_documents)} 个Document对象")
+            return processed_documents
             
-            print(f"✓ 成功处理: {Path(input_file).name}")
-            print(f"  原始abstracts: {original_count} 个")
-            print(f"  清洗后保存: {cleaned_count} 个chunks")
-            if original_count > cleaned_count:
-                print(f"  已过滤: {original_count - cleaned_count} 个空内容")
-            print(f"  保存至: {output_file}")
-            
-            return len(chunks)
-            
-        except FileNotFoundError:
-            print(f"✗ 错误: 找不到文件 {input_file}")
-            return 0
         except Exception as e:
-            print(f"✗ 处理文件时出错: {e}")
-            return 0
+            print(f"✗ 加载文档失败: {str(e)}")
+            return []
     
-    def process_all_tsv_files(self, raw_dir: Optional[str] = None, 
-                             processed_dir: str = "./data/processed") -> Dict[str, int]:
+    def load_reaction_documents(
+        self,
+        base_dir: str,
+        reaction_configs: Dict[str, Dict]
+    ) -> List[Document]:
         """
-        处理指定目录下的所有TSV文件
+        按反应类型加载所有文献数据
         
         Args:
-            raw_dir: 原始数据目录 (如果为None，使用self.data_dir)
-            processed_dir: 处理后数据目录
-            
+            base_dir: 数据根目录
+            reaction_configs: 反应类型配置字典
+        
         Returns:
-            Dict[str, int]: 每个文件的处理结果统计
+            List[Document]: 所有反应类型的Document列表
+            每个Document的metadata包含：
+                - reaction_type: 反应类型
+                - doc_id: 文献DOI号
         """
-        # 使用指定目录或默认目录
-        raw_path = Path(raw_dir) if raw_dir else self.data_dir
-        processed_path = Path(processed_dir)
+        all_documents = []
+        base_path = Path(base_dir)
         
-        if not raw_path.exists():
-            print(f"✗ 错误: {raw_path} 目录不存在")
-            return {}
-        
-        # 创建processed目录（如果不存在）
-        processed_path.mkdir(parents=True, exist_ok=True)
-        
-        # 查找所有TSV文件
-        tsv_files = list(raw_path.glob('*.tsv'))
-        
-        if not tsv_files:
-            print(f"✗ 在 {raw_path} 目录下没有找到TSV文件")
-            return {}
-        
-        print(f"\n找到 {len(tsv_files)} 个TSV文件")
-        print("-" * 60)
-        
-        results = {}
-        
-        # 处理每个TSV文件
-        for tsv_file in tsv_files:
-            # 生成输出文件名：将.tsv替换为_chunks.txt
-            output_filename = tsv_file.stem + '_chunks.txt'
-            output_file = processed_path / output_filename
+        for reaction_type, config in reaction_configs.items():
+            reaction_path = base_path / config.get("path", reaction_type)
             
-            print(f"\n处理文件: {tsv_file.name}")
-            chunk_count = self.process_tsv_to_chunks(tsv_file, output_file)
-            results[tsv_file.name] = chunk_count
+            print(f"\n--- 加载 {reaction_type} ---")
+            docs = self.load_documents(
+                data_dir=str(reaction_path),
+                reaction_type=reaction_type
+            )
+            all_documents.extend(docs)
         
-        print("\n" + "=" * 60)
-        print(f"所有文件处理完成! 共处理 {len(results)} 个TSV文件")
-        print(f"总计提取 {sum(results.values())} 个chunks")
+        return all_documents
+    
+    def chunk_documents(
+        self,
+        documents: List[Document],
+        chunk_size: int = 256,
+        chunk_overlap: int = 50
+    ) -> List[Document]:
+        """
+        使用两级切分策略对Document对象进行分块
         
-        return results
-
-
-# ===================================
-# 使用示例
-# ===================================
-if __name__ == "__main__":
-    processor = TextProcessor("./data/raw")
-    
-    print("=" * 60)
-    print("文本处理器 - 使用示例")
-    print("=" * 60)
-    
-    # 示例1: 处理TSV文件
-    print("\n【示例1】处理TSV文件，提取abstract列")
-    print("-" * 60)
-    results = processor.process_all_tsv_files()
-    
-    # 示例2: 加载处理后的chunks
-    print("\n【示例2】加载处理后的chunks文件")
-    print("-" * 60)
-    documents = processor.load_processed_chunks("*chunks.txt")
-    print(f"\n共加载 {len(documents)} 个文档chunks")
-    
-    # 示例3: 加载原始文本文件并分块
-    print("\n【示例3】加载并处理原始文本文件")
-    print("-" * 60)
-    raw_docs = processor.load_text_files("*.txt")
-    print(f"加载了 {len(raw_docs)} 个文档")
-    
-    if raw_docs:
-        processed = processor.process_documents(raw_docs, enable_chunking=True, chunk_size=512)
-        print(f"处理后共 {len(processed)} 个文档块")
+        两级切分策略：
+        1. 第一级：使用MarkdownNodeParser基于Markdown标题切分，确保chunk不跨越大章节
+        2. 第二级：使用SentenceSplitter对第一级节点进行细分
+        3. 使用IngestionPipeline将两级切分器串联
+        
+        Args:
+            documents: Document对象列表
+            chunk_size: 分块大小（默认256）
+            chunk_overlap: 分块重叠大小（默认50）
+        
+        Returns:
+            List[Document]: 分块后的Document列表
+        """
+        if not documents:
+            return []
+        
+        # 第一级：基于Markdown标题的切分器
+        markdown_parser = MarkdownNodeParser()
+        
+        # 第二级：基于句子的细分切分器
+        sentence_splitter = SentenceSplitter(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap
+        )
+        
+        # 使用IngestionPipeline串联两级切分器
+        pipeline = IngestionPipeline(
+            transformations=[
+                markdown_parser,      # 第一级：按标题切分
+                sentence_splitter     # 第二级：按句子细分
+            ]
+        )
+        
+        chunked_documents = []
+        
+        for doc in documents:
+            # 通过pipeline处理文档，获取分块后的节点
+            nodes = pipeline.run(documents=[doc])
+            
+            # 将节点转换为Document对象，保留原始metadata
+            for idx, node in enumerate(nodes):
+                chunk_metadata = doc.metadata.copy()
+                chunk_metadata["chunk_id"] = idx
+                chunk_metadata["total_chunks"] = len(nodes)
+                
+                chunk_doc = Document(
+                    text=node.get_content(),
+                    metadata=chunk_metadata
+                )
+                chunked_documents.append(chunk_doc)
+        
+        print(f"\n分块完成: {len(documents)} 个文档 -> {len(chunked_documents)} 个chunks")
+        return chunked_documents

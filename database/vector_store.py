@@ -91,7 +91,8 @@ class VectorStore:
         self,
         documents: List[str],
         metadatas: Optional[List[Dict]] = None,
-        ids: Optional[List[str]] = None
+        ids: Optional[List[str]] = None,
+        embeddings: Optional[List[List[float]]] = None
     ) -> None:
         """
         向向量数据库添加文档
@@ -99,8 +100,34 @@ class VectorStore:
         Args:
             documents: 文档文本列表
             metadatas: 文档元数据列表（可选）
-            ids: 文档ID列表（可选，不提供则自动生成）
+            ids: 文档ID列表（可选）
+            embeddings: 预生成向量列表（可选）
         """
+        if embeddings is not None:
+            if ids is None:
+                ids = [f"doc_{i}_{hash(text[:50]) % 1000000}" for i, text in enumerate(documents)]
+            if metadatas is None:
+                metadatas = [{}] * len(documents)
+            assert len(documents) == len(embeddings) == len(metadatas) == len(ids), \
+                "documents, embeddings, metadatas, ids长度必须一致"
+            
+            batch_size = 100
+            for i in range(0, len(documents), batch_size):
+                batch_documents = documents[i:i + batch_size]
+                batch_embeddings = embeddings[i:i + batch_size]
+                batch_metadatas = metadatas[i:i + batch_size]
+                batch_ids = ids[i:i + batch_size]
+                
+                self.collection.add(
+                    documents=batch_documents,
+                    embeddings=batch_embeddings,
+                    metadatas=batch_metadatas,
+                    ids=batch_ids
+                )
+            
+            print(f"[OK] 添加 {len(documents)} 个文档到集合 '{self.collection_name}'")
+            return
+        
         # 自动生成ID（如果未提供）
         if ids is None:
             ids = [f"doc_{i}" for i in range(len(documents))]
@@ -113,7 +140,39 @@ class VectorStore:
         )
         
         print(f"成功添加 {len(documents)} 个文档到向量数据库")
-    
+
+    def update_documents(
+        self,
+        ids: List[str],
+        documents: Optional[List[str]] = None,
+        metadatas: Optional[List[Dict]] = None
+    ) -> None:
+        """
+        更新文档
+        
+        Args:
+            ids: 要更新的文档ID列表
+            documents: 新的文档文本列表（可选）
+            metadatas: 新的元数据列表（可选）
+        """
+        self.collection.update(
+            ids=ids,
+            documents=documents,
+            metadatas=metadatas
+        )
+        
+        print(f"成功更新 {len(ids)} 个文档")
+            
+    def delete_documents(self, ids: List[str]) -> None:
+        """
+        删除文档
+        
+        Args:
+            ids: 要删除的文档ID列表
+        """
+        self.collection.delete(ids=ids)
+        print(f"成功删除 {len(ids)} 个文档")
+
     def query(
         self,
         query_texts: List[str],
@@ -144,152 +203,58 @@ class VectorStore:
     
     def similarity_search(
         self,
-        query_text: str,
+        query_text: Optional[str] = None,
+        query_embedding: Optional[List[float]] = None,
         top_k: int = 5,
-        threshold: Optional[float] = None
+        threshold: Optional[float] = None,
+        where: Optional[Dict] = None,
+        where_document: Optional[Dict] = None
     ) -> List[Dict]:
         """
-        相似度搜索
+        相似度搜索（支持文本或预生成向量）
         
         Args:
             query_text: 查询文本
+            query_embedding: 查询向量
             top_k: 返回top-k个最相似结果
             threshold: 相似度阈值（可选）
+            where: 元数据过滤条件（可选）
+            where_document: 文档内容过滤条件（可选，仅文本查询有效）
         
         Returns:
             List[Dict]: 相似文档列表
         """
-        results = self.query(
-            query_texts=[query_text],
-            n_results=top_k
-        )
+        
+        if query_embedding is not None:
+            results = self.collection.query(
+                query_embeddings=[query_embedding],
+                n_results=top_k,
+                where=where
+            )
+        else:
+            results = self.query(
+                query_texts=[query_text],
+                n_results=top_k,
+                where=where,
+                where_document=where_document
+            )
         
         # 解析结果
         similar_docs = []
-        for i in range(len(results['ids'][0])):
-            doc_dict = {
-                'id': results['ids'][0][i],
-                'document': results['documents'][0][i],
-                'distance': results['distances'][0][i],
-                'metadata': results['metadatas'][0][i] if results['metadatas'] else None
-            }
-            
-            # 应用阈值过滤（如果指定）
-            if threshold is None or doc_dict['distance'] <= threshold:
-                similar_docs.append(doc_dict)
+        if results.get('documents') and len(results['documents']) > 0:
+            for i in range(len(results['documents'][0])):
+                doc_dict = {
+                    'id': results['ids'][0][i] if results.get('ids') else None,
+                    'document': results['documents'][0][i],
+                    'distance': results['distances'][0][i] if results.get('distances') else None,
+                    'metadata': results['metadatas'][0][i] if results.get('metadatas') else None
+                }
+                
+                # 应用阈值过滤（如果指定）
+                if threshold is None or (doc_dict['distance'] is not None and doc_dict['distance'] <= threshold):
+                    similar_docs.append(doc_dict)
         
         return similar_docs
-    
-    def update_documents(
-        self,
-        ids: List[str],
-        documents: Optional[List[str]] = None,
-        metadatas: Optional[List[Dict]] = None
-    ) -> None:
-        """
-        更新文档
-        
-        Args:
-            ids: 要更新的文档ID列表
-            documents: 新的文档文本列表（可选）
-            metadatas: 新的元数据列表（可选）
-        """
-        self.collection.update(
-            ids=ids,
-            documents=documents,
-            metadatas=metadatas
-        )
-        
-        print(f"成功更新 {len(ids)} 个文档")
-    
-    def delete_documents(self, ids: List[str]) -> None:
-        """
-        删除文档
-        
-        Args:
-            ids: 要删除的文档ID列表
-        """
-        self.collection.delete(ids=ids)
-        print(f"成功删除 {len(ids)} 个文档")
-    
-    def add_documents_with_embeddings(
-        self,
-        texts: List[str],
-        embeddings: List[List[float]],
-        metadatas: Optional[List[Dict]] = None,
-        ids: Optional[List[str]] = None
-    ) -> None:
-        """
-        使用预生成的向量添加文档
-        
-        Args:
-            texts: 文本列表
-            embeddings: 向量列表
-            metadatas: 元数据列表
-            ids: 文档ID列表
-        """
-        if ids is None:
-            ids = [f"doc_{i}_{hash(text[:50]) % 1000000}" for i, text in enumerate(texts)]
-        
-        if metadatas is None:
-            metadatas = [{}] * len(texts)
-        
-        # 确保所有列表长度一致
-        assert len(texts) == len(embeddings) == len(metadatas) == len(ids), \
-            "texts, embeddings, metadatas, ids长度必须一致"
-        
-        # 批量添加
-        batch_size = 100
-        for i in range(0, len(texts), batch_size):
-            batch_texts = texts[i:i + batch_size]
-            batch_embeddings = embeddings[i:i + batch_size]
-            batch_metadatas = metadatas[i:i + batch_size]
-            batch_ids = ids[i:i + batch_size]
-            
-            self.collection.add(
-                documents=batch_texts,
-                embeddings=batch_embeddings,
-                metadatas=batch_metadatas,
-                ids=batch_ids
-            )
-        
-        print(f"[OK] 添加 {len(texts)} 个文档到集合 '{self.collection_name}'")
-    
-    def similarity_search_with_embedding(
-        self,
-        query_embedding: List[float],
-        top_k: int = 5,
-        where: Optional[Dict] = None
-    ) -> List[Dict]:
-        """
-        使用预生成的查询向量进行相似度搜索
-        
-        Args:
-            query_embedding: 查询向量
-            top_k: 返回结果数量
-            where: 元数据过滤条件
-        
-        Returns:
-            List[Dict]: 搜索结果列表
-        """
-        results = self.collection.query(
-            query_embeddings=[query_embedding],
-            n_results=top_k,
-            where=where
-        )
-        
-        documents = []
-        if results['documents'] and len(results['documents']) > 0:
-            for i in range(len(results['documents'][0])):
-                doc = {
-                    'text': results['documents'][0][i],
-                    'metadata': results['metadatas'][0][i] if results['metadatas'] else {},
-                    'distance': results['distances'][0][i] if results['distances'] else None,
-                    'id': results['ids'][0][i] if results['ids'] else None
-                }
-                documents.append(doc)
-        
-        return documents
     
     def get_collection_count(self) -> int:
         """
