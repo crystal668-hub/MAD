@@ -36,31 +36,12 @@ GOOGLE_API_KEY=your-actual-google-key
 
 ### 3. 准备数据
 
-将化学文献数据（TSV格式）放入 `data/raw/` 目录。
+将化学文献数据（Markdown格式）放入 `data/raw/` 目录（可按反应类型分子目录）。
 
-**TSV文件要求：**
-- 必须包含 `abstract` 列
-- 使用Tab（\t）分隔
-
-### 4. 处理数据
-
-运行数据处理脚本，提取abstract并切分chunks：
+### 4. 构建向量数据库
 
 ```bash
-python -m database.text_processor
-```
-
-此脚本会：
-- 读取 `data/raw/` 下的所有TSV文件
-- 提取每行的 `abstract` 列内容
-- 为每个chunk添加索引序号
-- 将结果保存到 `data/processed/` （格式：`索引\t内容`）
-
-**输出示例：**
-```
-0	This is the first abstract content...
-1	This is the second abstract content...
-2	This is the third abstract content...
+python build_vector_db.py
 ```
 
 ## 基本使用
@@ -131,15 +112,14 @@ print(f"过电势: {result['final_overpotential']}")
 ```python
 from database import RAGSystem
 
-# 初始化RAG系统（使用处理后的chunks）
+# 初始化RAG系统（从raw目录读取并切分）
 rag = RAGSystem(
-    data_dir="./data/processed",  # 注意：使用processed目录
+    data_dir="./data/raw",
     persist_dir="./data/chroma_db",
     collection_name="chemical_reactions"
 )
 
 # 构建索引（首次运行）
-# chunks已经切分好，直接加载，无需再分割
 rag.build_index()
 
 # 查询
@@ -259,14 +239,13 @@ results = store.query_experiences(
 
 ### 2. 数据处理失败
 
-- 检查TSV文件是否包含 `abstract` 列
-- 确保使用Tab（\t）分隔
-- 查看 `database.text_processor` 输出的错误信息
+- 检查 `data/raw/` 是否包含Markdown文件
+- 查看 `build_vector_db.py` 或 `database.text_processor` 的错误信息
 
 ### 3. RAG系统初始化失败
 
-- 确保已运行 `python -m database.text_processor` 处理数据
-- 检查 `data/processed/` 目录是否包含txt文件
+- 确保已运行 `python build_vector_db.py` 构建向量数据库
+- 检查 `data/raw/` 是否包含Markdown文件
 - 首次运行需要时间构建索引
 - 使用 `--skip-rag` 跳过RAG初始化进行快速测试
 

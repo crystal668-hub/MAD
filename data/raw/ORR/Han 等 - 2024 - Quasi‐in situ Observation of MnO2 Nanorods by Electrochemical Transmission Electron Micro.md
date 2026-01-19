@@ -1,0 +1,166 @@
+---
+source: Han 等 - 2024 - Quasi‐in situ Observation of MnO2 Nanorods by Electrochemical Transmission Electron Micro.pdf
+tool: marker
+duration: 43.173s
+generated: 2026-01-09T11:49:51.203573Z
+---
+
+[www.advenergysustres.com](http://www.advenergysustres.com)
+
+# Quasi-in situ Observation of MnO2 Nanorods by Electrochemical Transmission Electron Microscopy for Oxygen Reduction Reaction Process
+
+Zengyu Han, Hany Roslie, Shu Fen Tan,\* and Dongshuang Wu\*
+
+Understanding the electrode materials' surface is of fundamental importance for catalytic studies as most electrochemical reactions take place there. Although several operando techniques have been used to monitor the electrocatalytic process, real-time imaging techniques for observing the surface change on electrode materials are still a challenge and limited to a few stable catalytic systems. Herein, the quasi-in situ electrochemical transmission electron microscopy (TEM) was carried out to track the morphological and local structure evolution during the oxygen reduction reaction (ORR) on manganese dioxide (MnO2) for the first time. The α-MnO2 nanorods exhibit comparable ORR electrocatalytic activity (half-wave potential, <sup>E</sup>1/2: 0.83 vs. 0.85 V vs. RHE; diffusion-limiting current density, <sup>J</sup>d: 5.46 vs. 5.52 mA cm<sup>2</sup> ) and better methanol tolerance than Pt/C. An electrochemical TEM chip assembled with a three-electrode system was used to perform the electrochemical experiments similar to typical testing procedures. The ex situ and quasi-in situ TEM images consistently showed that MnO2 nanorods had undergone surface roughening, and lattice expansion with 0.97% and 1.97% in the <sup>a</sup> and <sup>c</sup>-axis, respectively as ORR proceeded. The quasi-in situ electrochemical TEM fills the gap between ex situ characterization and operando spectroscopies and deepens the mechanistic understanding of electrocatalytic processes.
+
+Z. Han School of Energy and Power Engineering Xi'an Jiaotong University Xi'an 710049, P. R. China
+
+Z. Han, H. Roslie, S. F. Tan, D. Wu School of Materials and Engineering Nanyang Technological University Singapore 639798, Singapore E-mail: [shufen.tan@ntu.edu.sg;](mailto:shufen.tan@ntu.edu.sg) [dongshuang.wu@ntu.edu.sg](mailto:dongshuang.wu@ntu.edu.sg)
+
+S. F. Tan Facility for Analysis, Characterisation Testing and Simulation (FACTS) Nanyang Technological University Singapore 639798, Singapore
+
+The ORCID identification number(s) for the author(s) of this article can be found under [https://doi.org/10.1002/aesr.202300229.](https://doi.org/10.1002/aesr.202300229)
+
+© 2024 The Authors. Advanced Energy and Sustainability Research published by Wiley-VCH GmbH. This is an open access article under the terms of the [Creative Commons Attribution](http://creativecommons.org/licenses/by/4.0/) License, which permits use, distribution and reproduction in any medium, provided the original work is properly cited.
+
+DOI: 10.1002/aesr.202300229
+
+### 1. Introduction
+
+Electrocatalytic reactions usually are considered heterogeneous reactions that occur on the surface of the electrocatalysts.[1,2] They are highly sensitive to their local microenvironments, which may affect their catalytic activity, kinetics, selectivity, etc.[1] However, under typical operational conditions, the results of the ex situ experiments are unable to completely clarify the real-time structural changes on the surface during the catalytic process. With these considerations in mind, the in situ observation has the advantage of detecting the structural and morphological changes that are urgently needed.[3] Most of the operando technologies have been used to investigate the origin and the real-time status of the electrocatalysts,[4,5] usually relying on X-ray absorption/emission spectroscopy (XAS/XES), infrared spectroscopy, X-ray photoelectron spectroscopy, Raman spectroscopy, etc. For instance, Jaramillo et al.[6] evaluated the Mn valence changes of a MnOx layer under oxygen reduction
+
+reaction (ORR) conditions by in situ X-ray absorption near-edge spectroscopy, and the non-reversible-metal-dissolution was revealed. Kaiser et al.[7] also reported the distortion of O in the Mn-O bond during oxygen electrochemistry by using in situ Raman spectroscopy. The real-time monitoring the morphological surface reconstruction during catalytic processes, which is deemed as the evolving catalytic centers, is less studied because most operando techniques have limited capability to do so. Besides, detecting the surface structural change that occurs at a nanoscale resolution during the electrochemical process, it requires atomic-level imaging under an ultrahigh vacuum level and at low multiple electron scattering in the presence of liquid electrolytes.[8–11]
+
+Electrochemical liquid cell transmission electron microscopy (TEM) is one of the most ideal characterization techniques for real-time tracking of solution-based reactions, because of its well-elaborated thickness and quantity of contact solutions, thereafter it has been used to probe the dynamic process with a high spatial and temporal resolution.[4,12,13] The electrochemical liquid TEM techniques have been found to apply in electrocatalysis, batteries and fuel cells. For example, Soleymani et al.[3] reported the structural evolution of Pt–Fe nanocatalysts resulting from the
+
+www.advenergysustres.com
+
+potential cycling by in situ liquid TEM. Yang et al.  $^{[14]}$  tracked the dynamic structural evolution of Cu nanocatalysts for  $CO_2$  reduction by operando electrochemical liquid-cell scanning TEM. However, up to date, most of the reported literature is focusing on the stable catalytic systems,  $^{[15,16]}$  such as the noble metal, despite of many non-noble catalysts, like transition metal oxides etc,  $^{[17-20]}$  which possess comparable or even better electrocatalytic properties than the noble metals.
+
+One of the most common transition metal oxides that have been commonly applied in electrochemistry is manganese dioxide (MnO<sub>2</sub>). [21-23] As an electrocatalyst, it has been acknowledged to be an alternative candidate for oxygen electrocatalysis with excellent performance. [24-26] Yang et al. [26] summarized a series of MnO<sub>2</sub> catalysts with high specific and mass activity for ORR. Chen et al. [25] found that  $\alpha$ -MnO<sub>2</sub> outperformed its counterparts, β- and γ-MnO<sub>2</sub> for ORR. It is noted that ORR involved in both metal-air batteries and fuel cells requires a deep understanding of the electrochemical process, especially the structural and morphological evolution. Herein, we first reported the quasi-in situ findings obtained from monitoring the surface morphology and local structure change of MnO2 during ORR at an atomic level. The quasi-in situ electrochemical TEM was carried out and the direct structural evolution view of the MnO2 nanorods during the ORR process was provided and clearly visualized.
+
+### 2. Results and Discussion
+
+The schematic illustrates the synthesis of the as-prepared MnO<sub>2</sub> via the modified hydrothermal treatment and simple pyrolysis followed by acid treatment, [22,27] as shown in Figure S1, Supporting Information. The X-ray diffraction (XRD) pattern in Figure S2, Supporting Information reveals the typical tetragonal phase of the obtained α-MnO<sub>2</sub> with a space group I4/m (87) (refer to PDF#44-0141). The dark-field scanning TEM (Figure S3, Supporting Information) and the corresponding energy-dispersive X-ray (EDX) spectrometry mapping show the uniform distribution of Mn-K (Figure S3b, Supporting Information) and O-K (Figure S3c, Supporting Information) with an atomic ratio of approximately 1/2 along the nanorod region. The high-resolution X-ray photoelectron spectroscopy (XPS) spectra of core-level Mn 3s and O1s were also characterized (Figure S4, Supporting Information). The binding energy difference ( $\Delta E$ ) between the deconvoluted two peaks in the Mn 3s spectra was calculated to be 4.8 eV (Figure S4a, Supporting Information), representing the Mn<sup>4+</sup> of the MnO<sub>2</sub>. [28] In a word, both the XPS and EDX mapping results strongly support the XRD pattern, confirming the formation of MnO<sub>2</sub>.
+
+The electrocatalytic performance of the as-prepared  $MnO_2$  toward ORR in the  $O_2$ -saturated alkaline electrolyte (0.1 M KOH) was measured, as illustrated in **Figure 1** (detailed results
+
+Figure 1. Linear sweep voltammetry (LSV) curves of MnO<sub>2</sub> nanorods and commercial 20 wt% Pt/C at 1600 rpm in O<sub>2</sub> saturated 0.1  $\,$ M KOH: a) Tafel plots of kinetically controlled ORR currents; b) Chronoamperometric responses with the addition of 3  $\,$ M methanol; c) H<sub>2</sub>O<sub>2</sub> selectivity (H<sub>2</sub>O<sub>2</sub>%); and d) the number of electrons (n) derived from RRDE data.
+
+ADVANCED
+ENERGY & SUSTAINABILITY
+RESEARCH
+
+www.advenergysustres.com
+
+in Table S1, Supporting Information), where the commercial Pt/C was employed as the reference catalyst for comparison. The prominent cathodic reduction peaks in cyclic voltammetry (CV) curves (Figure S5, Supporting Information) for MnO<sub>2</sub> and commercial Pt/C catalysts indicated the active response for ORR happening. Shown in Figure 1a, The as-prepared MnO<sub>2</sub> exhibits a considerable electrocatalytic performance compared to commercial Pt/C, as it delivers a positive onset potential (0.92 V) close to Pt/C (0.96 V) at the representative current density of 0.1 mA cm<sup>-2</sup>. Furthermore, MnO<sub>2</sub> shows a desirable ORR activity in terms of half-wave potential ( $E_{1/2}$ ) of 0.83 V vs. RHE and a diffusion-limiting current density (Id) of about  $-5.46 \,\mathrm{mA \, cm^{-2}}$  at a rotation rate of 1600 rpm in Figure 1a, which also comparable to that of commercial Pt/C catalyst  $(E_{1/2}, 0.85 \text{ V}; J_d, -5.52 \text{ mA cm}^{-2})$ . The linearly fitted Tafel plots (Figure 1b) are derived from the LSV results according to Koutecky-Levich equation, indicating that the Tafel slope of as-prepared MnO<sub>2</sub> (50.91 mV dec<sup>-1</sup>) with the lower value implying that it promotes a faster ORR process than the commercial Pt/C (62.38 mV dec<sup>-1</sup>).<sup>[29,30]</sup> Notably, the Tafel slope as a kinetics descriptor manifests that the typical MnO2 possesses an even better potential to give rise to greater benefits toward ORR kinetics than the commercial benchmark Pt/C catalyst. It's commonly known that the methanol-tolerant ability is dissatisfactory for the Pt/C catalyst, especially for its practical utilization in fuel cells. The methanol crossover and the reaction of methanol and oxygen would not only cause a mixed potential thus lowering the power output of fuel cells, but also deactivates the catalyst. [31,32] Thereafter, the compassion of the methanol tolerant effect between commercial Pt/C and prepared MnO<sub>2</sub> is performed by chronoamperometric measurement (Figure 1c). Once the methanol was injected with the volume ratio of 15% into the O2-saturated KOH electrolyte, a 14.2% decrease of its initial ORR current was observed for MnO2 and the current change was extremely small since after 600 s. While the Pt/C catalyst suffers from a 17.8% loss of its initial current, which demonstrates the higher methanol tolerance ability of MnO2 compared to commercial Pt/C in alkaline media. Moreover, to gain more detailed information about the reaction process, the rotating ring-disk electrode (RRDE) measurement was performed to evaluate the ORR catalytic mechanism in Figure 1d. MnO<sub>2</sub> and Pt/C catalysts both show negligible H<sub>2</sub>O<sub>2</sub> yield, and the electron transfer pathway almost reaches four, meaning the efficient ORR catalysis and electron transfer ability acquired by MnO<sub>2</sub> and Pt/C. Therefore, MnO<sub>2</sub> can be considered a promising candidate for ORR electrocatalysts, which endow comparable ORR performance with commercial Pt/C catalysts.
+
+The microstructure changes of the synthesized  $MnO_2$  nano-catalyst before and after the accelerated degradation test (ADT) of ORR are monitored while applying a chronopotentiometry under 0.2 V vs. RHE for 17 h. The high-resolution transition electron microscopy (HRTEM) images presented the microregion difference of  $MnO_2$  between the before and after ADT test in **Figure 2**. The as-synthesized  $MnO_2$  nanorods have a quite regular morphology and homogeneous dimension (Figure 2a,b). The lattice spacings can be assigned to planes from the tetragonal  $\alpha$ -MnO $_2$  structure (PDF#44-0141). There is obvious roughening on the surface of the  $MnO_2$  nanorods after the ORR process
+
+(dash dotted lines in Figure 2d,e). The SAED patterns were collected from as-synthesized  $MnO_2$  samples, one freshly prepared and another after ADT, shown in Figure 2c,f, respectively. The continuous concentric rings indicate the good crystallinity of synthesized  $MnO_2$ , while the broader diffuse rings were observed after the ORR process. The broadening of the rings originating from the electrochemical ORR process suggests the formation of amorphous-like structure in the surface regions,  $^{[33]}$  which could be one of the most possible reasons. This can be linked to the shape evolution of the prepared  $MnO_2$  nanocrystals during the ORR process.
+
+To potentially semi-quantify the diffracted beam intensities, the radial diffraction profiles extracted from the SAED images are shown in Figure 2g. The processing for semiquantitative phase analysis was determined according to the rotationally symmetric ring patterns, and the clearly distinguished characteristic peaks were chosen as the reference comparison by recording as well as the optimized fitting the distribution of diffraction intensity along the radial direction.<sup>[34,35]</sup> Specifically, the SAED pattern with a 2-dimensional distribution of intensities can be elliptically averaged to obtain an XRD-like distribution. The intensity was plotted as a function of the length of the scattering vector. The intensity of the diffraction peaks in the radial diffraction profiles corresponded to the intensity of the diffraction rings in SAED patterns. The length of the scattering vector is almost proportional to the scattering angle. Combined with the XRD result (Figure S2, Supporting Information), the possible orientation can be identified by calculating the lengths of real space and reciprocal space vectors. The peaks can be indexed according to the intensities of the diffracted electrons. As known in Bragg's law, peak positions to smaller angles correspond to larger d-spacing in the nanocrystals. [36,37] All peaks of MnO<sub>2</sub> nanorods after the ORR process in the XRD-like pattern showed a shift toward the lower scattering vectors, which corresponds to the smaller reciprocal length, thus illustrating the lattice expansion. The calculation of the corresponding interplanar spacing change can be carried out according to the peak shifts in the radial diffraction profiles. The schematic illustration of the hollandite phase structure of synthesized MnO<sub>2</sub> projected along the [100], [001], and [210] directions in Figure 2h–j, respectively, which corresponds to the three most obvious peak shifts compared between before and after ORR radial diffraction profiles from Figure 2g. Considering the {400} planes are sensitive to the evolution of lattice constant of a, and {002} planes reflect the change of lattice parameter of c, such an asymmetric expansion likely originated from different response degrees of crystal unit cells along the [100] and [001] directions upon the ORR proceeding. In specific, the lattice a expanded by  $\approx 0.97\%$ , and the lattice c exhibited a elongation of  $\approx$ 1.97%. Besides, the interplanar spacing of (420) has undergone a spacing expansion from 2.19 to 2.22 Å, further implying asymmetric crystal cell expansion along different crystallographic orientations of MnO<sub>2</sub> nanorods.
+
+The surface and structure change of the MnO<sub>2</sub> nanorods are further investigated through the quasi-in situ analysis at a nanoscale. The real picture and the schematic of the electrochemical chip (e-chip) shown in **Figure 3** was commercially obtained and paired up with its respective spacer chips in the quasi-in situ liquid cell. A Protochips liquid cell holder was used for the preliminary in situ TEM analysis first. However, it was found that MnO<sub>2</sub>
+
+26999412, 2024, 6, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/aesr.202300229 by University Of Science, Wiley Online Library on [06/01/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Figure 2. a,b) HRTEM images of MnO2 nanorods before ORR accelerated duration test, and d,e) after ORR accelerated duration test. The images of (b) and (e) are obtained from the enlarged white square of (a) and (d), respectively. d) The dotted dash lines within highlights the rough surfaces of MnO2 nanorods. e) Dotted lines indicate the selected area electron diffraction (SAED) patterns of MnO2 nanorods before (c) and after ORR accelerated duration test. f ) The corresponding average radial intensity profiles from SAED patterns, g) the vertical lines are used for comparison only. h) The atomic structure of α-MnO2 viewed along [100], i) [001], and j) [210] to show the lattice expansion.
+
+was unstable in the liquid TEM holder under the electron beam just with the flow of deionized water (seen in Video S1, Supporting Information), while the injection of 0.1 M KOH aqueous electrolyte would bring about more severe effects. Hence, in our project, a quasi-in situ localized identification was adopted as the modified method for analysis[38,39] that enables high-resolution imaging in a dry state (See details in SI, Supporting Information).
+
+The quasi-in situ electrochemical ORR observation by TEM, a Protochips benchtop liquid cell holder instead of the liquid TEM holder was used. The observation window made by silicon nitrate was highlighted in red (Figure 3b) and showed the direct TEM image in Figure 4a. The e-chip was assembled with a glassy carbon working electrode and Pt reference electrode as well as Pt counter electrode. A series of pretreatment on e-chip was implemented before the as-prepared MnO2 was drop-casted on. Then the leakage as well as the blockage were checked by pumping the electrolyte at 10 μL min<sup>1</sup> and confirmed by a microscope. Once the attachment of the testing electrochemical workstation with the e-chip in the liquid cell was ensured, the cyclic voltammetry
+
+26999412, 2024, 6, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/aesr.202300229 by University Of Science, Wiley Online Library on [06/01/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Figure 3. Picture of the in situ electrochemical TEM chip. a) Schematic view of the in situ electrochemical TEM chip, and b) the viewing window was highlighted by the red dashed circle.
+
+Figure 4. TEM image of the zoom-out chip, focus on working electrode. a) Two zoom-in observation areas marked in red circles are on-tip, and b–g) off-tip areas, i–n) studied by quasi-in situ electrochemical HRTEM in details. Quasi-in situ electrochemical HRTEM images of MnO2 nanorods recorded before ORR (b,i), after 20 CV cycles (c,j), after 100 CV cycles during ORR range (d,k), respectively. The lattice fringe images (e–g, l–n) enlarged from the white square areas in (b–d, i–k), respectively. Quasi-in situ cyclic voltammograms in 0.1 M KOH electrolyte after 20 cycles and 100 cycles of as-prepared MnO2 in liquid electrochemical TEM cell (h).
+
+www.advenergysustres.com
+
+tests were conducted ranging from -0.5 to  $1.2\,\mathrm{V}$  vs. RHE at  $100\,\mathrm{mV\,s^{-1}}$  (Figure 4h). In order to track the structure change during the electrochemical ORR process, the MnO<sub>2</sub> before the ORR test and experienced 20 cycles even the 100 cycles ORR CV scans were chosen to image.
+
+Studies have revealed that there is spatial potential variation throughout the working electrode on the electrochemical chip due to the effect of its geometric configuration. [3,40,41] In other words, it would experience a nonuniform electric field distribution, and give rise to a difference in electrical conductivity at different regions among the viewing window. Therefore, in order to eliminate the effect caused by the electric field and in turn the electrical conductivity on the e-chip, we selected two areas for comparison as evidence of the structure evolution during the electrochemical ORR process. Moreover, the difference between the before and after several ORR CV cycles can be better elucidated with the comparison of two locations on the electrode. The tip of the electrode and the location far away from the electrode were placed with heavy considerations, which are marked by red dashed circles in Figure 4a.
+
+Additionally, in order to align the electrochemical potential window within the quasi-in situ liquid electrochemical TEM cell corresponds to the same range in the classical three-electrode system, the typical redox couple  $Fe(CN)_6^{3-}/Fe(CN)_6^{4-}$  was introduced in the 0.1 M KOH electrolyte (Figure S7, Supporting Information). The redox potential of the Fe(CN)<sub>6</sub><sup>3-</sup>/Fe(CN)<sub>6</sub><sup>4</sup> with respect to a saturated calomel electrode (SCE) and a Pt reference electrode exhibit similar shapes, but shifted by 0.32 V from SCE to Pt. Thereafter, the potential shift compared to the reversible hydrogen electrode (RHE) for Pt reference in the e-chip can be calibrated as  $+0.7 \,\mathrm{V}$  in  $0.1 \,\mathrm{M}$  KOH. Taking the potential scales and the uncompensated resistance into account, the potential range between -0.5 and  $1.2\,\mathrm{V}$  vs. RHE was selected for quasi-in situ electrochemical ORR. The quasi-in situ CV cycles were recorded within the ORR range in the liquid TEM cell (Figure 4h), the reduction peak slightly shifted negatively along with the number of the CV cycles increases, which may account for the limitation of the mass transfer in the liquid quasi-in situ cell.[42] Besides, owing to the nonuniform distribution, higher polarization during cycling was observed in the quasi-in situ system. The pair of the oxidation and reduction peaks in the quasi-in situ CV cycle corresponds to the valence change of Mn, but the contributed current from Mn reduction in the polarization curve can be negligible according to the measurement of the total electric charge during the reaction process.[6]
+
+The TEM image of zoom-out chip that focus on the working electrode is shown in Figure 4a, which is also indicated in Figure 3b marked by red dashed line. Interestingly, a surface layer is observed on the MnO<sub>2</sub> nanorods located on the tip of the electrode once after several electrochemical ORR cycles (Figure 4b–d). The intensified surface roughness was presented as the CV cycles increased during ORR ranges, also can be clearly seen in the magnified lattice structure shown in Figure 4e–g. Taking for instance, the lattice structure of (400) for the MnO<sub>2</sub> nanorods positioned on-tip of the electrode after 20 cycles CV test (shown in Figure 4f) expanded by 7.18% compared to those after 100 cycles CV test (shown in Figure 4g) within ORR ranges. On the contrary, the representative HRTEM images
+
+(Figure 4i-k) and the corresponding magnified lattice fringe images of the off-tip region, especially when far away from the working electrode (Figure 4l-n) indicate the MnO<sub>2</sub> nanorods can stay stable and the surface of the nanorods can remain clear under the electron beam, which also confirms the surface structure evolution of the on-tip MnO<sub>2</sub> is caused by the electrochemical ORR process rather than other possible factors. The surface roughness faithfully reflects the surface restructuring relevant to ORR catalysis, also revealed in the ex situ TEM results obtained after ORR. Furthermore, when the electrode potential was scanned cyclically within the ORR window in Figure 4h, a pair of redox peaks of MnO2 and an obvious oxygen reduction peak appeared. The redox peaks reflect the conversion between Mn (II, III) and Mn (IV). [43] While the nonreversible behavior of the Mn oxidation state during catalysis results in a slight position shift of redox peak in an ORR potential window.<sup>[6]</sup>
+
+In conclusion, the apparent surface structure changes and the corresponding d-spacing expand along with the ORR process, implying an irreversible manner of the microstructure evolution was detected. We note that there were no secondary phases found in the sample post-ADT test and during quasi-in situ test, which manifests the good crystal structural stability of MnO2. According to the most reported XAS studies, the shift of white line position on Mn-O and Mn-Mn bonds are often associated with the oxidation state changes of MnO<sub>2</sub> and/or the generation of new phases. [26,44-46] The operando Raman spectroscopy studies also revealed that MnOx structures were distorted during oxygen electrocatalysis, thus gives rise to Mn-O bonds with different coordination number, chain length, and distances.<sup>[7]</sup> Our observations suggest that the electronic structure change of MnO<sub>2</sub> resulted from the lattice expansion, which would make the electron redistribute in the Mn-O and/or Mn-Mn bonds. Additionally, the accompanying surface state studies are still unknown and expected to be further unveiled in the future.
+
+### 3. Conclusions
+
+Overall, quasi-in situ electrochemical TEM observation provides a better understanding of assessing the electrochemical process. The structural and morphological evolution of MnO2 nanorods was tracked in electrochemical oxygen reduction catalysis. The structural analyses yielded a quite complete picture of the surface structural change of MnO<sub>2</sub> nanorods during the ORR process. The obvious expansion happened along a-axis and c-axis by 0.97% and 1.97%, respectively after ORR test. Also, the surface roughness presented as the CV cycles increased within the oxygen reduction testing ranges. The surface structure expansion appears to identify the exclusive effect of the electrochemical reaction, as evidenced in ex situ and quasi-in situ observations. A deeper and broader exploration of the microstructure and the surface evolution in relation to the electrocatalytic ORR process is expected for better development of electrocatalysts in the future.
+
+### Supporting Information
+
+Supporting Information is available from the Wiley Online Library or from the author.
+
+## Acknowledgements
+
+This work made use of facilities and instrumentation in Facilities for Analysis, Characterisation, Testing and Simulation (FACTS) at Nanyang Technological University (NTU). The authors acknowledge the Support from NAP-SUG from NTU, Tier 1 grants (RG81/22) from MOE Singapore, NTU presidential Postdoctoral Fellowship, and China Scholarship Council (CSC). The authors thank Dr. Minna CAO from Fujian Institute of Research on the Structure of Matter, Chinese Academy of Sciences for providing the XPS measurement.
+
+# Conflict of Interest
+
+The authors declare no conflict of interest.
+
+# Data Availability Statement
+
+The data that support the findings of this study are available on request from the corresponding author. The data are not publicly available due to privacy or ethical restrictions.
+
+## Keywords
+
+electrocatalysis, manganese dioxide, oxygen reduction reaction, quasiin situ electrochemical transition electron microscopy, structural evolution
+
+> Received: October 25, 2023 Revised: January 10, 2024 Published online: January 28, 2024
+
+- [1] G. Yasin, S. Ibrahim, S. Ajmal, S. Ibraheem, S. Ali, A. K. Nadda, G. X. Zhang, J. Kaur, T. Maiyalagan, R. K. Gupta, A. Kumar, Coord. Chem. Rev. 2022, 469, 214669.
+- [2] Y. Yang, M. C. Luo, W. Y. Zhang, Y. J. Sun, X. Chen, S. J. Guo, Chem 2018, 4, 2054.
+- [3] G. Z. Zhu, S. Prabhudev, J. Yang, C. M. Gabardo, G. A. Botton, L. Soleymani, J. Phys. Chem. C 2014, 118, 22111.
+- [4] Y. G. Zhao, D. P. A. Saseendran, C. Huang, C. A. Triana, W. R. Marks, H. Chen, H. Zhao, G. R. Patzke, Chem. Rev. 2023, 123, 6257.
+- [5] Z. Z. Xu, Z. B. Liang, W. H. Guo, R. Q. Zou, Coord. Chem. Rev. 2021, 436, 213824.
+- [6] J. Schröder, J. A. Z. Zeledón, G. A. Kamat, M. E. Kreider, L. Z. Wei, A. S. Mule, A. Torres, K. Yap, D. Sokaras, A. Gallo, M. B. Stevens, T. F. Jaramillo, ACS Energy Lett. 2023, 8, 2962.
+- [7] H. Radinger, P. Connor, R. Stark, W. Jaegermann, B. Kaiser, ChemCatChem 2021, 13, 1175.
+- [8] N. de Jonge, F. M. Ross, Nat. Nanotechnol. 2011, 6, 695.
+- [9] F. M. Ross, Science 2015, 350, aaa9886.
+- [10] S. Hwang, X. B. Chen, G. W. Zhou, D. Su, Adv. Mater. 2020, 10, 1902105.
+- [11] N. Hodnik, G. Dehm, K. J. J. Mayrhofer, Acc. Chem. Res. 2016, 49, 2015.
+- [12] S. F. Tan, S. W. Chee, Z. Baraissov, H. M. Jin, T. L. Tan, U. Mirsaidov, J. Phys. Chem. Lett. 2019, 10, 6090.
+- [13] S. E. Balaghi, S. Mehrabani, Y. Mousazade, R. Bagheri, A. S. Sologubenko, Z. L. Song, G. R. Patzke, M. M. Najafpour, ACS Appl. Mater. Interfaces 2021, 13, 19927.
+- [14] Y. Yang, Y. T. Shao, J. B. Jin, J. Feijoo, I. Roh, S. Louisia, S. M. Yu, M. V. F. Guzman, C. B. Chen, D. A. Muller, H. D. Abruna, P. D. Yang, ACS Sustainable Chem. Eng. 2023, 11, 4119.
+
+- [15] J. Yang, C. M. Andrei, Y. Chan, B. L. Mehdi, N. D. Browning, G. A. Botton, L. Soleymani, Langmuir 2019, 35, 862.
+- [16] V. Beermann, M. E. Holtz, E. Padgett, J. F. de Araujo, D. A. Muller, P. Strasser, Energy Environ. Sci. 2019, 12, 2476.
+- [17] M. K. Adak, A. Rajput, D. Ghosh, B. Chakraborty, ACS Appl. Energy Mater. 2022, 5, 13645.
+- [18] A. Kundu, M. K. Adak, Y. Kumar, B. Chakraborty, Inorg. Chem. 2022, 61, 4995.
+- [19] A. Kundu, B. Kumar, B. Chakraborty, J. Phys. Chem. C 2022, 126, 16172.
+- [20] A. Rajput, M. K. Adak, B. Chakraborty, Inorg. Chem. 2022, 61, 11189.
+- [21] T. C. Tsai, G. M. Huang, C. W. Huang, J. Y. Chen, C. C. Yang, T. Y. Tseng, W. W. Wu, Anal. Chem. 2017, 89, 9671.
+- [22] Y. F. Yuan, C. Zhan, K. He, H. R. Chen, W. T. Yao, S. Sharifi-Asl, B. Song, Z. Z. Yang, A. M. Nie, X. Y. Luo, H. Wang, S. M. Wood, K. Amine, M. S. Islam, J. Lu, R. Shahbazian-Yassar, Nat. Commun. 2016, 7, 13374.
+- [23] Z. M. Chan, D. A. Kitchaev, J. N. Weker, C. Schnedermann, K. Lim, G. Ceder, W. Tumas, M. F. Toney, D. G. Nocera, Proc. Natl. Acad. Sci. USA 2018, 115, E5261.
+- [24] Y. T. Meng, W. Q. Song, H. Huang, Z. Ren, S. Y. Chen, S. L. Suib, J. Am. Chem. Soc. 2014, 136, 11452.
+- [25] F. Y. Cheng, Y. Su, J. Liang, Z. L. Tao, J. Chen, Chem. Mater. 2010, 22, 898.
+- [26] K. A. Stoerzinger, M. Risch, B. H. Han, Y. Shao-Horn, ACS Catal. 2015, 5, 6021.
+- [27] S. P. Rong, P. Y. Zhang, F. Liu, Y. J. Yang, ACS Catal. 2018, 8, 3435.
+- [28] T. C. Wen, J. Wang, J. Zhang, C. Long, Environ. Res. 2023, 238, 117176.
+- [29] T. Shinagawa, A. T. Garcia-Esparza, K. Takanabe, Sci. Rep. 2015, 5, 13801.
+- [30] G. T. Burstein, Corros. Sci. 2005, 47, 2858.
+- [31] B. Gurau, E. S. Smotkin, J. Power Sources 2002, 112, 339.
+- [32] P. Costamagna, S. Srinivasan, J. Power Sources 2001, 102, 242.
+- [33] E. I. Suvorova, P. A. Buffat, J. Microsc. Oxford 1999, 196, 46.
+- [34] J. L. Lábár, Microsc. Microanal. 2008, 14, 287.
+- [35] R. L. van der Wal, Combust. Sci. Technol. 1997, 126, 333.
+- [36] B. E. Warren, Zeitschrift Fur Kristallographie 1933, 86, 349.
+- [37] F. K. Shan, G. Liu, W. J. Lee, B. C. Shin, J. Cryst. Growth 2006, 291, 328.
+- [38] J. J. De Yoreo, N. Sommerdijk, Nat. Rev. Mater. 2016, 1, 16035.
+- [39] Y. C. Yu, H. L. L. Xin, R. Hovden, D. L. Wang, E. D. Rus, J. A. Mundy, D. A. Muller, H. D. Abruna, ˜ Nano Lett. 2012, 12, 4417.
+- [40] J. W. Wang, M. H. Wang, L. S. Jang, Biosens. Bioelectron. 2010, 25, 1271.
+- [41] R. Pradhan, A. Mitra, S. Das, in 2010 Int. Conf. on Systems in Medicine and Biology, Kharagpur, India 2010, pp. 37–40.
+- [42] N. O. Pena, D. Ihiawakrim, M. Han, B. Lassalle-Kaiser, S. Carenco, ˜ C. Sanchez, C. Laberty-Robert, D. Portehault, O. Ersen, ACS Nano 2019, 13, 11372.
+- [43] Y. J. Sa, S. Kim, Y. S. Lee, J. M. Kim, S. H. Joo, ACS Appl. Mater. Interfaces 2023, 15, 31393.
+- [44] M. Risch, K. A. Stoerzinger, B. H. Han, T. Z. Regier, D. Peak, S. Y. Sayed, C. Wei, Z. C. Xu, Y. Shao-Horn, J. Phys. Chem. C 2017, 121, 17682.
+- [45] Y. Yang, Y. Wang, Y. Xiong, X. Huang, L. X. Shen, R. Huang, H. S. Wang, J. P. Pastore, S. H. Yu, L. Xiao, J. D. Brock, L. Zhuang, H. D. Abruna, ˜ J. Am. Chem. Soc. 2019, 141, 1463.
+- [46] P. W. Menezes, C. Walter, B. Chakraborty, J. N. Hausmann, I. Zaharieva, A. Frick, E. von Hauff, H. Dau, M. Driess, Adv. Mater. 2021, 33, 2004098.

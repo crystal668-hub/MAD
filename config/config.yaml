@@ -7,7 +7,7 @@ llm:
   # Agent 1: OpenRouter GPT-5.2 Thinking + text-embedding-3-large
   agent1:
     provider: "openai"
-    model: "openai/gpt-5.2-thinking"
+    model: "openai/gpt-5.2"
     api_key: "${OPENAI_API_KEY}"  # 从环境变量读取
     base_url: "https://openrouter.ai/api/v1"
     temperature: 0.5
@@ -19,14 +19,14 @@ llm:
   # Agent 2: Grok 4.1 Thinking + voyage-3-large（Grok走OpenRouter，voyage走Voyage SDK）
   agent2:
     provider: "xai"
-    model: "x-ai/grok-4.1-thinking"
+    model: "x-ai/grok-4.1"
     api_key: "${XAI_API_KEY}"  
     base_url: "https://openrouter.ai/api/v1"
     temperature: 0.5
     max_tokens: 2000
-    embedding_model: "voyage-3-large"  
-    embedding_provider: "voyage"  # 使用Voyage AI官方SDK
-    voyage_api_key: "${VOYAGE_API_KEY}" 
+    embedding_model: "voyage-3-large"    
+    voyage_api_key: "${VOYAGE_API_KEY}"
+    embedding_provider: "voyage" 
   
   # Agent 3: Gemini 3.0 Pro Preview + gemini-embedding-001
   agent3:
@@ -40,7 +40,7 @@ llm:
     emb_url: "https://openrouter.ai/api/v1/embeddings"
     embedding_provider: "openrouter"
   
-  # Agent 4: Qwen3-Max + text-embedding-v4 (阿里云百炼OpenAI兼容模式)
+  # Agent 4: Qwen3-Max + text-embedding-v4 
   agent4:
     provider: "qwen"
     model: "qwen3-max"
@@ -48,10 +48,9 @@ llm:
     base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
     temperature: 0.5
     max_tokens: 2000
-    embedding_model: "text-embedding-v4"
-    embedding_provider: "bailian"  # 使用阿里云百炼/通义千问官方SDK
-    bailian_api_key: "${QWEN_API_KEY}"
+    embedding_model: "text-embedding-v4" 
     emb_url: "https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings"
+    embedding_provider: "bailian" 
 
 # ===== 向量数据库配置 =====
 vector_store:
@@ -107,6 +106,5 @@ logging:
 # ===== 数据路径配置 =====
 paths:
   raw_data: "./data/raw"
-  processed_data: "./data/processed"
   models: "./models"
   outputs: "./outputs"

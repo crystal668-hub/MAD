@@ -6,6 +6,7 @@ RAG系统实现模块
 """
 
 import os
+from datetime import datetime
 from typing import List, Dict, Optional, Any
 from pathlib import Path
 
@@ -17,12 +18,23 @@ from llama_index.core import (
     load_index_from_storage,
     Settings
 )
+from llama_index.core.node_parser import SentenceSplitter, MarkdownNodeParser
+from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from database.vector_store import VectorStore
+from utils.logger import Logger
+
+db_log_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+db_log_file = Path("./logs/db_log") / f"rag_system_{db_log_timestamp}.log"
+logger = Logger.get_logger(
+    name=f"MAD.DB.RAGSystem.{db_log_timestamp}",
+    log_file=str(db_log_file),
+    level="INFO"
+)
 
 
 class RAGSystem:
@@ -37,22 +49,28 @@ class RAGSystem:
         persist_dir: str,
         collection_name: str,
         embedding_model: Optional[Any] = None,
-        top_k: int = 5
+        top_k: int = 5,
+        chunk_size: int = 256,
+        chunk_overlap: int = 50
     ):
         """
         初始化RAG系统
         
         Args:
-            data_dir: 已切分的chunk数据目录（data/processed）
+            data_dir: 原始文献数据目录（data/raw）
             persist_dir: 索引持久化目录
             collection_name: 向量数据库集合名称
             embedding_model: 嵌入模型（可选）
             top_k: 检索返回的top-k结果
+            chunk_size: 文本分块大小
+            chunk_overlap: 文本分块重叠
         """
         self.data_dir = data_dir
         self.persist_dir = persist_dir
         self.collection_name = collection_name
         self.top_k = top_k
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
         
         # 创建必要的目录
         os.makedirs(data_dir, exist_ok=True)
@@ -79,7 +97,7 @@ class RAGSystem:
         if self._index_exists():
             self._load_index()
         else:
-            print("索引不存在，请先调用 build_index() 构建索引")
+            logger.info("索引不存在，请先调用 build_index() 构建索引")
     
     def _index_exists(self) -> bool:
         """
@@ -112,10 +130,10 @@ class RAGSystem:
             # 创建查询引擎
             self._create_query_engine()
             
-            print(f"成功加载索引: {self.collection_name}")
+            logger.info(f"成功加载索引: {self.collection_name}")
         except Exception as e:
-            print(f"加载索引失败: {str(e)}")
-            print(f"将需要重新构建索引")
+            logger.error(f"加载索引失败: {str(e)}")
+            logger.warning("将需要重新构建索引")
             self.index = None
     
     def build_index(
@@ -132,7 +150,7 @@ class RAGSystem:
         """
         # 检查是否需要重建
         if self._index_exists() and not force_rebuild:
-            print("索引已存在，使用 force_rebuild=True 强制重建")
+            logger.info("索引已存在，使用 force_rebuild=True 强制重建")
             return
         
         # 加载文档
@@ -140,7 +158,7 @@ class RAGSystem:
             documents = self._load_documents()
         
         if not documents:
-            print("警告：没有找到文档，无法构建索引")
+            logger.warning("警告：没有找到文档，无法构建索引")
             return
         
         # 创建存储上下文（使用Chroma向量存储）
@@ -148,8 +166,7 @@ class RAGSystem:
         vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
         
-        # 构建索引（文档已经是切分好的chunks，无需再分割）
-        print(f"开始构建索引，共 {len(documents)} 个chunks...")
+        logger.info(f"开始构建索引，共 {len(documents)} 个chunks...")
         self.index = VectorStoreIndex.from_documents(
             documents,
             storage_context=storage_context,
@@ -162,59 +179,78 @@ class RAGSystem:
         # 创建查询引擎
         self._create_query_engine()
         
-        print("索引构建完成")
+        logger.info("索引构建完成")
     
     def _load_documents(self) -> List[Document]:
         """
-        从数据目录加载文档（已切分的chunks）
-        每个txt文件格式：索引\t内容
+        从数据目录加载Markdown文档并切分为chunks
         
         Returns:
             List[Document]: 文档列表（每个chunk作为一个Document）
         """
-        # 检查数据目录是否存在文件
+        # 检查数据目录是否存在Markdown文件
         data_path = Path(self.data_dir)
-        if not data_path.exists() or not any(data_path.iterdir()):
-            print(f"警告：数据目录 {self.data_dir} 不存在或为空")
+        if not data_path.exists() or not any(data_path.rglob('*.md')):
+            logger.warning(f"警告：数据目录 {self.data_dir} 不存在或为空")
             return []
-        
-        documents = []
-        
-        # 遍历所有txt文件
-        for txt_file in data_path.glob('*.txt'):
+
+        try:
+            reader = SimpleDirectoryReader(
+                input_dir=str(data_path),
+                required_exts=[".md"],
+                recursive=True
+            )
+            raw_documents = reader.load_data()
+        except Exception as e:
+            logger.warning(f"警告：加载Markdown失败: {e}")
+            return []
+
+        if not raw_documents:
+            logger.warning(f"警告：未找到Markdown文件: {self.data_dir}")
+            return []
+
+        markdown_parser = MarkdownNodeParser()
+        sentence_splitter = SentenceSplitter(
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap
+        )
+
+        pipeline = IngestionPipeline(
+            transformations=[
+                markdown_parser,
+                sentence_splitter
+            ]
+        )
+
+        chunked_documents: List[Document] = []
+        for doc in raw_documents:
             try:
-                with open(txt_file, 'r', encoding='utf-8') as f:
-                    for line in f:
-                        line = line.strip()
-                        if not line:
-                            continue
-                        
-                        # 解析格式：索引\t内容
-                        parts = line.split('\t', 1)
-                        if len(parts) == 2:
-                            chunk_id, content = parts
-                            # 创建Document对象
-                            doc = Document(
-                                text=content,
-                                metadata={
-                                    'source_file': txt_file.name,
-                                    'chunk_id': chunk_id
-                                }
-                            )
-                            documents.append(doc)
+                nodes = pipeline.run(documents=[doc])
+                for idx, node in enumerate(nodes):
+                    chunked_documents.append(
+                        Document(
+                            text=node.get_content(),
+                            metadata={
+                                **doc.metadata,
+                                "chunk_id": idx,
+                                "total_chunks": len(nodes)
+                            }
+                        )
+                    )
             except Exception as e:
-                print(f"警告：读取文件 {txt_file.name} 时出错: {e}")
+                file_name = doc.metadata.get('file_name', 'unknown')
+                logger.warning(f"警告：切分文件 {file_name} 时出错: {e}")
                 continue
-        
-        print(f"成功加载 {len(documents)} 个chunks")
-        return documents
+
+        logger.info(f"成功加载 {len(raw_documents)} 个文档，生成 {len(chunked_documents)} 个chunks")
+        return chunked_documents
     
     def _create_query_engine(self) -> None:
         """
         创建查询引擎
         """
         if self.index is None:
-            print("错误：索引未初始化，无法创建查询引擎")
+            logger.error("错误：索引未初始化，无法创建查询引擎")
             return
         
         # 创建检索器
@@ -226,7 +262,7 @@ class RAGSystem:
         # 创建查询引擎
         self.query_engine = RetrieverQueryEngine(retriever=retriever)
         
-        print("查询引擎创建完成")
+        logger.info("查询引擎创建完成")
     
     def query(self, query_text: str) -> Dict[str, Any]:
         """
@@ -302,7 +338,7 @@ class RAGSystem:
             documents: 新文档列表
         """
         if self.index is None:
-            print("索引不存在，将创建新索引")
+            logger.info("索引不存在，将创建新索引")
             self.build_index(documents=documents)
             return
         
@@ -313,7 +349,7 @@ class RAGSystem:
         # 持久化
         self.index.storage_context.persist(persist_dir=self.persist_dir)
         
-        print(f"成功添加 {len(documents)} 个文档到索引")
+        logger.info(f"成功添加 {len(documents)} 个文档到索引")
     
     def get_index_stats(self) -> Dict:
         """
@@ -341,7 +377,7 @@ class RAGSystem:
 if __name__ == "__main__":
     # 初始化RAG系统
     rag = RAGSystem(
-        data_dir="./data/processed",
+        data_dir="./data/raw",
         persist_dir="./data/chroma_db",
         collection_name="chemical_reactions",
         top_k=5
@@ -353,10 +389,10 @@ if __name__ == "__main__":
     # 执行查询
     if rag.query_engine:
         result = rag.query("什么是氧化还原反应的过电势？")
-        print(f"\n查询结果: {result['answer']}")
+        logger.info(f"\n查询结果: {result['answer']}")
         
         # 打印来源文档
-        print("\n来源文档:")
+        logger.info("\n来源文档:")
         for i, node in enumerate(result['source_nodes'], 1):
-            print(f"{i}. (相关度: {node['score']:.4f})")
-            print(f"   {node['text'][:100]}...")
+            logger.info(f"{i}. (相关度: {node['score']:.4f})")
+            logger.info(f"   {node['text'][:100]}...")

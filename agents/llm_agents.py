@@ -356,8 +356,8 @@ class GoogleAgent(ReActAgent):
 
 class QwenAgent(ReActAgent):
     """
-    基于通义千问的Agent
-    使用阿里云百炼OpenAI兼容端点调用Qwen模型
+    基于Qwen的Agent
+    使用Qwen模型进行推理和分析，支持ReAct推理
     """
     
     def _init_llm_client(self) -> None:

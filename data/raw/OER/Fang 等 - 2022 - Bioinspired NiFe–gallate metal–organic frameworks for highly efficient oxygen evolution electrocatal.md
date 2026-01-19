@@ -1,0 +1,149 @@
+---
+source: Fang 等 - 2022 - Bioinspired NiFe–gallate metal–organic frameworks for highly efficient oxygen evolution electrocatal.pdf
+tool: marker
+duration: 44.710s
+generated: 2026-01-09T06:31:28.301751Z
+---
+
+# Journal of Materials Chemistry A
+
+### COMMUNICATION
+
+View Article Online
+View Journal | View Issue
+
+Cite this: *J. Mater. Chem. A*, 2022, **10**, 7013
+
+Received 17th February 2022 Accepted 9th March 2022
+
+DOI: 10.1039/d2ta01293f
+
+rsc.li/materials-a
+
+# Bioinspired NiFe-gallate metal-organic frameworks for highly efficient oxygen evolution electrocatalysis†
+
+Min Fang,<sup>†a</sup> Xutao Gao,<sup>†b</sup> Jing Liang,<sup>†a</sup> Biao Guo,<sup>a</sup> Lie Zou,<sup>a</sup> Jun Lu,<sup>a</sup> Yan Gao, <sup>Da</sup> Edmund C. M. Tse <sup>ba</sup> and Jinxuan Liu <sup>ba</sup>
+
+We report the synthesis of a bioinspired NiFe-gallate metal-organic framework on carbon paper using gallic acid (GA) as the organic ligand, nickel chloride hexahydrate and iron(II) chloride tetrahydrate as metal sources by a one-step hydrothermal method. The as-prepared NiFe-GA on carbon paper exhibits excellent oxygen evolution reaction (OER) performance, which requires overpotentials of 185 mV and 236 mV to achieve 10 mA cm $^{-2}$  and 100 mA cm $^{-2}$  in 1.0 M KOH, respectively. In situ electrochemical and density functional theory calculation results reveal that the presence of Fe and GA favors the generation of active oxygen species and the catalytic active Ni- and Fe-sites facilitate the charge transport to adsorbed OH $_{\rm ad}$  reducing the activation barrier of OH $_{\rm ad}$  deprotonation to form O $_{\rm ad}$  intermediates, thereby contributing the superior OER performance.
+
+#### Introduction
+
+Clean energy and sustainable technologies are of great importance in recent years because of the environmental concerns and climate change from the ever-increasing consumption of fossil fuels.¹ Electrochemical water splitting has been considered as one of the promising strategies to produce clean hydrogen fuels.² However, the anodic half-reaction, *i.e.* oxygen evolution reaction (OER), requires a large overpotential to achieve the desired current density due to its sluggish kinetics with the transfer of four electrons, thereby limiting the overall energy efficiency of water electrolyzers.³ Therefore, the exploration of efficient OER electrocatalysts that can accelerate the intricate electron transfer steps and lower the overpotential is urgently demanded. Over the last decades, a variety of materials, such as
+
+noble metal oxides (RuO<sub>2</sub>, IrO<sub>2</sub>) and transition metal-based materials (oxides,<sup>4</sup> layered double hydroxides,<sup>5</sup> oxyhydroxide,<sup>6</sup> metal-organic frameworks (MOFs) and their derivatives<sup>7</sup>) have been explored as OER catalysts.
+
+Among a multitude of transition metal-based materials, MOFs, a family of porous and crystalline materials formed by metal ions (or clusters) and organic linkers, have ignited enormous research interests due to their flexible and tunable chemical and physical structural characteristics.8,9 In contrast to many other heterogeneous OER catalysts, MOFs possess high surface area which can expose abundant active sites as well as exhibit rapid mass transfer owing to their porous structures.10 In addition, various metals can be integrated into the welldefined and uniform framework as active sites that facilitate mechanistic studies and maximize product selectivity.11 Tang and co-workers report the fabrication of ultrathin bimetallic NiCo-MOF nanosheets with abundant unsaturated metal sites as active sites on copper foam for OER. This material exhibits excellent OER performance, which requires an overpotential of 180 mV to achieve a current density of 10 mA cm<sup>-2</sup> in alkaline conditions.10 Zhang and coworkers report a foam-like trimetallic NiCoFe-MOF, which shows extraordinary OER activity with an overpotential of 257 mV at the current density of 10 mA cm<sup>-2</sup> in alkaline condition.12 On the other hand, functionalized organic ligands allow for further tuning the properties of catalyst so that the role of each component of the MOF can be understood during OER process. Recently, we have reported the fabrication of 2D NiFc-MOF nanosheets on nickel foam by combining the 1,1'ferrocenedicarboxylic acid ligand with Ni2+ salt in an organic solvent. It has been found that the ferrocene ligand within the framework "ferry" electrons to active Ni-sites, thus promoting the OER performance with an overpotential of 195 mV at the current density of 10 mA cm<sup>-2</sup>.3
+
+However, the emergence of MOF-based OER electrocatalysts with high OER performances are still limited, and the understanding of the OER catalytic mechanism is far from complete. This is due to the localized coordination environment of redox inactive ligands and hard metal ions, leading to a relatively low
+
+<sup>&</sup>quot;State Key Laboratory of Fine Chemicals, Dalian University of Technology, 116024 Dalian, P. R. China. E-mail: jinxuan.liu@dlut.edu.cn
+
+<sup>&</sup>lt;sup>b</sup>Department of Chemistry, CAS-HKU Joint Laboratory on New Materials, University of Hong Kong, Hong Kong SAR, P. R. China. E-mail: ecmtse@hku.hk
+
+ $<sup>\</sup>dagger$  Electronic supplementary information (ESI) available. See DOI: 10.1039/d2ta01293f
+
+<sup>‡</sup> These authors contributed equally to this work.
+
+density of charge carriers and lack of low-energy charge transport pathway. Therefore, the development of MOF OER catalysts possessing low-energy charge migration channel remains challenging, and it may make further improvement on the OER activity of MOFs.
+
+Gallic acid (GA, 3,4,5-trihydroxybenzoic acid), a natural botanic phenolic compound, is known for its pharmacological properties including antioxidant, anti-inflammation, and anticancer activities.<sup>13</sup> It has been reported that GA can promote Fenton-type or auto-oxidation reaction generating reactive oxygen species in the presence of metals, particularly iron or copper.<sup>14</sup> Nanoscale Cu–GA MOF<sup>14</sup> and Fe–GA<sup>15</sup> nanocomplexes have been shown to reduce tumor burdens owing to the controlled generation of reactive oxygen species. Inspired by these works, we speculate that MOFs comprising of GA and transition metals such as Fe and Ni may facilitate the formation of indispensable "active oxygen" intermediates and further enhance OER performance. To our knowledge, except few reports of gallate-based MOFs as OER catalysts has not been reported yet.
+
+Herein, we demonstrate a solvothermal method to fabricate NiFe–GA MOF on carbon paper (CP) with a unique hexagonal prism-shaped structure (hereafter referred to as NiFe–GA–CP). The NiFe–GA–CP exhibits remarkable OER performance with overpotentials of 185 and 236 mV to achieve 10 and 100 mA cm $^{-2}$ , respectively under alkaline conditions. Electrochemical studies in combination with density functional theory calculation results reveal that the presence of Fe favors the generation of active oxygen species, and the co-presence of Ni and Fe facilitate charge transfer from Fe and Ni atoms to adsorbed O atom, thereby lowering the activation barrier of  $\mathrm{OH}_{\mathrm{ad}}$  deprotonation to form  $\mathrm{O}_{\mathrm{ad}}$  intermediates, and subsequently contributing to the superior OER performances recorded.
+
+#### Results and discussion
+
+The NiFe–GA–CP was synthesized by a conventional solvothermal method using nickel chloride hexahydrate (NiCl<sub>2</sub>- $^{\circ}6H_2O$ ) and iron(II) chloride tetrahydrate (FeCl<sub>2</sub>· $^{\circ}4H_2O$ ) as metal sources and gallic acid as organic ligand as schematically illustrated in Fig. 1(a). Briefly, a square-shaped carbon paper was placed into an autoclave containing KOH aqueous solution of NiCl<sub>2</sub>· $^{\circ}6H_2O$ , FeCl<sub>2</sub>· $^{\circ}4H_2O$ , and gallic acid. Subsequently, the autoclave was heated at 120 °C for 24 h. The detailed synthetic process can be found in the ESI.†
+
+After reaction, the carbon paper was coated by hexagonal prism-shaped NiFe–GA with an average length of 14  $\mu m$  and width of 9  $\mu m$  as shown in Fig. 1(b) and S1.† Interestingly, one end of the hexagonal prism-shaped NiFe–GA exhibits a honeycomb structure, which has not been observed in NiFe–GA powders synthesized without carbon paper (Fig. S2†). The transmission electron microscope (TEM) image (Fig. 1(c)) confirms the unique structure of NiFe–GA peeled from carbon paper, while the elemental mapping result shows that C, O, Fe, and Ni are homogeneously distributed within the NiFe–GA electrocatalyst (Fig. 1(d)), and the inductively coupled plasma (ICP) and energy dispersive X-ray spectroscopy (EDS) results
+
+reveal an atomic Ni/Fe ration of 3:1 for NiFe–GA MOF (Table S1†). Next, the Ni–GA, Fe–GA and NiFe–GA are characterized with Fourier transform infrared (FT-IR) spectroscopy with the FT-IR spectra displayed in Fig. S3.† The bands at 3480, 3350, and 3270 cm $^{-1}$  were assigned to  $\nu_{\rm C-H}$  while 1695 cm $^{-1}$  was assigned to  $\nu_{\rm C-HO}$  of GA. Both O–H and C=O stretches completely vanished in Ni–GA, Fe–GA and NiFe–GA, indicating successful coordination of carboxyl and hydroxyl groups with Ni/Fe. Detailed band assignments are listed in Table S2.†
+
+To determine the crystal structure of NiFe-GA, X-ray diffraction (XRD) experiments were carried out as presented in Fig. 1(e). The simulated XRD pattern is calculated based on an optimized triclinic structure of NiFe-GA with lattice parameters of a = 17.5 Å, b = 8.8 Å, c = 10.7 Å, and  $\alpha = 90^{\circ}$ ,  $\beta =$ 89.9°,  $\gamma = 119.9^{\circ}$  as shown in Fig. 1(f), where each unit cell comprises of five Ni(II) and one Fe(III), and each Ni(II) and Fe(III) is coordinated to six oxygen atoms from hydroxyl and carbonyl groups of GA.16 The detailed crystal structure optimization process can be found in ESI.† The NiFe-GA-CP exhibits an identical XRD pattern as NiFe-GA powder and simulated NiFe-GA with one exception of the peak at  $2\theta = 26.5^{\circ}$  observed on the carbon paper case. The XRD results in combination with the aforementioned experimental results strongly demonstrate the successful fabrication of crystalline hexagonal prism-shaped NiFe-GA on carbon paper. Prior to OER performance evaluation, the structural stability of the NiFe-GA powder under acidic/alkaline conditions is examined by employing XRD. The XRD patterns of NiFe-GA powders immersed into solutions with pH ranging from 3 to 14 are shown in Fig. S4.† Remarkably, the crystalline structure of NiFe-GA remains unchanged under acidic and alkaline conditions for 24 h at room temperature, which is indicative of the superior structural stability of NiFe-GA within an extensive pH range.
+
+The OER performances of NiFe–GA–CP are evaluated in a standard three-electrode electrochemical cell using NiFe–GA–CP as working electrode, Hg/HgO as reference electrode, and Pt wire as counter electrode in 1 M KOH solution (Fig. S5†). For the purpose of comparison, Ni–GA–CP and Fe–GA–CP were synthesized as displayed in Fig. S6 and S7.† To accurately evaluate the OER performance, the identical mass concentration of catalyst on carbon paper is controlled to  $\sim$ 11 mg cm $^{-2}$  for different catalysts (Fig. S8 and Table S3†).
+
+The polarization curves are recorded by linear sweep voltammetry (LSV) at a scan rate of 5 mV s<sup>-1</sup> as shown in Fig. 2(a), S9 and S10.† The lowest overpotentials of 185 and 236 mV at the current densities of 10 and 100 mA cm<sup>-2</sup> for NiFe–GA–CP are obtained, respectively, which are superior to the overpotentials for Ni–GA–CP (305 mV at j=10 mA cm<sup>-2</sup>, 522 mV at j=100 mA cm<sup>-2</sup>) and Fe–GA–CP (433 mV at j=10 mA cm<sup>-2</sup>, 570 mV at j=100 mA cm<sup>-2</sup>). The cyclic voltammogram of NiFe–GA–CP is displayed in Fig. S11,† and Ni<sup>2+</sup>/Ni<sup>3+</sup> redox peak is observed. It is worth of noting that the reduction peak locates before the onset potential of OER, which has no contribution to the current densities (Fig. 2(a)). The similar redox peak has been observed for NiFe-LDH OER catalysts as well, which can be explained to enable electrochemical accessibility of NiFe-sites, and favors higher catalytic OER activity. The steady Tafel slopes of various
+
+Fig. 1 (a) Schematic illustration of the solvothermal synthesis of NiFe-GA on carbon paper; (b) SEM images of NiFe-GA on carbon paper; (c) TEM image and (d) elemental mapping images of NiFe-GA; (e) XRD patterns of carbon paper (red), simulated NiFe-GA (black), NiFe-GA powder (blue) and NiFe-GA on carbon paper (green); (f) crystal structure of NiFe-GA.
+
+catalysts calculated from their corresponding LSV curves are shown in Fig. 2(b). NiFe-GA-CP gives the lowest value of 28.74 mV dec<sup>-1</sup> as compared to Ni-GA-CP (35.94 mV dec<sup>-1</sup>), Fe-GA-CP (184.89 mV dec<sup>-1</sup>), and CP (232.54 mV dec<sup>-1</sup>), indicating that the NiFe-GA-CP possesses the fastest OER kinetics. Electrochemical impedance spectroscopy (EIS) measurement of NiFe-GA-CP is conducted under OER conditions to investigate the charge transfer kinetics during this process as shown in Fig. 2(c). Electron transfer between the NiFe-GA and the conductive substrate, *i.e.* CP is facilitated during the electrochemical OER process, as indicated by a smaller charge transfer resistance of NiFe-GA than that of Ni-GA and Fe-GA. On the other hand, the obtained semicircle (green) at the low-frequency region for NiFe-GA-CP is associated with the adsorption of reaction intermediate such as O<sub>ad</sub> on the electrode surface,
+
+implying more favorable formation of  $O_{ad}$  on NiFe-GA-CP surface relative to Ni-GA-CP and Fe-GA-CP surfaces.  $^{20}$ 
+
+To further rationalize the differences in OER activities, electrochemical surface area (ECSA) of Ni–GA, Fe–GA, and NiFe–GA samples are estimated from the calculation of electrochemical double layer capacitances ( $C_{\rm cll}$ ) within the nonfaradaic potential window (Fig. S12†). As shown in Fig. 2(d), by fitting the curves  $C_{\rm cll}$  values of 2.04, 1.46, and 0.9 mF cm<sup>-2</sup> are obtained for NiFe–GA–CP, Ni–GA–CP, and Fe–GA–CP, respectively. These results suggest that NiFe–GA–CP exposes more active sites than Ni–GA–CP and Fe–GA–CP. With considerations of the overpotentials, Tafel slopes, EIS, and ECSA acquired, key indicators to determine the electro-catalytic performance of OER catalysts, NiFe–GA–CP exhibits superior OER performance over Ni–GA–CP and Fe–GA–CP. Remarkably, NiFe–GA–CP possesses the lowest overpotential of 185 mV at 10 mA cm<sup>-2</sup> as
+
+Fig. 2 (a) LSV curves of CP, Ni–GA–CP, Fe–GA–CP, and NiFe–GA–CP in 1.0 M KOH; (b) Tafel plots calculated from their corresponding LSV curves; (c) EIS spectra of Ni–GA–CP, Fe–GA–CP, and NiFe–GA–CP in 1.0 M KOH at 1.48 V; (d) plots showing the  $C_{\rm dl}$  of Ni–GA–CP, Fe–GA–CP, and NiFe–GA–CP; (e) overpotentials of various OER catalysts on carbon paper at 10 mA cm<sup>-2</sup>; (f) XRD patterns of NiFe–GA–CP before and after OER; (g) stability tests of NiFe–GA–CP at current densities of 10 and 100 mA cm<sup>-2</sup>; (h) LSV curves of NiFe–GA–CP before and after stability test. All the potentials are reported *versus* RHE.
+
+compared to overpotentials at 10 mA cm $^{-2}$  for reported OER catalysts on carbon paper (Fig. 2(e) and Table S4†) and the majority of OER catalysts on nickel foam (Table S5†). The comparison of the OER performance between NiFe–GA–CP and other electrocatalysts at 100 mA cm $^{-2}$  is listed in Table S6.† The excellent OER performance of NiFe–GA–CP can be attributed to (i) the unique hexagonal prism-shaped with honeycomb structure providing abundant catalytic active sites; (ii) the synergistic effect of Ni and Fe which improves the charge transfer ability $^{21}$  and (iii) favorable formation of reaction intermediate  $O_{ad}$  on NiFe–GA surface. $^{14}$ 
+
+The intact crystalline structure and morphology of NiFe–GA–CP after OER test remain virtually unchanged as presented in Fig. 2(f) and S13,† implying that the intrinsic structure of NiFe–GA–CP is robust. We further examine the stability of NiFe–GA–CP held at current densities of 10 and 100 mA cm<sup>-2</sup> as shown in Fig. 2(g). It can be seen clearly that the overpotentials remain virtually constant at both current densities up to 60 h. After the 60 h stability test, the NiFe–GA–CP exhibits excellent OER
+
+performance analogous to pristine NiFe–GA–CP with an overpotential difference of only  ${\sim}10$  mV (Fig. 2(h)).
+
+It should be noted that the crystalline structure of NiFe-GA-CP is completely lost (Fig. S14 and S15†) and converted into amorphous ultrathin wrinkled 2D nanosheets (Fig. S16†) after the 60 h stability test. X-ray photoelectron (XP) spectra of NiFe-GA-CP before and after the 60 h stability test are shown in Fig. S17.† Detailed peak assignments are listed in Table S7.† In Ni 2p spectra (Fig. S17(a) $\dagger$ ), the binding energies of Ni<sup>2+</sup> 2p (2p<sub>3/</sub>  $_2$  at 856.2 eV,  $2p_{1/2}$  at 873.7 eV) $^{12,22}$  shift to lower energies ( $2p_{3/2}$ at 854.8 eV,  $2p_{1/2}$  at 872.2 eV) after stability test due to destruction of MOF leading to the formation of Ni(OH)2. The peaks with binding energies of 855.8 and 873.2 eV are ascribed to Ni<sup>3+</sup> 2p<sub>3/2</sub> and 2p<sub>1/2</sub>, respectively. These two peaks are observed after the stability test as a result of the electrochemically formed NiOOH.23 In the case of Fe 2p spectra (Fig. S17(b)†), the binding energies at 711.9 eV  $(2p_{3/2})$  and 725.5 eV  $(2p_{1/2})$  in the pristine NiFe-GA confirm the presence of Fe<sup>3+</sup>. After the stability test, the binding energies shift slightly to lower binding
+
+Fig. 3 (a) Calculated density of states for Fe-GA, Ni-GA, and NiFe-GA; (b) partial density of states for (100) plane of NiFe-GA; (c) calculated free energy diagram of the OER process on NiFe-GA; charge density difference of \*O intermediate on (d) NiFe-GA, (e) Fe-GA, and (f) Ni-GA, where the isosurface value is set to  $0.005 \text{ e} \text{ Å}^{-1}$ . Yellow and cyan refer to the positive and negative charges, respectively.
+
+energies ( $2p_{3/2}$  at 711.6 eV and  $2p_{1/2}$  at 725.2 eV). This shift could be attributed to the formation of FeOOH owing to the structural evolution during the stability test.24 Obvious electronic structural changes of O are observed as shown in Fig. S17(c).† The peak at 533.0 eV ascribed to O-H completely vanished after the stability test due to the removal of chemisorbed molecular H<sub>2</sub>O, while the peak at 531.4 eV (M-O-R) shifts to 530.8 eV (M-O-M), demonstrating the possible formation of nickel-iron oxyhydroxide during OER.23
+
+To further probe the distinct catalytic origin of the OER activity observed, in situ electrochemical Raman spectroscopic experiments of NiFe-GA-CP, Ni-GA-CP, and Fe-GA-CP were carried out as shown in Fig. S18† and their band assignments are listed in Table S8.† The band at 487 cm<sup>-1</sup> in the Raman spectra of NiFe-GA-CP (Fig. S18(a)†) can be ascribed to the stretching modes of Fe-O and Ni-OOH.25 At potentials above 1.4 V vs. RHE, the intensity of this band increases due to the overlap of newly formed Ni(III)-O in Ni(III)O(OH) during OER. 26,27 The band at 707 cm<sup>-1</sup> observed in the Raman spectra of Ni-GA-CP can be assigned to  $\nu_{\text{Ni-O}}$ , and the intensity of this band remains unchanged upon applying more positive potentials (Fig. S18(b)†). Intriguingly, the 707 cm<sup>-1</sup> band substantially increases in intensity in the Raman spectra of NiFe-GA-CP at potentials above 1.4 V vs. RHE, which can be mainly attributed to the stretching mode of newly generated FeOOH species.<sup>28,29</sup> The broadband centered at 1061 cm<sup>-1</sup> in the Raman spectra of Ni-GA-CP can be assigned to  $v_{Ni-O}$ . A similar band in the Raman spectra of Fe-GA-CP (Fig. S18(c)†) observed at
+
+potentials above 1.4 V vs. RHE can be associated with "active oxygen" in the oxyhydroxide structure, 30 which is in accordance with the observed FeOOH species at potentials ≥1.4 V vs. RHE for NiFe-GA-CP.
+
+To obtain deep insights into the OER mechanism of NiFe-GA-CP, density functional theory (DFT) calculations were performed to explore the OER pathways on metal active sites (see ESI† for details of computational methods). The optimized MOF structures of Ni-GA, Fe-GA, and NiFe-GA structures are shown in Fig. S19.† The density of states (DOS) is computed to investigate the intrinsic electronic structure of pure Ni-GA, Fe-GA, and NiFe-GA (Fig. 3(a)). The calculated DOS indicates that Ni-GA and Fe-GA are semiconductive with a bandgap around the Fermi level  $(E_{\rm F})$ . In contrast, NiFe-GA exhibits a conductorlike electronic property with an increased electronic density around the  $E_F$ . The increased electronic density originates from the co-presence of Fe and Ni atoms, indicative of higher electrical conductivity and faster charge transport in NiFe-GA.
+
+Moreover, as shown in Fig. 1(e) and S6,† the (100) plane is the most exposed surface of Ni-GA, Fe-GA, and NiFe-GA structures. Therefore, the (100) plane was constructed to expose surface metal atoms as catalytic active sites for OER. The atomic positions of the (100) surface were optimized by DFT calculation to achieve a stable structure. The calculated partial density of states (PDOS) of (100) NiFe-GA surface structure (Fig. 3(b)) shows that overlaps occur between Ni<sub>3d</sub> and O<sub>2p</sub> as well as Fe<sub>3d</sub> and O<sub>2p</sub>, suggesting that strong interactions among Ni, Fe, and O atoms could enable efficient OER.
+
+A four-step OER mechanism in alkaline conditions31 was proposed including \* (\* represents an active site on the catalyst surface), \*OH, \*O, and \*OOH surface species (Fig. S20† for Fe-GA, Fig. S21† for Ni-GA, and Fig. S22† for NiFe-GA). The calculated free energy of each OER step from the corresponding structure is listed in Table S9.† Fig. 3(c), S23 and S24† display the calculated free energy diagrams of OER at 1.23 V vs. RHE following the proposed mechanism for NiFe-GA, Fe-GA, and Ni-GA, respectively. According to calculations, the deprotonation step from OH\* to O\* has the largest energy barrier to overcome for Fe-GA, Ni-GA, and NiFe-GA. This step can be considered as the potentialdetermining step with a limiting potential of 0.27 eV for NiFe-GA, 1.71 eV for Fe-GA, and 1.63 eV for Ni-GA. The calculation results establish that NiFe-GA facilitates OER via an activation barrier greatly lower than those of single metal MOFs. To further explore why dual Ni-Fe atoms possess the lowest limiting potential, the charge density difference of \*O intermediates for Fe-GA, Ni-GA, and NiFe-GA were calculated as:  $\Delta \rho = \rho_{sur\text{-O}} - \rho_{sur} - \rho_{O}$ , where  $\rho_{sur\text{-O}}$ ,  $\rho_{sur}$ , and  $\rho_{O}$  represent the charge density of adsorbed oxygen (O\*) on the catalyst surface, isolated catalyst surface, and isolated O atom, respectively. \*O intermediate was chosen as the activity descriptor because \*O intermediates have the highest activation energy barriers in the free energy diagrams of all three catalysts. As shown in Fig. 3(d), the O atom was anchored on the NiFe-GA surface by both Ni and Fe atoms. Combined with Bader charge analysis,  $^{32}$  there are totally -0.75 charge transferred from Fe and Ni atoms to the adsorbed O atom. In contrast, -0.49 charge and -0.32 charge were transferred to the adsorbed O atom on Fe-GA (Fig. 3(e)) and Ni-GA (Fig. 3(f)), respectively. The calculated results show that Fe and Ni atoms synergistically coordinate to O atoms to achieve a stable \*O intermediate and further minimize the activation barrier of \*OH deprotonation to form \*O, which is consistent with the experimental observation that NiFe-GA displays the best OER performance.
+
+#### Conclusion
+
+In conclusion, we demonstrate the successful solvothermal synthesis of NiFe–GA MOF on carbon paper, which possesses a unique hexagonal prism-shaped with honeycomb structure. The NiFe–GA–CP exhibits the best OER performance with overpotentials of 185 mV and 236 mV at 10 mA cm<sup>-2</sup> and 100 mA cm<sup>-2</sup> in 1.0 M KOH, respectively, as compared to reported OER catalysts on carbon paper. *In situ* electrochemical and DFT calculation results reveal that the presence of Fe facilitates the charge transfer and the formation of O<sub>ad</sub> intermediates, and the catalytic active sites of Ni and Fe contribute to the superior OER performance of NiFe–GA–CP. We anticipate that the present study will stimulate extensive exploration of new types of MOFs as electrocatalysts for water splitting.
+
+#### Conflicts of interest
+
+There are no conflicts to declare.
+
+## Acknowledgements
+
+This work was conducted by the Fundamental Research Center of Artificial Photosynthesis (FReCAP), financially supported by National Natural Science Foundation of China (NSFC) under grant no. 22088102. Financial support from the Fundamental Research Funds for the Central Universities of China (DUT21GI209, DUT21YG103), and the State Key Laboratory of Physical Chemistry of Solid Surfaces, Xiamen University (201812), the State Key Laboratory of Fine Chemicals, Dalian University of Technology (KF 2002) is gratefully acknowledged. E. C. M. T. would like to express his gratitude to the Hong Kong (HK) Research Grants Council (RGC) and the European Union (EU) for supporting the software packages via the EU/RGC Co-Funding Mechanism (RGC: E-HKU704/19), the Early Career Scheme (RGC: 27301120) for funding our research activities, as well as the RGC-CAS Joint Laboratory Funding Scheme (RGC: JLFS/P-704/18) for upgrading the HKU-CAS Joint Laboratory on New Materials. X. G. would like to recognize the High-Performance Computing (HPC) infrastructure maintained by the Information Technology Services (ITS) at the University of Hong Kong (HKU). The authors thank Prof. Licheng Sun for the fruitful discussions.
+
+#### References
+
+- L. An, C. Wei, M. Lu, H. Liu, Y. Chen, G. G. Scherer,
+   A. C. Fisher, P. Xi, Z. J. Xu and C. H. Yan, Adv. Mater.,
+   2021, 33, 2006328.
+- 2 S. Roy, Z. Huang, A. Bhunia, A. Castner, A. K. Gupta, X. Zou and S. Ott, *J. Am. Chem. Soc.*, 2019, **141**, 15942–15950.
+- 3 J. Liang, X. Gao, B. Guo, Y. Ding, J. Yan, Z. Guo, E. C. M. Tse and J. Liu, *Angew. Chem., Int. Ed.*, 2021, **60**, 12770–12774.
+- 4 Z. Fang, L. Peng, Y. Qian, X. Zhang, Y. Xie, J. J. Cha and G. Yu, J. Am. Chem. Soc., 2018, 140, 5241–5247.
+- 5 D. Zhou, P. Li, X. Lin, A. McKinley, Y. Kuang, W. Liu, W. F. Lin, X. Sun and X. Duan, *Chem. Soc. Rev.*, 2021, 50, 8790–8817.
+- 6 W. Moschkowitsch, K. Dhaka, S. Gonen, R. Attias, Y. Tsur, M. Caspary Toroker and L. Elbaz, ACS Catal., 2020, 10, 4879–4887.
+- 7 J. Du, F. Li and L. Sun, Chem. Soc. Rev., 2021, 50, 2663-2695.
+- 8 J. Liu and C. Wöll, Chem. Soc. Rev., 2017, 46, 5730-5770.
+- 9 H. Furukawa, K. E. Cordova, M. O'Keeffe and O. M. Yaghi, *Science*, 2013, **341**, 1230444.
+- 10 S. Zhao, Y. Wang, J. Dong, C.-T. He, H. Yin, P. An, K. Zhao, X. Zhang, C. Gao, L. Zhang, J. Lv, J. Wang, J. Zhang, A. M. Khattak, N. A. Khan, Z. Wei, J. Zhang, S. Liu, H. Zhao and Z. Tang, Nat. Energy, 2016, 1, 16184.
+- 11 S. Zhao, C. Tan, C.-T. He, P. An, F. Xie, S. Jiang, Y. Zhu, K.-H. Wu, B. Zhang, H. Li, J. Zhang, Y. Chen, S. Liu, J. Dong and Z. Tang, *Nat. Energy*, 2020, 5, 881–890.
+- 12 Q. Qian, Y. Li, Y. Liu, L. Yu and G. Zhang, *Adv. Mater.*, 2019, 31, 1901139
+- 13 C. Alonso, M. Marti, C. Barba, M. Lis, L. Rubio and L. Coderch, *J. Photochem. Photobiol.*, *B*, 2016, **156**, 50–55.
+
+- 14 S. Sharma, D. Mittal, A. K. Verma and I. Roy, *ACS Appl. Bio Mater.*, 2019, 2, 2092–2101.
+- 15 Y. Zheng, X. Li, C. Dong, L. Ding, H. Huang, T. Zhang, Y. Chen and R. Wu, *Adv. Funct. Mater.*, 2021, 2107529.
+- 16 R. K. Feller and A. K. Cheetham, *Solid State Sci.*, 2006, **8**, 1121–1125.
+- 17 Z. Kang, L. Fan and D. Sun, *J. Mater. Chem. A*, 2017, 5, 10073–10091.
+- 18 Z. Bao, J. Wang, Z. Zhang, H. Xing, Q. Yang, Y. Yang, H. Wu, R. Krishna, W. Zhou, B. Chen and Q. Ren, *Angew. Chem., Int. Ed.*, 2018, 57, 16020–16025.
+- 19 S. Dresp, F. Dionigi, M. Klingenhof, T. Merzdorf, H. Schmies, J. Drnec, A. Poulain and P. Strasser, ACS Catal., 2021, 11, 6800–6809
+- 20 V. Maruthapandian, S. Kumaraguru, S. Mohan, V. Saraswathy and S. Muralidharan, *ChemElectroChem*, 2018, 5, 2795–2807.
+- 21 M. W. Louie and A. T. Bell, *J. Am. Chem. Soc.*, 2013, 135, 12329–12337.
+- 22 J. Li, W. Huang, M. Wang, S. Xi, J. Meng, K. Zhao, J. Jin, W. Xu, Z. Wang, X. Liu, Q. Chen, L. Xu, X. Liao, Y. Jiang,
+
+- K. A. Owusu, B. Jiang, C. Chen, D. Fan, L. Zhou and L. Mai, *ACS Energy Lett.*, 2018, 4, 285–292.
+- 23 L. Trotochaud, J. K. Ranney, K. N. Williams and S. W. Boettcher, *J. Am. Chem. Soc.*, 2012, **134**, 17253–17261.
+- 24 K. Wang, H. Du, S. He, L. Liu, K. Yang, J. Sun, Y. Liu, Z. Du, L. Xie, W. Ai and W. Huang, Adv. Mater., 2021, 33, 2005587.
+- 25 M. Legodi and D. Dewaal, Dyes Pigm., 2007, 74, 161-168.
+- 26 Z. Qiu, C.-W. Tai, G. A. Niklasson and T. Edvinsson, *Energy Environ. Sci.*, 2019, 12, 572–581.
+- 27 X. Bo, R. K. Hocking, S. Zhou, Y. Li, X. Chen, J. Zhuang, Y. Du and C. Zhao, *Energy Environ. Sci.*, 2020, **13**, 4225–4237.
+- 28 Q. Han, Y. Luo, J. Li, X. Du, S. Sun, Y. Wang, G. Liu and Z. Chen, *Appl. Catal.*, *B*, 2022, **304**, 120937.
+- 29 L. Bai, S. Lee and X. Hu, Angew. Chem., Int. Ed., 2021, 60, 3095–3103.
+- 30 W. Cheng, X. Zhao, H. Su, F. Tang, W. Che, H. Zhang and Q. Liu, *Nat. Energy*, 2019, 4, 115–122.
+- 31 P. Liao, J. A. Keith and E. A. Carter, *J. Am. Chem. Soc.*, 2012, **134**, 13296–13309.
+- 32 W. Tang, E. Sanville and G. Henkelman, J. Phys.: Condens. Matter, 2009, 21, 084204.

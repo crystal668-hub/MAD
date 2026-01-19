@@ -11,8 +11,7 @@ MAD/
 ├── config/              # 配置文件目录
 │   └── config.yaml     # 主配置文件
 ├── data/               # 数据目录
-│   ├── raw/           # 原始TSV数据文件
-│   ├── processed/     # 提取出来的abstract chunks（txt格式）
+│   ├── raw/           # 原始Markdown文献数据
 │   └── chroma_db/     # 向量数据库（运行时生成）
 ├── database/          # 数据库模块
 │   ├── rag_system.py  # RAG系统实现
@@ -45,17 +44,13 @@ MAD/
 ## 核心功能
 
 ### 1. 数据预处理（database/text_processor.py）
-- 从TSV文件提取abstract列内容（整合后的文本处理器）
-- **自动文本清洗**：去除HTML标签、多余空格、编码错误、引用标记等
-- 自动添加索引序号
-- 每行abstract作为一个独立chunk
-- 输出为txt格式供RAG系统使用
+- 加载Markdown文献并进行分块
+- **自动文本清洗**：去除无关段落（如致谢与参考文献）
 
 ### 2. 数据库建立（database/）
-- 使用LlamaIndex对处理后的chunks进行索引构建
+- 使用LlamaIndex对Markdown文档进行分块与索引构建
 - 采用Chroma向量数据库存储嵌入向量
 - 支持四个不同的embedding模型
-- 直接加载预切分的chunks，无需二次分割
 
 ### 3. Agent Definition (agents/)
 - **Agent 1**: Based on OpenAI GPT-5.2
@@ -118,14 +113,12 @@ DEEPSEEK_API_KEY=your_deepseek_api_key
 ```
 
 5. 准备数据
-将TSV格式的化学文献数据放入 `data/raw/` 目录，确保包含`abstract`列
+将Markdown格式的化学文献数据放入 `data/raw/` 目录（可按反应类型分子目录）
 
-6. 处理数据
+6. 构建向量数据库
 ```bash
-# 提取abstract并切分chunks（使用整合后的文本处理器）
-python -m database.text_processor
+python build_vector_db.py
 ```
-这会在 `data/processed/` 目录生成处理后的txt文件。
 
 ## 使用方法
 
@@ -177,10 +170,9 @@ for step in trajectory.steps:
 
 ### 完整流程
 
-1. **数据预处理**
+1. **构建向量数据库**
 ```bash
-# 处理data/raw下的TSV文件，提取abstract列
-python -m database.text_processor
+python build_vector_db.py
 ```
 
 2. **Run debate system**

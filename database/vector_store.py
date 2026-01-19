@@ -6,16 +6,26 @@
 """
 
 import os
+from datetime import datetime
 from typing import List, Dict, Optional, Any, Callable
 import chromadb
 from chromadb.config import Settings
 from pathlib import Path
+from utils.logger import Logger
+
+db_log_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+db_log_file = Path("./logs/db_log") / f"vector_store_{db_log_timestamp}.log"
+logger = Logger.get_logger(
+    name=f"MAD.DB.VectorStore.{db_log_timestamp}",
+    log_file=str(db_log_file),
+    level="INFO"
+)
 
 
 class VectorStore:
     """
     向量数据库管理类
-    负责Chroma向量数据库的初始化、文档添加、相似度检索等操作
+    负责Chroma向量数据库的初始化、文档添加、文档删除、相似度检索等操作
     """
     
     def __init__(
@@ -67,7 +77,7 @@ class VectorStore:
                     name=self.collection_name,
                     metadata={"hnsw:space": self.distance_metric}
                 )
-                print(f"[OK] 初始化向量数据库 (使用自定义向量模型)")
+                logger.info("[OK] 初始化向量数据库 (使用自定义向量模型)")
             else:
                 # 使用提供的embedding_function
                 collection = self.client.get_or_create_collection(
@@ -75,14 +85,14 @@ class VectorStore:
                     embedding_function=self.embedding_function,
                     metadata={"hnsw:space": self.distance_metric}
                 )
-                print(f"[OK] 初始化向量数据库 (使用embedding_function)")
+                logger.info("[OK] 初始化向量数据库 (使用embedding_function)")
             
-            print(f"  集合名称: {self.collection_name}")
-            print(f"  存储路径: {self.persist_directory}")
-            print(f"  当前文档数: {collection.count()}")
+            logger.info(f"  集合名称: {self.collection_name}")
+            logger.info(f"  存储路径: {self.persist_directory}")
+            logger.info(f"  当前文档数: {collection.count()}")
             
         except Exception as e:
-            print(f"[ERROR] 初始化向量数据库失败: {str(e)}")
+            logger.error(f"[ERROR] 初始化向量数据库失败: {str(e)}")
             raise
         
         return collection
@@ -125,7 +135,7 @@ class VectorStore:
                     ids=batch_ids
                 )
             
-            print(f"[OK] 添加 {len(documents)} 个文档到集合 '{self.collection_name}'")
+            logger.info(f"[OK] 添加 {len(documents)} 个文档到集合 '{self.collection_name}'")
             return
         
         # 自动生成ID（如果未提供）
@@ -139,7 +149,7 @@ class VectorStore:
             ids=ids
         )
         
-        print(f"成功添加 {len(documents)} 个文档到向量数据库")
+        logger.info(f"成功添加 {len(documents)} 个文档到向量数据库")
 
     def update_documents(
         self,
@@ -161,7 +171,7 @@ class VectorStore:
             metadatas=metadatas
         )
         
-        print(f"成功更新 {len(ids)} 个文档")
+        logger.info(f"成功更新 {len(ids)} 个文档")
             
     def delete_documents(self, ids: List[str]) -> None:
         """
@@ -171,7 +181,7 @@ class VectorStore:
             ids: 要删除的文档ID列表
         """
         self.collection.delete(ids=ids)
-        print(f"成功删除 {len(ids)} 个文档")
+        logger.info(f"成功删除 {len(ids)} 个文档")
 
     def query(
         self,
@@ -272,7 +282,7 @@ class VectorStore:
         """
         self.client.delete_collection(name=self.collection_name)
         self.collection = self._get_or_create_collection()
-        print(f"集合 {self.collection_name} 已重置")
+        logger.info(f"集合 {self.collection_name} 已重置")
     
     def get_all_documents(self) -> Dict:
         """

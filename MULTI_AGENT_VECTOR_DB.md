@@ -41,7 +41,6 @@ python build_vector_db.py
 if __name__ == "__main__":
     build_vector_database(
         config_path="./config/config.yaml",
-        use_processed_data=True,
         agent_name="agent2"  # 改为agent2、agent3或agent4
     )
 ```

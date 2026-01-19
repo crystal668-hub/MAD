@@ -17,7 +17,7 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 from agents.agent_config import AgentConfig
-from database.openai_embedder import MultiModelEmbedder
+from database.embedder import MultiModelEmbedder
 
 
 def test_embedding_selection():

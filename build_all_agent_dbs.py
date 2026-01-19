@@ -21,7 +21,6 @@ from build_vector_db import build_vector_database
 
 def build_all_agent_databases(
     config_path: str = "./config/config.yaml",
-    use_processed_data: bool = True,
     agent_names: list = None
 ):
     """
@@ -29,7 +28,6 @@ def build_all_agent_databases(
     
     Args:
         config_path: 配置文件路径
-        use_processed_data: 是否使用processed目录的数据
         agent_names: Agent名称列表（默认为所有agent）
     """
     if agent_names is None:
@@ -54,7 +52,6 @@ def build_all_agent_databases(
         try:
             build_vector_database(
                 config_path=config_path,
-                use_processed_data=use_processed_data,
                 agent_name=agent_name
             )
             successful.append(agent_name)
@@ -82,6 +79,5 @@ def build_all_agent_databases(
 if __name__ == "__main__":
     # 批量构建所有Agent的向量数据库
     build_all_agent_databases(
-        config_path="./config/config.yaml",
-        use_processed_data=True
+        config_path="./config/config.yaml"
     )

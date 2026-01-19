@@ -1,0 +1,168 @@
+---
+source: Zhou 等 - 2025 - Synergistic Effect of Single Atomic Ce Sites and CeO2 Nanoparticles for Boosting Oxygen R.pdf
+tool: marker
+duration: 11.502s
+generated: 2026-01-09T14:30:34.572857Z
+---
+
+# **Synergistic Effect of Single Atomic Ce Sites and CeO2 Nanoparticles for Boosting Oxygen Reduction Reaction**
+
+*Han Zhou, Heng Liu, Yanyan Sun,\* Luozhen Jiang, Jiamin Xiao, Handong Zhang, Haijiao Xie, Lina Li,\* Shuangyin Wang,\* and Lei Han\**
+
+**Fe-based single-atomic catalysts (SACs) are considered the most promising non-precious oxygen reduction reaction (ORR) catalysts, whereas further development is largely hindered due to the unavoidable Fenton reaction during the ORR process. Herein rare-metal Ce-based SACs consisting of single-atomic Ce sites and CeO2 nanoparticles are constructed by a facile gas-phase migration strategy. Theoretical calculation results demonstrate that the synergistic effect of the introduction of CeO2 and the coordination structure change of single-atomic sites is beneficial for the decreased energy barrier of the hydrogenation step of \*OH over the single-atomic Ce sites, which contributes to the enhanced ORR performance with positive half-wave potential of 0.88 V in 0.1 m KOH. Moreover, the assembled zinc-air battery can deliver a high power density of 107 mW cm<sup>−</sup><sup>2</sup> and remarkable long-term stability of 400 cycles at the current density of 5 mA cm<sup>−</sup>2. This work provides a new insight for the design and construction of rare-earth-metal-based SACs for the ORR.**
+
+H. Zhou, H. Liu, J. Xiao, H. Zhang, L. Han College of Materials Science and Engineering Hunan Joint International Laboratory of Advanced Materials and Technology for Clean Energy
+
+Hunan University
+
+Changsha, Hunan 410082, China E-mail: [hanlei@hnu.edu.cn](mailto:hanlei@hnu.edu.cn)
+
+Y. Sun
+
+School of Materials Science and Engineering
+
+Central South University Changsha, Hunan 410083, China E-mail: [yanyan.sun@csu.edu.cn](mailto:yanyan.sun@csu.edu.cn)
+
+L. Jiang, L. Li
+
+Shanghai Synchrotron Radiation Facility Shanghai Advanced Research Institute
+
+Shanghai 201210, China E-mail: [lilina@sinap.ac.cn](mailto:lilina@sinap.ac.cn)
+
+H. Xie
+
+Hangzhou Yanqu Information Technology Co. Ltd
+
+Hangzhou, Zhejiang 310003, China
+
+S. Wang
+
+State Key Laboratory of Chem/Bio-Sensing and Chemometrics College of Chemistry and Chemical Engineering
+
+Hunan University
+
+Changsha, Hunan 410082, China E-mail: [shuangyinwang@hnu.edu.cn](mailto:shuangyinwang@hnu.edu.cn)
+
+The ORCID identification number(s) for the author(s) of this article can be found under <https://doi.org/10.1002/aenm.202404689>
+
+**DOI: 10.1002/aenm.202404689**
+
+## **1. Introduction**
+
+Zinc-air batteries (ZABs) have gained widespread attention owing to their high theoretical energy density, low cost, and environmental friendliness.[\[1–3\]](#page-6-0) The large-scale commercial application of ZABs is largely dependent upon the development of efficient catalysts for oxygen reduction reaction (ORR) because of the sluggish reaction kinetics during the ORR process.[\[4–6\]](#page-6-0) Presently, noble-metalbased nanostructured catalysts have been widely recognized as advanced ORR catalysts with high efficacy and selectivity, whereas their inherent drawbacks, such as low reserves, high cost, and inadequate tolerance to methanol, have significantly restricted their further development in commercial applications.[\[7,8\]](#page-6-0) In this regard, transition-metal nitrogen-doped carbon-based single-atomic catalysts
+
+(M-N-C SACs, M = Fe, Co, Cu, Ni, etc.) have been widely investigated and have shown outstanding ORR activity due to their unique electronic structure and ≈100% atom utilization.[\[9–14\]](#page-6-0) Specially, Fe-N-C SACs have been considered to be one of the most promising ORR catalyst alternatives to commercial Pt/C from the viewpoint of high catalytic activity,[\[15\]](#page-6-0) whereas the single-atomic Fe sites can react with the ORR intermediate H2O2 by Fenton reaction to produce reactive oxygen species, which seriously affect the stability of the catalyst.[\[16,17\]](#page-6-0) In addition, other types of the reported M-N-C SACs exhibit inferior catalytic performance to Fe-N-C SACs.[\[18–21\]](#page-6-0) Therefore, it remains necessary to design and synthesize a new type of iron-free SACs with superior catalytic performance toward the ORR.
+
+In recent years, rare-earth-metal-based SACs have shown great potential application in electrocatalysis due to the unique electronic structures from the spin-orbit coupling of 4f orbitals and valence orbitals.[\[22–24\]](#page-6-0) In particular, Ce has a flexible redox pair (Ce3<sup>+</sup>/Ce4<sup>+</sup>) similar to Fe, which is beneficial to effectively promote oxygen adsorption and thus improve the ORR performance.[\[25–27\]](#page-6-0) Till now, considerable efforts have been made to design advanced Ce-N-C SACs catalysts for promoting the ORR process through different strategies, including optimizing porous structure optimization, regulating spin-state, and tuning local coordination microenvironment through heteroatom.[\[28–33\]](#page-6-0) For instance, Li et al. reported the synthesis of single-atomic Ce sites anchored on N-doped porous carbon nanowires, which
+
+exhibited good ORR activity and stability under both acidic and alkaline conditions.[\[25\]](#page-6-0) Wu's group fabricated single-atomic Ce sites embedded into a hierarchically macro-meso-microporous N-doped carbon as an ORR catalyst.[\[30\]](#page-6-0) Very recently, Du's group reported a novel strategy for modulating the electronic structures of single-atomic Ce sites embedded into P, S, and N co-doped hollow carbon matrix through synergistic long-range interactions of P and S.[\[34\]](#page-7-0) In addition, CeO2 has been reported as a cocatalyst and supports to elimination of the formation of free radicals and promotes oxygen adsorption and activation as well as electron transfer during the catalytic process.[\[29,35\]](#page-6-0) Inspired by the discussions above, the coexistence of single-atomic Ce sites and CeO2 nanoparticles is expected to significantly boost the catalytic performance through the synergistic effect of their respective advantages. Nevertheless, there are rare relevant reports probably due to the lack of appropriate synthetic methods, and the underlying catalytic mechanism needs to be further investigated.
+
+In the present work, we have developed a two-step pyrolysis strategy that combines direct pyrolysis and gas phase migration process for the construction of Ce-based SACs catalysts consisting of single-atomic Ce sites and CeO2 nanoparticles, which has been certified by spherical aberration-corrected high-angle annular dark-field scanning transmission electron microscopy and synchrotron X-ray absorption spectroscopy. Moreover, the theoretical calculation results reveal that the synergistic effect of the introduction of CeO2 and the coordination structure of singleatomic sites results in the decreased energy barrier of the hydrogenation step of \*OH during the ORR process. The optimal catalyst exhibits superior catalytic ORR performance to commercial Pt/C with half-wave potential of 0.88 V in 0.1 m KOH and the assembled ZABs deliver high power density and excellent longterm stability.
+
+## **2. Results and Discussion**
+
+The synthetic process of Ce-based SACs involves a two-step pyrolysis process, which is schemed in **Figure 1**[a.](#page-2-0) Detailly, the resultant mixture of the pre-synthesized g-C3N4 and glucose as carbon sources, Zn (NO3)2 as a pore-forming agent, and CeCl3 was directly pyrolyzed under Ar atmosphere with acid pickling (Step I), where the resultant sample was named as CeNC-D. After that, by gas-phase migration strategy (Step II), the resultant CeNC-D was second pyrolyzed in the presence of CeO2 nanoparticles, where the resultant sample was named CeNC-M. As observed, there is a rough surface with worm-like cracks for the resultant CeNC-D (Figure S1b,c, Supporting Information). The transmission electron microscopy (TEM) result shows the presence of few nanoparticles on the surface of carbon (Figure S1d, Supporting Information), which can be confirmed to be Ce nanoclusters since there are the obvious lattice fringes with the interplanar spacing of 0.275 nm assigned to the (110) crystal plane of Ce from the high-resolution TEM (Figure S1e, Supporting Information). Further, spherical aberration-corrected highangle annular dark-field scanning transmission electron micrograph (AC-HADDF-STEM) result exhibits the presence of singleatomic Ce sites (Figure S1f, Supporting Information). After the introduction of CeO2 nanoparticles during the pyrolysis process, no obvious change in morphologic structures can be observed whereas more nanoparticles were anchored on the surface of the carbon matrix (Figure [1b,c\)](#page-2-0), which can be confirmed to be CeO2 nanoparticles because of the obvious lattice fringes with the interplanar spacing of 0.318 nm assigned to the (111) crystal plane of CeO2 (Figure [1d\)](#page-2-0). Meanwhile, the energy-dispersive X-ray spectrometer (EDS) element mapping images indicate the uniform distribution of C, N, O, and Ce within the resultant catalyst (Figure [1e,f](#page-2-0) ). Careful observation demonstrates that the O species are mostly distributed around the Ce species and there are also some separately dispersed Ce species, which can be further confirmed by the AC-HADDF-STEM result (Figure [1g\)](#page-2-0). These results indicate the successful construction of Ce-based SACs with the coexistence of single-atomic Ce sites and CeO2 nanoparticles. Further, the content of Ce was determined by the inductively coupled plasma-mass spectra (ICP-MS) to be 3.10 and 4.98 wt% for the resultant CeNC-D and CeNC-M (Table S1, Supporting Information). The increase in the Ce content also indicates the successful loading of CeO2, proving the effectiveness of the gas-phase migration strategy.
+
+The crystal structures of the resultant catalysts were analyzed by X-ray diffraction (XRD). As shown, there are several diffraction peaks that contributed to CeO2 except the typical broad diffraction peak of amorphous carbon within the resultant CeNC-M-0.6 catalyst (**Figure 2**[a\)](#page-3-0). The characteristic diffraction peaks at ≈28.5°, 33.1°, 47.5°, and 56.3° correspond to (111), (200), (220), and (311) planes of the CeO2, respectively. In contrast, CeO2 cannot be observed in the resultant CeNC-D-0.6 and CeNC-0.6 catalyst. Differently, there are two kinds of Ce species of CeOCl and CeNCl within the resultant CeNC-D-0.6-WA without acid pickling, which also rules out that the removal of CeO2 is caused by acid pickling. Unexpectedly, only weak diffraction peaks of CeO2 can be observed for the resultant CeNC-M-0 (Figure S2, Supporting Information), which was prepared under the same condition of CeNC-M-0.6 except for the absence of CeCl3 during the first pyrolysis. This result indicates the important role of single-atomic Ce sites for the subsequent loading of CeO2 nanoparticles. The Raman spectra of all the resultant catalysts display two peaks at around 1320 and 1588 cm<sup>−</sup><sup>1</sup> assigned to the D band and G band with similar peak intensity ratios (Figure [2b\)](#page-3-0), indicating that the introduction of Ce species has no significant influence in structural defects. In addition, clear IV-type isotherms and an H4-type hysteresis loop can be observed from the N2 sorption curves for the resultant CeNC-M-0.6 and CeNC-D-0.6 catalyst (Figure S3a, Supporting Information), suggesting the existence of both micropores and mesopores, which can be also confirmed by the pore size distribution (Figure S3b,c, Supporting Information). Besides, the specific surface area and total pore volume of the resultant CeNC-M-0.6 can be calculated to be 630.731 m<sup>2</sup> g<sup>−</sup><sup>1</sup> and 0.796 cm<sup>3</sup> g<sup>−</sup>1, which are much higher than that of CeNC-D-0.6 (42.377 m<sup>2</sup> g<sup>−</sup>1, 0.245 cm3 g <sup>−</sup>1) (Table S2, Supporting Information). These results indicate that the introduction of CeO2 leads to an increase in the surface area, which is beneficial to expose more catalytic active sites and promote the occurrence of ORR.
+
+X-ray photoelectron spectroscopy (XPS) was used to probe the elemental composition and chemical state of the resultant catalyst. The survey spectra of XPS indicate the presence of C, N, O, and Ce within the resultant CeNC-M-0.6 and CeNC-D-0.6 catalyst (Figure S4a, Supporting Information). The HR XPS spectrum of C 1s can be deconvoluted into three peaks of 284.8, 286.3, and 288.2 eV assigned to C═C/C─C, C─N, and C═O
+
+<span id="page-2-0"></span>**Figure 1.** a) Schematic diagram of a synthetic procedure of CeNC-M. b) FESEM, c) TEM, d) HRTEM, e,f) the corresponding elemental mappings, and g) AC-HAADF-STEM images of the resultant CeNC-M-0.6.
+
+(Figure S4b, Supporting Information), respectively.[\[36\]](#page-7-0) Meanwhile, the HR XPS spectrum of N 1s can be fitted into five peaks at 398.4, 399.1, 400.4, 401.4, and 402.3 eV assigned to pyridinic N, Ce-N, pyrrolic N, graphitic N, and oxidized N (Figure S4c, Supporting Information), respectively.[\[37\]](#page-7-0) Moreover, there is a proportion of pyridinic N and graphitic N within the resultant CeNC-M-0.6 catalyst compared to CeNC-D-0.6. It is usually considered that pyridinic N is the main nitrogen species that forms singleatomic metal sites,[\[38,39\]](#page-7-0) and graphitic N is beneficial to promote the reaction kinetics of the ORR and thus lower the activation energy.[\[40,41\]](#page-7-0) In addition, the XPS spectrum of Ce 3d can be deconvoluted into eight peaks (Figure [2c\)](#page-3-0),[\[25\]](#page-6-0) where the peaks located at ≈905 and ≈886 eV belong to Ce<sup>3</sup><sup>+</sup> whereas other peaks belong to Ce4<sup>+</sup>. [\[30\]](#page-6-0) Obviously, there is a positive shift of ≈0.7 eV for the Ce 3d peak of CeNC-M-0.6 compared to that of CeNC-D-0.6, suggesting the charge density change of single-atomic Ce sites after the introduction of CeO2. To further determine the electronic structure and coordination environment around Ce sites in the resultant catalyst, X-ray absorption spectroscopy (XAS) was performed. It can be observed that there is a single peak at around 5726 eV for the resultant CeNC-D-0.6 catalyst due to the electronic excitation of the Ce3<sup>+</sup> 2p3/2 state to the localized 5d state at the Ce L3-edge (Figure [2d\)](#page-3-0),[\[31,42\]](#page-6-0) whereas CeO2 possesses two characteristic peaks at 5732.5 and 5739.5 eV, which are assigned to the superposition of two final states of Ce. Differently, the resultant CeNC-M-0.6 has two well-separated peaks at around 5727 and 5738 eV, where the former peak is similar to Ce3<sup>+</sup> at 5276 eV, and the latter peak may arise from oscillation after a whiteline peak due to the difference of coordination structure or the presence of CeO2, which can be well supported by the XRD and AC-HADDF-STEM results. In addition, there is a positive shift in the adsorption edge of Ce after the introduction of CeO2, implying an increase in the average valence of Ce within CeNC-M-0.6 compared to CeNC-D-0.6, This result suggests that the introduction of CeO2 causes the electron redistribution of single-atomic Ce sites. Besides, there is a strong peak at around 1.50 Å in the FT-EXAFS spectra for the resultant CeNC-D-0.6 and CeNC-M-0.6 (Figure [2e\)](#page-3-0), which has been reported to be attributed to Ce−N/O
+
+<span id="page-3-0"></span>**Figure 2.** a) XRD patterns of the resultant CeNC-M-0.6, CeNC-D-0.6, CeNC-0.6, and CeNC-D-0.6-WA. b) Raman spectra of the resultant NC, CeNC-0.6, CeNC-M-0.6, and CeNC-D-0.6. c) high-resolution XPS spectra of Ce 3d. d) Ce L3-edge X-ray absorption near-edge structure spectra (XANES) and e) Fourier transform extended X-ray absorption fine structure (FT-EXAFS) spectra of the resultant CeNC-M-0.6, CeNC-D-0.6, and CeO2. f) The corresponding EXAFS R-space fitting curves of the CeNC-M-0.6.
+
+scattering.[\[25,34\]](#page-6-0) The average coordination numbers of Ce-N and Ce-O within CeNC-0.6 are fitted to be 4 and 1, respectively, as shown in Figure 2f and Table S5 (Supporting Information).
+
+The ORR performance of the resultant catalysts was evaluated using a typical three-electrode configuration in O2-saturated 0.1 m KOH. As observed, there is a distinct cathodic redox peak in O2-saturated 0.1 m KOH whereas no obvious cathodic peak in N2-saturated 0.1 m KOH for the resultant CeNC-M-0.6 catalyst (Figure S6, Supporting Information), indicating the significant ORR activity. Moreover, the ORR activity shows an increase trend with increasing the addition amount of Ce precursor whereas excessive addition leads to decreased ORR activity (**Figure 3**[a\)](#page-4-0), which may be attributed to the fact that the excessive addition of Ce precursor also results in the decreased electrochemical active surface area (ECSA) (Figure S7, Supporting Information). Among them, the resultant CeNC-M-0.6 catalyst exhibits the best ORR activity with a more positive onset potential (Eonset = 0.98 V) and half-wave potential (E1/2 = 0.88 V) than CeNC-M-0 (0.90 V, 0.80 V), CeNC-M-0.2 (0.93 V, 0.81 V), CeNC-M-1.0 (0.95 V, 0.84 V), even better than Pt/C (0.97 V, 0.85 V) and most of nonprecious ORR catalysts reported (Table S6, Supporting Information). Meanwhile, in order to investigate the effect of different preparation strategies on the ORR performance, we also prepared CeNC-D-0.6 without secondary pyrolysis in the absence of CeO2 and CeNC-0.6 prepared with direct one-step pyrolysis in the presence of CeO2. As shown, the resultant CeNC-M-0.6 catalyst has significantly better ORR activity than both CeNC-D-0.6 and CeNC-0.6 and also shows the lowest Tafel slope value of 55.7 mV dec<sup>−</sup><sup>1</sup> (Figure [3b;](#page-4-0) Figure S8, Supporting Information), indicating the fast kinetics process. Besides, the ORR performance of the catalyst, heat-treated CeNC-D-0.6 at 1000 °C without gas phase migration of CeO2, was also investigated and compared with CeNC-M-0.6 (Figure S9, Supporting Information), which also shows the improved ORR activity over CeNC-M-0.6. The number of electrons transferred (n) during the ORR process was calculated based on the Koutecky–Levich (K–L) equation by measuring LSV curves at different rotation speeds from 400 to 1600 rpm (Figure [3c\)](#page-4-0). As observed, there is a good linearity at the potential range from 0.2 to 0.4 V and the n value of CeNC-M-0.6 is calculated to be ≈3.74, approaching the theoretical value of the four-electron ORR process. The rotating ring-disk electrode (RRDE) was further used to quantitatively investigate the n and H2O2 selectivity. In the potential range from 0.2 to 0.8 V, the H2O2 selectivity of CeNC-M-0.6 is below 2.9% (Figure [3d\)](#page-4-0), which is much lower than CeNC-D-0.6 (18.1%). The corresponding number of electrons transferred was ≈4. This result again illustrates that the resultant CeNC-M-0.6 performs an efficient four-electron ORR process and verifies that CeO2 can effectively inhibit the occurrence of side reactions. Given that the methanol resistance of cathode ORR catalysts for direct methanol fuel cells is critical, the methanol resistance performance of CeNC-M-0.6 and Pt/C catalysts was also compared. It can be seen that the resultant CeNC-M-0.6 catalyst shows no significant change in current density after the addition of methanol to the electrolyte (Figure [3e\)](#page-4-0), reflecting its excellent methanol tolerance. In contrast, the Pt/C showed a substantial decrease in current density after the
+
+<span id="page-4-0"></span>**Figure 3.** a) Linear sweep voltammograms (LSV) curves and b) Tafel plots of various catalysts and Pt/C at a rotation speed of 1600 rpm in O2 saturated 0.1 m KOH with a scan rate of 5 mV s<sup>−</sup>1. c) Polarization curves of CeNC-M-0.6 at different rotating speeds, and the insert is the corresponding K–L curves at different potentials. d) Percentage of peroxide yield and electron transfer number of various catalysts and Pt/C. e) Current–time (*i–t*) curves of CeNC-M-0.6 and Pt/C at 0.7 V (vs RHE) with an addition of 2 m methanol. f) relative retention *i–t* curves at 0.7 V (vs RHE) at a rotation speed of 1600 rpm in O2-saturated 0.1 m KOH for CeNC-M-0.6 and Pt/C.
+
+addition of methanol. Chronoamperometry results show that the resultant CeNC-M-0.6 catalyst can well maintain 98.5% of the initial current density after continuous measurement for 60 000 s (Figure 3f ), while Pt/C has obvious decay up to 86.6%, indicating the excellent stability of CeNC-M-0.6 under alkaline condition.
+
+In order to further understand the synergistic effect of singleatomic Ce sites and nanoparticles embedded into nitrogen-doped carbon matrix toward the ORR performance, density functional theory (DFT) calculations were performed. Based on the AC-HAADF-STEM and XAS with XRD, three kinds of structural models were first constructed (Figure S10, Supporting Information), that is, single-atomic Ce sites embedded into nitrogendoped graphene with the coordination structure of CeN4, the coexistence of single-atomic Ce sites with the coordination structure of CeN4 and CeO2 nanoparticles embedded into nitrogendoped graphene (CeO2-CeN4), single-atomic Ce sites embedded into nitrogen-doped graphene with the coordination structure of CeN2O2. Considering that the hydrogenation step of \*OH has been reported to be the rate-determining step (RDS) at equilibrium potential U = 1.23 V for Ce-based SACs,[\[25\]](#page-6-0) adsorption energies of different structural models for \*OH intermediate before and after binding to hydroxyl species was calculated (**Figure 4**[a,c\)](#page-5-0). As shown, the established three kinds of structural models indeed have strong adsorption for \*OH intermediate, whereas the introduction of hydroxyl species can obviously weaken the adsorption for \*OH intermediate. Based on these results, Gibbs free energy of the ORR intermediates over the corresponding hydroxyl species modification structures (OH-CeN4, OH-CeN4-CeO2, and OH-CeN2O2) was calculated (Figure [4d\)](#page-5-0). As observed, there is a lower reaction free energy (0.56 eV) of the hydrogenation step of \*OH on the single-atomic Ce sites of HO-CeO2-CeN4 compared to that on OH-CeN2O2 (1.10 eV), suggesting that the hydrogenation reaction of \*OH is more likely to occur at the HO-CeO2-CeN4. Careful observation demonstrates that the introduction of CeO2 is beneficial for the hydrogenation step of adsorbed oxygen over HO-CeO2-CeN4 compared to HO-CeN4. In addition, the charge density difference results (Figure [4b\)](#page-5-0) indicate that the synergistic effect of the introduction of CeO2 and the coordination structure change induces the electron redistribution of single-atomic Ce sites, which is beneficial to weaken the adsorption strength of the \*OH intermediates during the ORR process and thus boosts the ORR performance.
+
+To verify the practicality of the resultant CeNC-M-0.6 catalyst, a homemade aqueous rechargeable Zn-air battery was assembled by using a Zn plate as the anode, carbon-paper supported CeNC-M-0.6 as the air-cathode, and 6.0 m KOH and 0.2 m Zn(Ac)2 solution as the electrolyte. For comparison, zinc-air cells with commercial 20% Pt/C as the air cathode were assembled using the same method. As shown in **Figure 5**[a,](#page-5-0) the assembled CeNC-M-0.6 and Pt/C-based ZABs have an open-circuit potential of 1.48 and 1.51 V, respectively. In addition, the CeNC-M-0.6-based cell has a higher maximum power density of 107 mW cm<sup>−</sup><sup>2</sup> than the Pt/C-based cell (85 mW cm<sup>−</sup>2) (Figure [5b\)](#page-5-0). However, the specific capacity of the CeNC-M-0.6-based cell is 703.1 mAh gZn<sup>−</sup><sup>1</sup> at 20 mA cm<sup>−</sup>2, which is lower than that of the Pt/C (836.7 mAh gZn<sup>−</sup>1) (Figure [5c\)](#page-5-0). Meanwhile, the ZABs based on CeNC-M-0.6 exhibit
+
+<span id="page-5-0"></span>Figure 4. a) Optimized structural models and b) the charge density difference diagrams of OH-CeN<sub>4</sub>, OH-CeN<sub>4</sub>-CeO<sub>2</sub> and OH-CeN<sub>2</sub>O<sub>2</sub>. c) Adsorption energies of different models for \*OH intermediates before and after binding to hydroxyl. d) Free energy diagrams of the intermediates on OH-CeN4,  $OH-CeN_4-CeO_2$ , and  $OH-CeN_2O_2$  at equilibrium potential U=1.23 V during the ORR process.
+
+Figure 5. a) Open circuit voltage measurements (inset: schematic illustration of zinc-air batteries). b) Polarization curves and power density plots. c) Specific capacity of the zinc-air battery based on CeNC-M-0.6 and Pt/C at 20 mA cm<sup>-2</sup>. d) Discharge curves of the batteries under different current densities. e) Discharge/charge cycling curves of Zn-air batteries based on CeNC-M-0.6+RuO<sub>2</sub> and Pt/C+RuO<sub>2</sub> at the current density of 5 mA cm<sup>-2</sup>.
+
+<span id="page-6-0"></span>**[www.advancedsciencenews.com](http://www.advancedsciencenews.com) [www.advenergymat.de](http://www.advenergymat.de)**
+
+16146840, 2025, 14, Downloaded from https://advanced.onlinelibrary.wiley.com/doi/10.1002/aenm.202404689 by University Of Science, Wiley Online Library on [06/01/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Received: October 10, 2024 Revised: November 15, 2024 Published online: November 27, 2024
+
+comparable rate capacity to that based on Pt/C in the current density range from 1 to 10 mA cm<sup>−</sup><sup>2</sup> (Figure [5d\)](#page-5-0). To investigate the long-term stability of ZABs, rechargeable ZABs were constructed using a 6.0 m KOH solution containing 0.2 m Zn(Ac)2 as the electrolyte and a carbon paper-loaded mixture of CeNC-M-0.6 and RuO2 with a mass ratio of 1:1 as the air cathode. The galvanostatic charge/discharge cycling test (Figure [5e\)](#page-5-0) results show that ZABs based on CeNC-M-0.6+RuO2 can well maintain the charge/discharge plateau after 400 cycles at a current density of 5 mA cm<sup>−</sup>2, demonstrating the better stability of CeNC-M-0.6 in practical ZABs than that of Pt/C.
+
+### **3. Conclusion**
+
+In summary, we have successfully constructed a Ce-based SACs catalyst with the coexistence of single-atomic Ce sites and CeO2 nanoparticles embedded into a nitrogen-doped carbon matrix by gas-phase migration strategy. Theoretical calculation results indicate that the introduction of CeO2 nanoparticles promotes the decrease in the energy barrier of the hydrogenation step of \*OH over the single-atomic Ce sites during the ORR process. As a result, the optimal catalyst has an outstanding ORR performance with a half-wave potential of 0.88 V in 0.1 m KOH, which is superior to commercial Pt/C. Moreover, the assembled ZABs deliver outstanding performance with a high power density of 107 mW cm<sup>−</sup><sup>2</sup> and remarkable long-term stability of 400 cycles at the current density of 5 mA cm<sup>−</sup>2.
+
+## **Supporting Information**
+
+Supporting Information is available from the Wiley Online Library or from the author.
+
+#### **Acknowledgements**
+
+This work is financially supported by the National Natural Science Foundation of China (No. 22372057), Natural Science Foundation of Hunan Province (No. 2023JJ30121), Fundamental Research Funds for the Central Universities (No. 202044011), Natural Science Foundation of Changsha (No. KQ2208259). This work was supported by the Photon Science Research Center for Carbon Dioxide, Project of the National Natural Science Foundation of China (No. 22332003), Shanghai Science and Technology Innovation Action Plan (No. 22JC1403800), Shanghai Municipal Science and Technology Commission (No. 23JC1403300) and 2022 Self Deployed Instrument Design Project of Shanghai Advanced Research Institute. This work was also supported by BL16U1 and the User Experiment Assist System of SSRF.
+
+#### **Conflict of Interest**
+
+The authors declare no conflict of interest.
+
+#### **Data Availability Statement**
+
+The data that support the findings of this study are available from the corresponding author upon reasonable request.
+
+#### **Keywords**
+
+CeO2 nanoparticle, oxygen reduction reaction, single-atomic Ce site, synergistic effect
+
+- [1] X. Zhu, C. Hu, R. Amal, L. Dai, X. Lu, *Energy Environ. Sci.* **2020**, *13*, 4536.
+- [2] C. Zhou, X. Chen, S. Liu, Y. Han, H. Meng, Q. Jiang, S. Zhao, F. Wei, J. Sun, T. Tan, R. Zhang, *J. Am. Chem. Soc.* **2022**, *144*, 2694.
+- [3] T. Jin, J. Nie, M. Dong, B. Chen, J. Nie, G. Ma, *Nano-Micro Lett.* **2022**, *15*, 26.
+- [4] M. Luo, W. Sun, B. B. Xu, H. Pan, Y. Jiang, *Adv. Energy Mater.* **2021**, *11*, 2002762.
+- [5] Q. Lu, X. Zou, Y. Bu, Z. Shao, *Energy Storage Mater.* **2023**, *55*, 166.
+- [6] H.-M. Xu, C.-J. Huang, T.-Y. Shuai, Q.-N. Zhan, Z.-J. Zhang, W. Cai, J. Chen, G.-R. Li, *Sci. China Mater.* **2023**, *66*, 2953.
+- [7] C. Hu, R. Paul, Q. Dai, L. Dai, *Chem. Soc. Rev.* **2021**, *50*, 11785.
+- [8] T. Wang, A. Chutia, D. J. L. Brett, P. R. Shearing, G. He, G. Chai, I. P. Parkin, *Energy Environ. Sci.* **2021**, *14*, 2639.
+- [9] Y. Wang, F.-L. Hu, Y. Mi, C. Yan, S. Zhao, *Chem. Eng. J.* **2021**, *406*, 127135.
+- [10] Q. Zhang, J. Guan, *Adv. Funct. Mater.* **2020**, *30*, 2000768.
+- [11] Y. Deng, J. Luo, B. Chi, H. Tang, J. Li, X. Qiao, Y. Shen, Y. Yang, C. Jia, P. Rao, S. Liao, X. Tian, *Adv. Energy Mater.* **2021**, *11*, 2101222.
+- [12] H. Liu, L. Jiang, Y. Wang, X. Wang, J. Khan, Y. Zhu, J. Xiao, L. Li, L. Han, *Chem. Eng. J.* **2023**, *452*, 138938.
+- [13] M. Zhang, H. Li, J. Chen, F.-X. Ma, L. Zhen, Z. Wen, C.-Y. Xu, *Small* **2022**, *18*, 2202476.
+- [14] J. R. Bai, Y. B. Lian, Y. Y. Deng, M. Xiang, P. Xu, Q. F. Zhou, Y. W. Tang, Y. Q. Su, *Nano Res.* **2024**, *17*, 2291.
+- [15] L.-J. Yuan, B. Liu, L.-x. Shen, Y.-K. Dai, Q. Li, C. Liu, W. Gong, X.-L. Sui, Z.-B. Wang, *Adv. Mater.* **2024**, *35*, 2305945.
+- [16] J. Roh, A. Cho, S. Kim, K.-S. Lee, J. Shin, J. S. Choi, J. Bak, S. Lee, D. Song, E.-J. Kim, C. Lee, Y. R. Uhm, Y.-H. Cho, J. W. Han, E. Cho, *ACS Catal.* **2023**, *13*, 9427.
+- [17] J. Chen, B. Huang, R. Cao, L. Li, X. Tang, B. Wu, Y. Wu, T. Hu, K. Yuan, Y. Chen, *Adv. Funct. Mater.* **2023**, *33*, 2209315.
+- [18] J. Y. Jung, S. Kim, J.-G. Kim, M. J. Kim, K.-S. Lee, Y.-E. Sung, P. Kim, S. J. Yoo, H.-K. Lim, N. D. Kim, *Nano Energy* **2022**, *97*, 107206.
+- [19] Y. Zhang, X. Yu Gao, Z. Wen, C. Cheng Yang, Q. Jiang, *Chem. Eng. J.* **2022**, *446*, 137441.
+- [20] Y. Qin, C. Guo, Z. Ou, C. Xu, Q. Lan, R. Jin, Y. Liu, Y. Niu, Q. Xu, Y. Si, H. Li, *J. Energy Chem.* **2023**, *80*, 542.
+- [21] X. Yao, Y. Zhu, T. Xia, Z. Han, C. Du, L. Yang, J. Tian, X. Ma, J. Hou, C. Cao, *Small* **2023**, *19*, 2301075.
+- [22] Z. Liang, L. Yin, H. Yin, Z. Yin, Y. Du, *Nanoscale Horiz.* **2022**, *7*, 31.
+- [23] D. Li, L. Sun, J. Zhu, L. Hu, D. Guo, *Appl. Surf. Sci.* **2021**, *535*, 147689.
+- [24] X. Shi, B. Cao, J. Liu, J. Zhang, Y. Du, *Small* **2021**, *17*, 2005371.
+- [25] J.-C. Li, X. Qin, F. Xiao, C. Liang, M. Xu, Y. Meng, E. Sarnello, L. Fang, T. Li, S. Ding, Z. Lyu, S. Zhu, X. Pan, P.-X. Hou, C. Liu, Y. Lin, M. Shao, *Nano Lett.* **2021**, *21*, 4508.
+- [26] J. Xia, H. Zhao, B. Huang, L. Xu, M. Luo, J. Wang, F. Luo, Y. Du, C. H. Yan, *Adv. Funct. Mater.* **2020**, 30.
+- [27] Z. Liu, N. Li, H. Zhao, Y. Zhang, Y. Huang, Z. Yin, Y. Du, *Chem. Sci.* **2017**, *8*, 3211.
+- [28] F. He, H. Li, Y. Ding, K. Li, Y. Wang, Z. Wu, *Carbon* **2018**, *130*, 636.
+- [29] J. Liu, G. Li, C. Xu, H. Chen, R. Jin, L. Sun, C. Shu, H. Chen, C. Guo, H. Li, Y. Si, *Inorg. Chem. Front.* **2023**, *10*, 3091.
+- [30] M. Zhu, C. Zhao, X. Liu, X. Wang, F. Zhou, J. Wang, Y. Hu, Y. Zhao, T. Yao, L.-M. Yang, Y. Wu, *ACS Catal.* **2021**, *11*, 3923.
+- [31] B. Yang, H. Yu, X. Jia, Q. Cheng, Y. Ren, B. He, Z. Xiang, *ACS Appl. Mater. Interfaces* **2023**, *15*, 23316.
+
+<span id="page-7-0"></span>**[www.advancedsciencenews.com](http://www.advancedsciencenews.com) [www.advenergymat.de](http://www.advenergymat.de)**
+
+- [32] Y. Zhao, H. Wang, J. Li, Y. Fang, Y. Kang, T. Zhao, C. Zhao, *Adv. Funct. Mater.* **2023**, *33*, 2305268.
+- [33] J. Liu, C. Guo, L. Sun, Y. Liu, H. Chen, C. Shu, J. Dai, C. Xu, R. Jin, H. Li, Y. Si, *Small* **2024**, *20*, 2305615.
+- [34] L. Yin, S. Zhang, M. Sun, S. Wang, B. Huang, Y. Du, *Adv. Mater.* **2023**, *35*, 2302485.
+- [35] A. Sivanantham, P. Ganesan, S. Shanmugam, *Appl. Catal. B Environ.* **2018**, *237*, 1148.
+- [36] H. Liu, L. Jiang, Y. Sun, J. Khan, B. Feng, J. Xiao, H. Zhang, H. Xie, L. Li, S. Wang, L. Han, *Adv. Funct. Mater.* **2023**, *33*, 2304074.
+- [37] H. Liu, L. Jiang, J. Khan, X. Wang, J. Xiao, H. Zhang, H. Xie, L. Li, S. Wang, L. Han, *Angew. Chem., Int. Ed.* **2023**, *62*, e202214988.
+- [38] S. Chen, T. Luo, X. Li, K. Chen, J. Fu, K. Liu, C. Cai, Q. Wang, H. Li, Y. Chen, C. Ma, L. Zhu, Y.-R. Lu, T.-S. Chan, M. Zhu, E. Cortés, M. Liu, *J. Am. Chem. Soc.* **2022**, *144*, 14505.
+- [39] W. Wang, Q. Jia, S. Mukerjee, S. Chen, *ACS Catal.* **2019**, *9*, 10126.
+- [40] H. Kim, K. Lee, S. I. Woo, Y. Jung, *Phys. Chem. Chem. Phys.* **2011**, *13*, 17505.
+- [41] Y. Shao, S. Zhang, M. H. Engelhard, G. Li, G. Shao, Y. Wang, J. Liu, I. A. Aksay, Y. Lin, *J. Mater. Chem.* **2010**, *20*, 7491.
+- [42] D. Sun, Y. Chen, X. Yu, Y. Yin, G. Tian, *Chem. Eng. J.* **2023**, *462*, 142084.

@@ -1,0 +1,123 @@
+---
+source: Ren 等 - 2024 - Mn and Mo co-doped NiS nanosheets induce abundant Ni3+ –O bonds for efficient electro-oxi.pdf
+tool: marker
+duration: 89.709s
+generated: 2026-01-10T08:54:21.591578Z
+---
+
+## ChemComm
+
+## COMMUNICATION
+
+**View Article Online** 
+
+Cite this: Chem. Commun., 2024, 60, 13392
+
+Received 17th September 2024, Accepted 17th October 2024
+
+DOI: 10.1039/d4cc04818k
+
+rsc.li/chemcomm
+
+# Mn and Mo co-doped NiS nanosheets induce abundant Ni<sup>3+</sup>-O bonds for efficient electrooxidation of biomass†
+
+Pengfei Ren,<sup>a</sup> Zixuan Wang,<sup>a</sup> Wenchao Zhang,<sup>b</sup> Fang Duan,<sup>a</sup> Shuanglong Lu, o Mingliang Du \* and Han Zhu \* \* and Han Zhu \* \* and Han Zhu \* \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Zhu \* and Han Z
+
+MnMo-NiS were synthesized for electro-oxidizing ethylene glycol (EG), glycerol (GLY), and 5-hydroxymethylfurfural (HMF), achieving faradaic efficiencies of 97.5%, 98.6%, and 99.2%, and yield rates of 615.7, 475.5, and 333.9 μmol h<sup>-1</sup> cm<sup>-2</sup>. In situ Raman spectroscopy and multi-step chronoamperometry reveal that Ni3+-O is the active site.
+
+The escalating energy crisis and environmental pollution stemming from fossil fuel consumption have significantly impacted human survival and development.<sup>1-4</sup> One of the most promising strategies to address these challenges is to convert abundant and renewable biomass from nature into valuable products.<sup>5-8</sup> The electrochemical conversion of low-value EG and GLY into high-value formic acid (FA) through EG oxidation reaction (EGOR) and GL oxidation reaction (GLOR) represents a viable approach for their effective utilization. Additionally, hydroxymethylfurfural (HMF) can be converted into furan-2, 5-dicarboxylic acid (FDCA) via HMF oxidation reaction (HMFOR), a monomer for the biodegradable polymer polyethylene 2,5-furandicarboxylate (PEF).8 Given the immense potential of biomass development, exploring electrochemical catalysts with rapid reaction rates and high selectivity for EGOR, GLOR, and HMFOR is imperative.
+
+Nickel-based catalysts, which oxidize biomass through proton-coupled electron transfer (PCET), have been widely used in the electrochemical conversion of biomass due to their excellent performance.9 Previous studies have demonstrated that NiOOH is the essential species for the nucleophilic oxidation of GLY, EG, and HMF. 10,11 NiS exhibits superior activity
+
+Jiangsu 214122, P. R. China. E-mail: zhysw@jiangnan.edu.cn,
+
+NiOOH at the interface through electro-oxidation, thereby optimizing the adsorption of nucleophiles. 12 However, at higher potentials, NiOOH formed by NiS can undergo conversion into NiO<sub>x</sub>(OH)<sub>y</sub>, which exhibits greater activity in the oxygen evolution reaction (OER).<sup>11</sup> Modulating the surface structure of NiS to promote the formation of NiOOH at low voltage, inhibiting the formation of NiO<sub>r</sub>(OH), at high potential, and simultaneously enhancing the reaction rate remain a significant challenge for NiS.
+
+Doping heteroatoms into the NiS lattice induces rearrangement of energy levels by the Jahn-Teller effect, enhancing its ability to lose electrons and oxidize it to NiOOH, improving the electron-loss capability of NiOOH, and shifting the onset potential for the oxidation of NiS to NiOOH to lower potential while delaying the oxidation of NiOOH to NiO<sub>x</sub>(OH)<sub>y</sub>. <sup>13</sup> To validate this theory, we synthesized Mn and Mo co-doped NiS on carbon paper (MnMo-NiS). The doping of Mn and Mo, having a significantly different atomic radius from Ni, can induce the Jahn-Teller effect in NiS, and the doping of metal atoms of high oxidation states can lead to the formation of oxygen-containing acid radicals and the creation of cation vacancies as the reaction progresses (Fig. S1, ESI†).
+
+The MnMo-NiS nanosheets were synthesized via a singlestep hydrothermal method (Fig. S2, ESI†). As depicted in Fig. 1a, the X-ray diffraction (XRD) pattern of MnMo-NiS displays prominent NiS diffraction peaks. The diffraction peaks observed at  $30.2^{\circ}$ ,  $34.7^{\circ}$ ,  $46.0^{\circ}$ , and  $53.5^{\circ}$  correspond to the (100), (101), (102), and (110) crystal planes of NiS (PDF#02-1280), respectively. Compared to NiS, the (100), (101), and (110) crystal planes of MnMo-NiS shift to higher angles, indicating that doping with Mn and Mo causes lattice contraction in NiS (Fig. S3, ESI†). Field emission scanning electron microscope (FE-SEM) images (Fig. S4, ESI†) indicate that the MnMo-NiS grown on carbon paper displays disordered nanosheet structures with a particle size ranging from 200 to 1000 nm. Transmission electron microscopy (TEM) images (Fig. S5, ESI† and Fig. 1b) indicate that the average diameter of the MnMo-NiS nanosheets is approximately 250 nm. High-resolution TEM
+
+compared to Ni(OH)<sub>2</sub> and NiO, as it forms SO<sub>4</sub><sup>2-</sup> modified <sup>a</sup> Key Laboratory of Synthetic and Biological Colloids, Ministry of Education, School of Chemical and Material Engineering, Jiangnan University, Wuxi,
+
+du@jiangnan.edu.cn <sup>b</sup> School of Chemistry and Life Sciences, Suzhou University of Science and Technology, Suzhou, 215009, Jiangsu, P. R. China
+
+<sup>†</sup> Electronic supplementary information (ESI) available. See DOI: https://doi.org/
+
+Communication
+
+Fig. 1 (a) XRD pattern, (b) TEM image, and (c) HRTEM image of MnMo-NiS. (d) Ni 2p, (e) Mo 3d, (f) Mn 2p, and (g) S 2p XPS spectra of MnMo-NiS. (h) STEM-EDX elemental mapping images of MnMo-NiS.
+
+(HRTEM) images (Fig. S6, ESI† and Fig. 1c) reveal clearly visible lattice fringes with distinct lattice spacings of approximately 2.6 Å corresponding to the (101) plane of NiS.
+
+The presence of Mn and Mo peaks in the X-ray photoelectron spectroscopy (XPS) survey spectrum confirmed the successful doping and coexistence with Ni and S on the surface of MnMo-NiS (Fig. S7, ESI†). Fig. 1d shows the Ni 2p spectrum, with binding energies (BEs) at 875.5, 857.1, 872.9, 855.3, 870.1, and 852.8 eV, corresponding to the Ni<sup>3+</sup>  $2p_{1/2}$ , Ni<sup>3+</sup>  $2p_{3/2}$ , Ni<sup>2+</sup>  $2p_{1/2}$ ,  $Ni^{2+}$   $2p_{3/2}$ ,  $Ni^0$   $2p_{1/2}$ , and  $Ni^0$   $2p_{3/2}$ , respectively. The most prominent peaks were those associated with Ni<sup>2+</sup> 2p<sub>1/2</sub> and Ni<sup>2+</sup> 2p<sub>3/2</sub>, indicating that Ni predominantly exists in the Ni<sup>2+</sup> state within MnMo-NiS. 14,15 As shown in Fig. 1e, the Mo 3d spectrum overlaps with the S 2s spectrum (227.6 eV), implying the presence of Mo-S bonds. The significantly higher intensity of the  $Mo^{4+}$  peaks (231.6 eV for  $Mo^{4+}$   $3d_{3/2}$  and 233.9 eV for  $Mo^{4+}$  $3d_{5/2}$ ) compared to Mo<sup>6+</sup> (234.6 eV for Mo<sup>6+</sup>  $3d_{3/2}$ ) further corroborates that Mo primarily exists in the Mo4+ state in MnMo-NiS.<sup>8,16</sup> The Mn 2p spectrum displays the coexistence of  $\mathrm{Mn}^{2+}$  (641.4 and 652.1 eV for  $\mathrm{Mn}^{2+}$   $2\mathrm{p}_{3/2}$  and  $\mathrm{Mn}^{2+}$   $2\mathrm{p}_{1/2}$ ) and Mn<sup>3+</sup> (644.6 and 653.8 eV for Mn<sup>3+</sup> 2p<sub>3/2</sub> and Mn<sup>3+</sup> 2p<sup>1/2</sup>), suggesting that Mn is predominantly doped in Mn<sup>+2</sup> and Mn<sup>+3</sup> states in MnMo-NiS (Fig. 1f).<sup>17</sup> For S 2p, the two peaks at 161.1 and 163.0 eV are attributed to the  $S^{2-}$  2p<sub>3/2</sub> and S<sup>2-</sup> 2p<sub>1/2</sub> orbitals, respectively. 11 Scanning transmission electron microscopy-energy dispersive X-ray spectroscopy (STEM-EDX) elemental mapping images (Fig. 1h) suggest that the Mn, Mo, Ni, and S elements are uniformly distributed throughout the MnMo-NiS, with Ni and S exhibiting higher intensity, while Mn and Mo, as doped elements, display lower intensity. The above results strongly confirmed the successful doping of Mn and Mo into NiS nanosheets.
+
+The electro-oxidation of EG, GLY, and HMF using MnMo-NiS as a catalyst was evaluated in an H-cell equipped with a three-electrode system. The as-synthesized MnMo-NiS catalyst, an Hg/HgO electrode, and a graphite rod served as the working,
+
+Fig. 2 (a) Schematic of MnMo-NiS in the EGOR, GLOR, and HMFOR. (b) The CV curves of MnMo-NiS in 1 M KOH and 1 M KOH with 0.1 M nucleophiles. LSV curves of (c) MnMo-NiS and (d) NiS in 1 M KOH with 0.1 M EG, GLY and HMF, respectively. (e) The current density plots of MnMo-NiS and NiS at 1.5 V in 1 M KOH and 1 M KOH with 0.1 M nucleophiles. (f) Chronoamperometry plots of MnMo-NiS for the EGOR, GLOR, and HMFOR.
+
+reference electrode and counter electrode, respectively. A 1 M KOH solution containing 0.1 M EG, GLY, and HMF was added to the anode chamber. During reactor operation, EG, GLY, and HMF were converted into FA and FDCA (Fig. 2a). As shown in the cyclic voltammetry (CV) curves, in 1 M KOH, a weak current response peak was observed at 1.20 V vs. RHE, corresponding to the oxidation peak of S<sup>2-</sup> to SO<sub>4</sub><sup>2-</sup> within MnMo-NiS. A more pronounced oxidation peak appeared at 1.42 V vs. RHE, corresponding to the oxidation of Ni<sup>2+</sup> to Ni<sup>3+</sup>. The reduction peak at 1.2 V vs. RHE indicated the reduction of Ni<sup>3+</sup> to Ni<sup>2+</sup>. Upon the addition of 0.1 M EG, GLY, and HMF to 1 M KOH, the peak intensity for Ni2+ to Ni3+ increased significantly and the peak intensity for Ni3+ to Ni2+ decreased, suggesting the catalytic oxidation of EG, GLY, and HMF. The Ni3+-O, generated from surface oxidation and reconstruction of MnMo-NiS, exhibits strong activity in EGOR, GLOR, and HMFOR (Fig. 2b).
+
+Linear scanning voltammetry (LSV) curves of the MnMo–NiS electrode in 1.0 M KOH, with 0.1 M EG, GLY, and HMF, are presented in Fig. 2c. MnMo–NiS exhibited an exceedingly low current density in 1.0 M KOH, reaching only 63 mA cm<sup>2</sup> at 1.5 V vs. RHE. However, the current density of MnMo–NiS increased substantially with the addition of EG, GLY, and HMF. At 1.5 V vs. RHE, the current densities for EGOR, GLOR, and HMFOR with MnMo–NiS achieved 168, 177, and 134 mA cm<sup>-2</sup>, respectively, suggesting that EG, GLY, and HMF undergo nucleophilic oxidation reactions at the interface. As shown in Fig. S7 (ESI†),
+
+at 1.5 V vs. RHE, the Mo-NiS achieve the current densities of 78, 74, and 74 mA cm<sup>-2</sup> for EGOR, GLOR, and HMFOR while the
+
+Mn-NiS reach the current densities of 75, 86, and 69 mA cm<sup>-2</sup>, respectively (Fig. S8, ESI†), which were higher than those of NiS (29, 50 and 75 mA<sup>-2</sup>, Fig. 2d). Therefore, the co-doping with Mn and Mo significantly increases the current density and activity across all three reactions.
+
+ChemComm
+
+As shown in Fig. 2c and d, when Mo and Mn were doped into NiS, the onset potentials for EGOR, GLOR, and HMFOR shifted positively by 0.27 V vs. RHE (from 1.13 to 1.40 V vs. RHE), 0.02 V vs. RHE (from 1.15 to 1.17 V vs. RHE), and 0.06 V vs. RHE (from 1.26 to 1.32 V vs. RHE). Moreover, compared to NiS, at 1.5 V vs. RHE, the current densities for EGOR, GLOR, and HMFOR increased by 140, 127, and 60 mA cm<sup>-2</sup>, respectively (Fig. 2e). Comparisons of the electrochemical active surface area (ECSA), electric double-layer capacitance, Tafel slopes, and ECSAnormalized LSV curves among MnMo-NiS, Mn-NiS, Mo-NiS, and NiS demonstrate that Mn and Mo co-doping is an effective strategy for enhancing the catalytic activity of NiS (detailed discussion can be found in the ESI†, Fig. S9-S14). Chronoamperometry was conducted to evaluate the stability of MnMo-NiS and the applied potential was 1.48 V vs. RHE with each test lasting 2 h, accumulating a total of 30 h. As shown in Fig. 2f, during a single test, the current density gradually decreased due to the consumption of reactants but returned to its initial state after the electrolyte was refreshed. After 30 h, the MnMo-NiS exhibited sustained activity, indicating its high stability for EGOR, GLOR, and HMFOR. The FE-SEM images and XRD patterns after the stability tests (Fig. S15, ESI†) demonstrate that the morphologies and crystal structures of the MnMo-NiS nanosheets remain well-preserved, further suggesting its high stability in EGOR, GLOR, and HMFOR reactions.
+
+Chronoamperometry was conducted to evaluate the electrode performance in EGOR, GLOR, and HMFOR. With applied potentials ranging from 1.38 to 1.58 V vs. RHE, the post-test electrolytes for EGOR and GLOR were analysed qualitatively and quantitatively using <sup>1</sup>H NMR spectroscopy. For EGOR, the <sup>1</sup>H NMR spectrum revealed peaks corresponding to FA and EG at 8.4 and 3.5 ppm, along with an internal standard (dimethyl sulfoxide, DMSO) appearing at 2.5 ppm (Fig. S16, ESI†). 18 The near-absence of glyoxylic acid (GA) (3.7 ppm) indicated high selectivity of MnMo-NiS for FA in EGOR. The FE of FA in EGOR for MnMo-NiS reached a maximum of 97.5% at 1.48 V vs. RHE. However, at higher potentials, the competitive OER begins to affect the EGOR, leading to a decrease in FE of FA (87.4%). For GLOR, the <sup>1</sup>H NMR spectrum exhibited peaks for FA, DMSO, and GLY at 8.4, 2.5, and 3.2-4.0 ppm, respectively, with minimal detection of other C2 and C3 products. This confirmed the high selectivity of MnMo-NiS for FA during GLOR (Fig. S17, ESI†). 19 As shown in Fig. 3b, the FE of FA in GLOR reached a maximum of 98.6% but decreased to 85.8% at higher potentials due to the OER promotion. For HMFOR, HPLC analysis identified five potential products: FDCA, 5-hydroxymethyl-2-fur ancarboxylic acid (HMFCA), 5-formyl-2-furancarboxylic acid (FFCA), HMF, and 2,5-furandicarboxaldehyde (DFF) (Fig. S18-S23, ESI†).20 The FE of HMFOR with MnMo-NiS ranged from
+
+Fig. 3 The FE of (a) EGOR, (b) GLOR, and (c) HMFOR for 2 h chronoamperometry at varied potentials. The yield of (d) EGOR, (e) GLOR, and (f) HMFOR for 2 h chronoamperometry at varied potentials. In situ Raman spectra of (g) EGOR, (h) GLOR, and (i) HMFOR. (j) Multi-step chronoamperometry curves of the MnMo-NiS electrode.
+
+89.5% to 99.2% (Fig. 3c). Overall, these results demonstrate the exceptional performance of MnMo-NiS in electro-oxidation of EG, GLY, and HMF, with high selectivity and efficiency for FA and FDCA.
+
+As shown in Fig. 3a-c, MnMo-NiS demonstrated higher FEs than NiS in all reactions, indicating that Mn and Mo doping significantly enhance nucleophilic oxidation of NiS. NiS maintained relatively high FEs (over 90%) between 1.38 and 1.48 V vs. RHE, but experienced a sharp decline in efficiency at higher voltages. Specifically, at 1.58 V vs. RHE, the FEs of NiS for EGOR, GLOR, and HMFOR decreased to 75.8%, 76.3%, and 71.8%, respectively, while MnMo-NiS exhibited significantly higher FEs (87.5%, 85.8%, 98.5%). The rapid decline in FEs for EGOR, GLOR, and HMFOR of NiS at high potentials may be attributed to the formation of  $Ni_xOH_y$ , facilitating the OER. In contrast, MnMo-NiS maintains a high FE at elevated potentials, demonstrating that co-doping effectively enables NiS to achieve efficient EGOR, GLOR, and HMFOR at higher potentials. Fig. 3d-f illustrates the yields of MnMo-NiS and NiS within the 1.38-1.48 V vs. RHE. MnMo-NiS achieved higher yields for EGOR, GLOR, and HMFOR compared to NiS, with peak yields of 615.7, 425.5, and 333.9  $\mu$ mol h<sup>-1</sup> cm<sup>-2</sup>, significantly surpassing the yields of 242.3, 259.5, and 146.3  $\mu$ mol h<sup>-1</sup> cm<sup>-2</sup> obtained with NiS. Doping with Mn and Mo leads to higher current density and stable faradaic efficiency for NiS, ultimately achieving efficient conversion of EG, GLY, and HMF.
+
+In situ Raman spectroscopy was employed to investigate the surface structural evolution of MnMo-NiS during EGOR, GLOR, and HMFOR. In EGOR (Fig. 3g), when the potential exceeded 1.3 V vs. RHE, two prominent peaks at 466 and 542 cm $^{-1}$ appeared in the Raman spectra, indicative of Ni3+-O formation, suggesting that MnMo-NiS underwent dynamic reconstruction during the reaction.21 Additionally, characteristic peaks of EG
+
+Communication ChemComm
+
+were observed at 842 and 1053 cm<sup>-1</sup>.<sup>10</sup> Ni<sup>3+</sup>-O peaks similar to that observed in EGOR were also seen in GLOR, along with characteristic peaks for GLY appearing at 294, 396, 564, and 623 cm<sup>-1</sup>, respectively (Fig. 3h).<sup>17</sup> Furthermore, Ni<sup>3+</sup>-O peaks were also present in HMFOR (Fig. 3i). The presence of Ni<sup>3+</sup>-O peaks in EGOR, GLOR, and HMFOR, with their onset potential overlapping with EGOR, GLOR, and HMFOR, suggests that Ni<sup>3+</sup>-O is the active site for EGOR, GLOR, and HMFOR. Multi-step chronoamperometry was utilized to study the role of Ni<sup>3+</sup>-O (Fig. 3j).<sup>11</sup> At 1.5 V vs. RHE, MnMo-NiS underwent an oxidation process, resulting in a rapid decrease in current density (grey line), indicating the swift formation of Ni<sup>3+</sup>-O species on the MnMo-NiS surface.
+
+When the applied potential was switched to open circuit potential (OCP), a reduction current density (grey line) was observed, suggesting the reduction of high-valence Ni<sup>3+</sup> back to  $Ni^{3-\delta}$ . In contrast, no reduction current density was observed at OCP in 1 M KOH and 0.1 M nucleophilic reagent electrolytes. This absence implies that Ni<sup>3+</sup>-O formed on MnMo-NiS surfaces at 1.5 V vs RHE was immediately reduced by the nucleophilic reagent. NiS is ultimately oxidized to Ni3+-O, reacting with adsorbed EG, GLY, and HMF, reverting to  $Ni^{3-\delta}$  before being re-oxidized to Ni<sup>3+</sup>-O to complete the cycle. <sup>21-24</sup> The adsorption behavior of nucleophilic reagents on the catalyst can also be further elucidated by using the change in open circuit potential before and after adding the nucleophilic reagent ( $\Delta$ OCP) as a descriptor for changes in the inner Helmholtz layer adsorption.8 As shown in Fig. S24 (ESI†), in 1 M KOH solution, the OCP of MnMo-NiS is 1.29 V vs. RHE. Upon the addition of EG, GLY, and HMF, the OCP decreased to 0.81, 0.79 and 0.45 V vs. RHE, respectively, indicating that nucleophilic reagents adsorbed at the catalyst interface and altered the OCP. As shown in Fig. S25 (ESI†), compared to NiS, MnMo-NiS exhibits higher ΔOCP in EGOR (from 0.48 V to 0.13 V vs. RHE), GLOR (from 0.5 V to 0.31 V vs. RHE), and HMFOR (from 0.84 V to 0.73 V vs. RHE), indicating that Mn and Mo doping enhances the adsorption capability of NiS for nucleophilic reagents EG, GLY, and HMF, thereby improving the activity of EGOR, GLOR, and HMFOR.
+
+In summary, we have successfully synthesized MnMo–NiS via a hydrothermal sulfurization method. MnMo–NiS demonstrated exceptional catalytic activity for EGOR, GLOR, and HMFOR, achieving the highest FEs of 97.5%, 98.6%, and 99.2%, and the highest yield rates of 615.7, 475.5, and 333.9  $\mu$ mol h<sup>-1</sup> cm<sup>-2</sup>, respectively. This study not only introduces an efficient catalyst for EGOR, GLOR, and HMFOR, but also paves the way for further exploration of biomass-derived alcohols.
+
+This study was supported by the National Natural Science Foundation of China (NSFC) (52273058, 52073124), the Natural Science Foundation of Jiangsu Province (BK2022030167), and the Fundamental Research Funds for the Central Universities (KYCX23\_2465). The authors would also like to thank the Central Laboratory, School of Chemical and Material Engineering, Jiangnan University.
+
+### Data availability
+
+The data supporting this article have been included as part of the ESI. $\dagger$ 
+
+#### Conflicts of interest
+
+There are no conflicts to declare.
+
+### Notes and references
+
+- 1 H. Cheng, B. Dong, Q. Liu and F. Wang, J. Am. Chem. Soc., 2023, 145, 26858–26862.
+- 2 X. Zheng, J. Hao, Z. Zhuang, Q. Kang, X. Wang, S. Lu, F. Duan, M. Du and H. Zhu, *Nanoscale*, 2024, 16, 4047–4055.
+- 3 Y. Zhang, M. Zhao, J. Wu, Y. Wang, L. Zheng, F. Gu, J. Zou, J. Gao and X. Zhu, *ACS Catal.*, 2024, 14, 7867–7876.
+- 4 N. Cao, Y. Di, S. Chen, J. Qian, M. Liu, X. Jin and X. Zang, *Energy Mater. Dev.*, 2023, 1(2), 9370024.
+- 5 Q. Hong, Y. Zhao, X. Ai, Y. Ding, F. Li, P. Chen, P. Jin and Y. Chen, Chem. Eng. J., 2024, 482, 1385–8947.
+- 6 W. Luo, H. Tian, Q. Li, G. Meng, Z. Chang, C. Chen, R. Shen, X. Yu, L. Zhu, F. Kong, X. Cui and J. Shi, Adv. Funct. Mater., 2023, 34, 2306995.
+- 7 G. Liu, T. Nie, Z. Song, X. Sun, T. Shen, S. Bai, L. Zheng and Y.-F. Song, Angew. Chem., Int. Ed., 2023, 62, e202311696.
+- 8 F. Liu, X. Gao, R. Shi, J. Xiong, Z. Guo, E. C. M. Tse and Y. Chen, Adv. Funct. Mater., 2023, 34, 2310274.
+- 9 L. Xu, Y. Yang, C. Li, R. Ning, J. Ma, M. Yao, S. Geng and F. Liu, Chem. Eng. J., 2024, 481, 148304.
+- 10 F. Liu, X. Gao, R. Shi, Z. Guo, E. C. M. Tse and Y. Chen, Angew. Chem., Int. Ed., 2023, 62, e202300094.
+- 11 A. Pei, P. Wang, S. Zhang, Q. Zhang, X. Jiang, Z. Chen, W. Zhou, Q. Qin, R. Liu, R. Du, Z. Li, Y. Qiu, K. Yan, L. Gu, J. Ye, G. I. N. Waterhouse, W.-H. Huang, C.-L. Chen, Y. Zhao and G. Chen, Nat. Commun., 2024, 15, 5899.
+- 12 C. Liu, F. Chen, B.-H. Zhao, Y. Wu and B. Zhang, Nat. Rev. Chem., 2024, 8, 277–293.
+- 13 G. Fu, X. Kang, Y. Zhang, X. Yang, L. Wang, X.-Z. Fu, J. Zhang, J.-L. Luo and J. Liu, *Nano-Micro Lett.*, 2022, 14, 200.
+- 14 H. Zhu, S. Sun, J. Hao, Z. Zhuang, S. Zhang, T. Wang, Q. Kang, S. Lu, X. Wang, F. Lai, T. Liu, G. Gao, M. Du and D. Wang, *Energy Environ. Sci.*, 2023, 16, 619–628.
+- 15 J. Hao, Z. Zhuang, K. Cao, G. Gao, C. Wang, F. Lai, S. Lu, P. Ma, W. Dong, T. Liu, M. Du and H. Zhu, Nat. Commun., 2022, 13, 2662.
+- 16 Y. Zhu, Q. Xiang, L. Guo, S. Lu, F. Duan, M. Du and H. Zhu, Colloids Surf., A, 2024, 686, 133315.
+- 17 J. Hao, J. Li, Y. Zhu, S. Sun, S. Lu, F. Duan, M. Du and H. Zhu, Chem. Commun., 2023, 59, 772–775.
+- 18 Z. Wang, Q. Hong, B. Miao, T. Wang, Y. Ding, P. Jin, P. Chen and Y. Chen, Chin. Chem. Lett., 2024, 35, 1001–8417.
+- 19 X. Wang, Z. Zhang, Z. Wang, Y. Ding, Q. Zhai, Y. Jiang, S. Li and Y. Chen, *Chem. Eng. J.*, 2023, **465**, 1385–8947.
+- 20 Z. Xia, C. Ma, Y. Fan, Y. Lu, Y. Huang, Y. Pan, Y. Wu, Q. Luo, Y. He, C. Dong, S. Wang and Y. Zou, ACS Catal., 2024, 14, 1930–1938.
+- 21 Z. Yang, S. Wang, C. Wei, L. Chen, Z. Xue and T. Mu, Energy Environ. Sci., 2024, 17, 1603–1611.
+- 22 D. Kim, C. Dang Van, M. S. Lee, M. Kim, M. H. Lee and J. Oh, ACS Catal., 2024, 14, 7717-7725.
+- 23 Y. Yan, H. Zhou, S.-M. Xu, J. Yang, P. Hao, X. Cai, Y. Ren, M. Xu, X. Kong, M. Shao, Z. Li and H. Duan, J. Am. Chem. Soc., 2023, 145, 6144–6155.
+- 24 Y. Wen, T. Wang, J. Hao, Z. Zhuang, G. Gao, F. Lai, S. Lu, X. Wang, Q. Kang, G. Wu, M. Du and H. Zhu, Adv. Funct. Mater., 2024, 34, 2400849.
