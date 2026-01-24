@@ -8,6 +8,9 @@
 import os
 from datetime import datetime
 from typing import List, Dict, Optional, Any, Callable
+import hashlib
+import json
+import uuid
 import chromadb
 from chromadb.config import Settings
 from pathlib import Path
@@ -113,11 +116,15 @@ class VectorStore:
             ids: 文档ID列表（可选）
             embeddings: 预生成向量列表（可选）
         """
+
         if embeddings is not None:
             if ids is None:
-                ids = [f"doc_{i}_{hash(text[:50]) % 1000000}" for i, text in enumerate(documents)]
-            if metadatas is None:
-                metadatas = [{}] * len(documents)
+                ids = self.create_ids(
+                    documents=documents,
+                    metadatas=metadatas,
+                    strategy="content_hash",
+                    prefix="doc"
+                )
             assert len(documents) == len(embeddings) == len(metadatas) == len(ids), \
                 "documents, embeddings, metadatas, ids长度必须一致"
             
@@ -137,19 +144,9 @@ class VectorStore:
             
             logger.info(f"[OK] 添加 {len(documents)} 个文档到集合 '{self.collection_name}'")
             return
-        
-        # 自动生成ID（如果未提供）
-        if ids is None:
-            ids = [f"doc_{i}" for i in range(len(documents))]
-        
-        # 添加文档到集合
-        self.collection.add(
-            documents=documents,
-            metadatas=metadatas,
-            ids=ids
-        )
-        
+
         logger.info(f"成功添加 {len(documents)} 个文档到向量数据库")
+
 
     def update_documents(
         self,
@@ -293,4 +290,41 @@ class VectorStore:
         """
         return self.collection.get()
 
+
+    def create_ids(
+        self,
+        documents: List[str],
+        metadatas: Optional[List[Dict]] = None,
+        strategy: str = "content_hash",
+        prefix: str = "doc"
+    ) -> List[str]:
+        """生成文档ID。
+
+        strategy:
+            - content_hash: 基于 document + metadata 的 sha256 哈希
+            - uuid4: 随机 uuid（仅保证唯一，不保证同内容同ID）
+        """
+        if metadatas is None:
+            metadatas = [{}] * len(documents)
+        if len(metadatas) != len(documents):
+            raise ValueError("metadatas长度必须与documents一致")
+
+        if strategy == "uuid4":
+            return [f"{prefix}_{uuid.uuid4().hex}" for _ in documents]
+
+        if strategy == "content_hash":
+            ids: List[str] = []
+            for doc, meta in zip(documents, metadatas):
+                payload = {"document": doc, "metadata": meta or {}}
+                raw = json.dumps(
+                    payload,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    default=str
+                ).encode("utf-8")
+                digest = hashlib.sha256(raw).hexdigest()
+                ids.append(f"{prefix}_{digest}")
+            return ids
+
+        raise ValueError(f"Unknown id strategy: {strategy}")
 

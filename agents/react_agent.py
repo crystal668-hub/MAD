@@ -9,11 +9,10 @@ ReAct Agent实现模块
 from typing import Dict, List, Optional, Any
 from agents.base_agent import BaseAgent, AgentResponse
 from agents.react_reasoning import (
-    ReActEngine, 
-    ReActTrajectory, 
+    ReActEngine,
+    ReActTrajectory,
     ReActStep,
-    ActionType,
-    create_react_prompt
+    ActionType
 )
 
 
@@ -162,67 +161,107 @@ class ReActAgent(BaseAgent):
         step_number = 0
         last_action = None
         final_answer = None
+
+        system_prompt = (
+            f"{self.get_system_prompt()}\n"
+            "你是一个使用ReAct推理模式的AI助手。"
+            "请在调用工具前先在content中输出Thought。"
+        )
+        messages = trajectory.to_context_messages(system_prompt=system_prompt)
+        if messages and len(messages) > 1:
+            messages[1]["content"] = query_with_context
+        
+        tools_schema = self.react_engine.get_tool_schemas()
         
         while self.react_engine.should_continue(step_number, last_action):
-            step_number += 1
-            
-            # 构建ReAct提示
-            available_tools = [
-                "search_rag: 从文献知识库检索相关信息",
-                "query_experience: 查询历史经验库",
-                "analyze: 分析当前收集的信息",
-                "conclude: 得出最终结论"
-            ]
-            
-            react_prompt = create_react_prompt(
-                query_with_context,
-                trajectory.steps,
-                available_tools
+            response_message = self._call_llm(
+                messages=messages,
+                tools=tools_schema,
+                tool_choice="auto"
             )
             
-            # 调用LLM获取思考和行动
-            llm_response = self._call_llm(react_prompt)
+            thought = response_message.content or ""
+            tool_calls = response_message.tool_calls or []
             
-            # 解析LLM响应
-            thought, action, action_input = self.react_engine.parse_llm_response(llm_response)
-            
-            # 如果没有解析到有效的动作，使用智能默认策略
-            if not thought or not action_input:
-                thought, action, action_input = self._smart_default_action(
-                    step_number, 
-                    trajectory.steps,
-                    components
-                )
-            
-            # 执行动作
-            observation, observation_data = self.react_engine.execute_action(
-                action,
-                action_input
-            )
-            
-            # 创建推理步骤
-            step = ReActStep(
-                step_number=step_number,
-                thought=thought,
-                action=action,
-                action_input=action_input,
-                observation=observation,
-                observation_data=observation_data
-            )
-            
-            # 添加到轨迹
-            trajectory.add_step(step)
-            
-            # 记录步骤
-            self.react_engine.log_step(step)
-            
-            # 如果是结论动作，提取最终答案
-            if action == ActionType.CONCLUDE:
-                final_answer = observation
-                last_action = action
+            if not tool_calls:
+                final_answer = thought.strip()
+                if final_answer:
+                    step_number += 1
+                    final_step = ReActStep(
+                        step_number=step_number,
+                        thought=final_answer,
+                        action=ActionType.CONCLUDE,
+                        action_input={},
+                        observation=final_answer,
+                        tool_call_id=None,
+                        observation_data=None
+                    )
+                    trajectory.add_step(final_step)
+                    self.react_engine.log_step(final_step)
+                last_action = ActionType.CONCLUDE
                 break
             
-            last_action = action
+            assistant_message = {
+                "role": "assistant",
+                "content": response_message.content,
+                "tool_calls": [
+                    {
+                        "id": tool_call.id,
+                        "type": tool_call.type,
+                        "function": {
+                            "name": tool_call.function.name,
+                            "arguments": tool_call.function.arguments
+                        }
+                    }
+                    for tool_call in tool_calls
+                ]
+            }
+            messages.append(assistant_message)
+            
+            for tool_call in tool_calls:
+                step_number += 1
+                function_name = tool_call.function.name
+                action_input = self.react_engine.parse_tool_arguments(
+                    tool_call.function.arguments
+                )
+                
+                try:
+                    action = self.react_engine.resolve_action_type(function_name)
+                    observation, observation_data = self.react_engine.execute_action(
+                        action,
+                        action_input
+                    )
+                except Exception as e:
+                    action = ActionType.ANALYZE
+                    observation = f"工具调用失败: {str(e)}"
+                    observation_data = None
+                
+                step = ReActStep(
+                    step_number=step_number,
+                    thought=thought,
+                    action=action,
+                    action_input=action_input,
+                    observation=observation,
+                    tool_call_id=tool_call.id,
+                    observation_data=observation_data
+                )
+                trajectory.add_step(step)
+                self.react_engine.log_step(step)
+                
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "name": function_name,
+                    "content": str(observation)
+                })
+                
+                if action == ActionType.CONCLUDE:
+                    final_answer = observation
+                    last_action = ActionType.CONCLUDE
+                    break
+            
+            if last_action == ActionType.CONCLUDE:
+                break
         
         # 如果循环结束但没有明确结论，生成最终答案
         if final_answer is None:
@@ -240,15 +279,22 @@ class ReActAgent(BaseAgent):
         
         return response, trajectory
     
-    def _call_llm(self, prompt: str) -> str:
+    def _call_llm(
+        self,
+        messages: List[Dict[str, Any]],
+        tools: Optional[List[Dict[str, Any]]] = None,
+        tool_choice: Optional[str] = None
+    ) -> Any:
         """
         调用LLM（需要在子类中实现具体的调用逻辑）
         
         Args:
-            prompt: 输入提示
+            messages: 消息列表
+            tools: 工具定义列表
+            tool_choice: 工具选择策略
         
         Returns:
-            str: LLM响应
+            Any: LLM响应消息对象
         """
         # 这是一个抽象方法，将在具体的Agent子类中实现
         # 例如在OpenAIReActAgent中调用OpenAI API
@@ -334,8 +380,12 @@ Please synthesize the above information and provide a final conclusion about cat
         
         # 调用LLM生成最终答案
         try:
-            final_answer = self._call_llm(summary_prompt)
-            return final_answer
+            messages = [
+                {"role": "system", "content": self.get_system_prompt()},
+                {"role": "user", "content": summary_prompt}
+            ]
+            response_message = self._call_llm(messages=messages)
+            return response_message.content or ""
         except:
             return "基于推理过程，需要进一步分析才能得出结论。"
     

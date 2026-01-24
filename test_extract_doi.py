@@ -5,7 +5,7 @@ from database.text_processor import TextProcessor
 
 def main() -> int:
     base_dir = Path(__file__).resolve().parent
-    raw_dir = base_dir / "data" / "raw" / "EOR"
+    raw_dir = base_dir / "data" / "raw" / "O5H"
     if not raw_dir.exists():
         print(f"Directory not found: {raw_dir}")
         return 1

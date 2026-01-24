@@ -427,7 +427,7 @@ class TextProcessor:
         Returns:
             List[Document]: Document对象列表
             metadata包含：
-                - reaction_type: 反应类型
+                - reaction_type: 所属反应类型
                 - doc_id: 文献DOI号
         """
         data_path = Path(data_dir)
@@ -439,7 +439,7 @@ class TextProcessor:
             reader = SimpleDirectoryReader(
                 input_dir=str(data_path),
                 required_exts=[".md"],  
-                recursive=False  # 不递归读取子目录
+                recursive=False  
             )
             documents = reader.load_data()
             

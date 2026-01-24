@@ -8,6 +8,7 @@ LLM Agent实现模块
 
 import os
 import re
+from types import SimpleNamespace
 from typing import Dict, List, Optional, Any
 import openai
 
@@ -114,32 +115,39 @@ class OpenAIAgent(ReActAgent):
         """
         return _parse_llm_response(content)
     
-    def _call_llm(self, prompt: str) -> str:
+    def _call_llm(
+        self,
+        messages: List[Dict[str, Any]],
+        tools: Optional[List[Dict[str, Any]]] = None,
+        tool_choice: Optional[str] = None
+    ) -> Any:
         """
         调用OpenAI LLM
         
         Args:
-            prompt: 输入提示
+            messages: 消息列表
+            tools: 工具定义列表
+            tool_choice: 工具选择策略
         
         Returns:
-            str: LLM响应文本
+            Any: LLM响应消息对象
         """
         try:
-            messages = [
-                {"role": "system", "content": self.get_system_prompt()},
-                {"role": "user", "content": prompt}
-            ]
+            request = {
+                "model": self.model,
+                "messages": messages,
+                "temperature": self.temperature,
+                "max_tokens": self.max_tokens
+            }
+            if tools:
+                request["tools"] = tools
+                if tool_choice:
+                    request["tool_choice"] = tool_choice
             
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens
-            )
-            
-            return response.choices[0].message.content
+            response = self.client.chat.completions.create(**request)
+            return response.choices[0].message
         except Exception as e:
-            return f"LLM调用失败: {str(e)}"
+            return SimpleNamespace(role="assistant", content=f"LLM调用失败: {str(e)}", tool_calls=[])
 
 
 class XAIAgent(ReActAgent):
@@ -220,32 +228,39 @@ class XAIAgent(ReActAgent):
         """解析响应（使用统一的解析函数）"""
         return _parse_llm_response(content)
     
-    def _call_llm(self, prompt: str) -> str:
+    def _call_llm(
+        self,
+        messages: List[Dict[str, Any]],
+        tools: Optional[List[Dict[str, Any]]] = None,
+        tool_choice: Optional[str] = None
+    ) -> Any:
         """
         调用xAI Grok LLM
         
         Args:
-            prompt: 输入提示
+            messages: 消息列表
+            tools: 工具定义列表
+            tool_choice: 工具选择策略
         
         Returns:
-            str: LLM响应文本
+            Any: LLM响应消息对象
         """
         try:
-            messages = [
-                {"role": "system", "content": self.get_system_prompt()},
-                {"role": "user", "content": prompt}
-            ]
+            request = {
+                "model": self.model,
+                "messages": messages,
+                "temperature": self.temperature,
+                "max_tokens": self.max_tokens
+            }
+            if tools:
+                request["tools"] = tools
+                if tool_choice:
+                    request["tool_choice"] = tool_choice
             
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens
-            )
-            
-            return response.choices[0].message.content
+            response = self.client.chat.completions.create(**request)
+            return response.choices[0].message
         except Exception as e:
-            return f"LLM调用失败: {str(e)}"
+            return SimpleNamespace(role="assistant", content=f"LLM调用失败: {str(e)}", tool_calls=[])
 
 
 class GoogleAgent(ReActAgent):
@@ -326,32 +341,39 @@ class GoogleAgent(ReActAgent):
         """解析响应（使用统一的解析函数）"""
         return _parse_llm_response(content)
     
-    def _call_llm(self, prompt: str) -> str:
+    def _call_llm(
+        self,
+        messages: List[Dict[str, Any]],
+        tools: Optional[List[Dict[str, Any]]] = None,
+        tool_choice: Optional[str] = None
+    ) -> Any:
         """
         调用Google Gemini LLM
         
         Args:
-            prompt: 输入提示
+            messages: 消息列表
+            tools: 工具定义列表
+            tool_choice: 工具选择策略
         
         Returns:
-            str: LLM响应文本
+            Any: LLM响应消息对象
         """
         try:
-            messages = [
-                {"role": "system", "content": self.get_system_prompt()},
-                {"role": "user", "content": prompt}
-            ]
+            request = {
+                "model": self.model,
+                "messages": messages,
+                "temperature": self.temperature,
+                "max_tokens": self.max_tokens
+            }
+            if tools:
+                request["tools"] = tools
+                if tool_choice:
+                    request["tool_choice"] = tool_choice
             
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens
-            )
-            
-            return response.choices[0].message.content
+            response = self.client.chat.completions.create(**request)
+            return response.choices[0].message
         except Exception as e:
-            return f"LLM调用失败: {str(e)}"
+            return SimpleNamespace(role="assistant", content=f"LLM调用失败: {str(e)}", tool_calls=[])
 
 
 class QwenAgent(ReActAgent):
@@ -413,21 +435,28 @@ class QwenAgent(ReActAgent):
     def _parse_response(self, content: str) -> Dict:
         return _parse_llm_response(content)
     
-    def _call_llm(self, prompt: str) -> str:
+    def _call_llm(
+        self,
+        messages: List[Dict[str, Any]],
+        tools: Optional[List[Dict[str, Any]]] = None,
+        tool_choice: Optional[str] = None
+    ) -> Any:
         try:
-            messages = [
-                {"role": "system", "content": self.get_system_prompt()},
-                {"role": "user", "content": prompt}
-            ]
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens
-            )
-            return response.choices[0].message.content
+            request = {
+                "model": self.model,
+                "messages": messages,
+                "temperature": self.temperature,
+                "max_tokens": self.max_tokens
+            }
+            if tools:
+                request["tools"] = tools
+                if tool_choice:
+                    request["tool_choice"] = tool_choice
+            
+            response = self.client.chat.completions.create(**request)
+            return response.choices[0].message
         except Exception as e:
-            return f"LLM调用失败: {str(e)}"
+            return SimpleNamespace(role="assistant", content=f"LLM调用失败: {str(e)}", tool_calls=[])
 
 
 # ===================================

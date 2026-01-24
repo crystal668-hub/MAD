@@ -48,13 +48,13 @@ def build_vector_database(
     """
     构建向量数据库
     使用LlamaIndex解析Markdown，创建Document对象并进行chunk和索引构建
-    使用Chromadb存储持久化向量数据
+    使用Chromadb进行持久化数据存储
     
     Args:
         config_path: 配置文件路径
-        data_dir: 原始数据目录（包含各反应类型子目录）
+        data_dir: 原始数据目录，包含各反应类型子目录
         reaction_configs: 反应类型配置字典，None则使用默认配置
-        agent_name: 使用的Agent配置名称(默认agent2——voyage-embedding)
+        agent_name: 使用的Agent配置名称
         chunk_size: 分块大小
         chunk_overlap: 分块重叠大小
     """
@@ -123,14 +123,7 @@ def build_vector_database(
     documents = processor.load_reaction_documents(
         base_dir=data_dir,
         reaction_configs=reaction_configs
-    )
-    
-    # 如果按反应目录没有找到，尝试直接从data_dir加载所有md文件
-    if len(documents) == 0:
-        logger.info("\n  未找到按反应类型组织的数据，尝试直接加载data_dir中的文件...")
-        documents = processor.load_documents(
-            data_dir=data_dir
-        )
+    )  
     
     logger.info(f"\n✓ 共加载 {len(documents)} 个Document对象")
     
@@ -170,10 +163,6 @@ def build_vector_database(
         embeddings = embedder.embed_batch(texts, batch_size=10, show_progress=True, agent_name=agent_name)
     except Exception as e:
         logger.error(f"\n✗ 向量化失败: {str(e)}")
-        logger.error("  请检查:")
-        logger.error("    1. API Key是否正确")
-        logger.error("    2. 网络连接是否正常")
-        logger.error("    3. API额度是否充足")
         return
     
     logger.info(f"\n✓ 成功生成 {len(embeddings)} 个向量")
@@ -213,7 +202,6 @@ def build_vector_database(
     logger.info(f"✓ 集合名称: {collection_name}")
     logger.info(f"✓ 存储路径: {vector_config.get('persist_directory')}")
     logger.info(f"✓ 文档总数: {vector_store.get_collection_count()}")
-    
     logger.info("\n" + "=" * 60)
     logger.info("向量数据库构建完成!")
     logger.info("=" * 60)

@@ -10,8 +10,7 @@ from agents.react_reasoning import (
     ReActEngine, 
     ReActTrajectory, 
     ReActStep, 
-    ActionType,
-    create_react_prompt
+    ActionType
 )
 
 __all__ = [
@@ -20,13 +19,12 @@ __all__ = [
     'OpenAIAgent',
     'XAIAgent',
     'GoogleAgent',
-    'DeepSeekAgent',
+    'QwenAgent',
     'create_agent',
     'AgentConfig',
     'ReActAgent',
     'ReActEngine',
     'ReActTrajectory',
     'ReActStep',
-    'ActionType',
-    'create_react_prompt'
+    'ActionType'
 ]
