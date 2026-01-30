@@ -52,6 +52,10 @@ python build_vector_db.py
 # 运行辩论（指定金属催化剂元素）
 python main.py --components "Pt,Pd,Ru,Ir,Rh"
 
+# 选择辩论引擎（默认：langgraph；可选：autogen）
+python main.py --components "Pt,Pd,Ru,Ir,Rh" --engine langgraph
+python main.py --components "Pt,Pd,Ru,Ir,Rh" --engine autogen
+
 # 跳过RAG系统初始化（快速测试）
 python main.py --components "Pt,Pd,Ru,Ir,Rh" --skip-rag
 
@@ -202,10 +206,10 @@ results = store.query_experiences(
 主要配置位于 `config/config.yaml`：
 
 - **llm**: 四个Agent的LLM配置
-  - agent1: OpenAI GPT-4o-mini
-  - agent2: xAI Grok-4.1-fast  
-  - agent3: Google Gemini-3-pro
-  - agent4: DeepSeek V3.2
+    - agent1: OpenAI GPT-4o-mini
+    - agent2: DeepSeek V3.2  
+    - agent3: Google Gemini-3-pro
+    - agent4: Qwen3-Max
   - 每个均配置独立的embedding模型
 
 - **vector_store**: Chroma向量数据库配置

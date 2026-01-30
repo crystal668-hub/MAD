@@ -1,354 +1,439 @@
 """
-===================================
-经验存储模块
-功能：管理辩论经验的存储、检索和更新
-===================================
+Experience store.
+
+This project supports two types of "experience":
+1) Dynamic experiences saved as JSON (append-only) from debate runs.
+2) Read-only "experience packs" stored as YAML files (one file or a directory of files).
+
+YAML pack formats supported:
+- Explicit list: {"experiences": [ {...}, {...} ]}
+- Top-level list: [ {...}, {...} ]
+- Hydra-style agent config: {"agent": {"instructions": "...[G0]. ..."}}
+  In this case we extract guideline blocks like:
+    [G0]. Title: content...
+    [G1]. ...
+  and expose them as global experiences (no components).
 """
 
+from __future__ import annotations
+
 import json
-import os
-from typing import List, Dict, Optional
+import re
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, Iterable, List, Optional, Tuple
+
+import yaml
+
+
+def _normalize_component(value: str) -> str:
+    return str(value or "").strip().lower()
+
+
+def _ensure_list_str(value: Any) -> List[str]:
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple)):
+        return [str(x).strip() for x in value if str(x).strip()]
+    # Accept "Pt, Pd" strings as a convenience.
+    if isinstance(value, str):
+        parts = [p.strip() for p in re.split(r"[,，;；]", value) if p.strip()]
+        return parts
+    return [str(value).strip()] if str(value).strip() else []
 
 
 class ExperienceStore:
     """
-    经验库管理类
-    负责存储、检索和管理历史辩论经验
+    Experience store with optional YAML pack loading.
+
+    Args:
+        storage_path:
+            - ".json" file path: dynamic store (read/write)
+            - ".yaml"/".yml" file path OR directory: treated as a read-only pack root
+        packs_path:
+            Optional extra pack root (file or directory). If omitted, defaults to the
+            built-in `./experience` directory (the folder containing this file).
     """
-    
+
     def __init__(
         self,
         storage_path: str,
         max_experiences: int = 1000,
-        relevance_threshold: float = 0.8
-    ):
-        """
-        初始化经验库
-        
-        Args:
-            storage_path: 经验库存储路径
-            max_experiences: 最大存储经验数量
-            relevance_threshold: 经验相关性阈值
-        """
+        relevance_threshold: float = 0.8,
+        packs_path: Optional[str] = None,
+    ) -> None:
         self.storage_path = Path(storage_path)
-        self.max_experiences = max_experiences
-        self.relevance_threshold = relevance_threshold
-        
-        # 确保存储目录存在
-        self.storage_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        # 加载已有经验
-        self.experiences = self._load_experiences()
-        
-        print(f"经验库初始化完成，当前包含 {len(self.experiences)} 条经验")
-    
-    def _load_experiences(self) -> List[Dict]:
-        """
-        从磁盘加载经验
-        
-        Returns:
-            List[Dict]: 经验列表
-        """
-        if not self.storage_path.exists():
-            print(f"经验库文件不存在，创建新的经验库: {self.storage_path}")
+        self.max_experiences = int(max_experiences)
+        self.relevance_threshold = float(relevance_threshold)
+
+        self._json_path: Optional[Path] = None
+        if self.storage_path.suffix.lower() == ".json":
+            self._json_path = self.storage_path
+
+        # Pack roots:
+        # - If storage_path is YAML or a directory, treat it as a pack root.
+        # - Always load the built-in packs (folder containing this file).
+        # - Allow the caller to specify an extra packs_path.
+        pack_roots: List[Path] = []
+        if self.storage_path.is_dir() or self.storage_path.suffix.lower() in {".yaml", ".yml"}:
+            pack_roots.append(self.storage_path)
+
+        builtin_packs = Path(__file__).resolve().parent
+        pack_roots.append(builtin_packs)
+
+        if packs_path:
+            pack_roots.append(Path(packs_path))
+
+        self._pack_roots = self._dedupe_paths(pack_roots)
+
+        self._dynamic_experiences: List[Dict[str, Any]] = self._load_dynamic_experiences()
+        self._pack_experiences: List[Dict[str, Any]] = self._load_pack_experiences(self._pack_roots)
+
+        # Public view (for compatibility with older code/docs).
+        self.experiences: List[Dict[str, Any]] = self._pack_experiences + self._dynamic_experiences
+
+    # -------------------------
+    # Loading
+    # -------------------------
+
+    @staticmethod
+    def _dedupe_paths(paths: List[Path]) -> List[Path]:
+        seen: set[str] = set()
+        out: List[Path] = []
+        for p in paths:
+            try:
+                key = str(p.resolve())
+            except Exception:
+                key = str(p)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(p)
+        return out
+
+    def _load_dynamic_experiences(self) -> List[Dict[str, Any]]:
+        if self._json_path is None:
             return []
-        
+        if not self._json_path.exists():
+            return []
+
         try:
-            with open(self.storage_path, 'r', encoding='utf-8') as f:
-                experiences = json.load(f)
-            return experiences
-        except json.JSONDecodeError:
-            print("警告：经验库文件损坏，创建新的经验库")
+            with open(self._json_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, list):
+                # Mark as writable entries.
+                return [self._coerce_dynamic_entry(x) for x in data if isinstance(x, dict)]
             return []
-        except Exception as e:
-            print(f"加载经验库失败: {str(e)}")
+        except Exception:
+            # Corrupt or unreadable store: treat as empty (do not crash the runtime).
             return []
-    
-    def _save_experiences(self) -> None:
-        """保存经验到磁盘"""
+
+    def _coerce_dynamic_entry(self, entry: Dict[str, Any]) -> Dict[str, Any]:
+        out = dict(entry)
+        out.setdefault("_readonly", False)
+        out["components"] = _ensure_list_str(out.get("components"))
+        return out
+
+    def _load_pack_experiences(self, pack_roots: List[Path]) -> List[Dict[str, Any]]:
+        experiences: List[Dict[str, Any]] = []
+        for root in pack_roots:
+            for yaml_file in self._iter_yaml_files(root):
+                experiences.extend(self._load_yaml_pack_file(yaml_file))
+        return experiences
+
+    @staticmethod
+    def _iter_yaml_files(root: Path) -> Iterable[Path]:
+        if not root.exists():
+            return []
+        if root.is_file():
+            if root.suffix.lower() in {".yaml", ".yml"}:
+                return [root]
+            return []
+
+        files: List[Path] = []
         try:
-            with open(self.storage_path, 'w', encoding='utf-8') as f:
-                json.dump(self.experiences, f, ensure_ascii=False, indent=2)
-            print(f"经验库已保存，共 {len(self.experiences)} 条经验")
-        except Exception as e:
-            print(f"保存经验库失败: {str(e)}")
-    
-    def add_experience(self, experience: Dict) -> None:
+            files.extend(sorted(root.glob("*.yaml")))
+            files.extend(sorted(root.glob("*.yml")))
+        except Exception:
+            return []
+        return files
+
+    def _load_yaml_pack_file(self, path: Path) -> List[Dict[str, Any]]:
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+        except Exception:
+            return []
+
+        items: List[Dict[str, Any]] = []
+
+        if isinstance(data, list):
+            items = [x for x in data if isinstance(x, dict)]
+        elif isinstance(data, dict):
+            if isinstance(data.get("experiences"), list):
+                items = [x for x in data.get("experiences", []) if isinstance(x, dict)]
+            else:
+                # Hydra-like pack: parse agent.instructions guidelines into experiences.
+                agent = data.get("agent") if isinstance(data.get("agent"), dict) else None
+                instructions = agent.get("instructions") if isinstance(agent, dict) else None
+                if isinstance(instructions, str) and instructions.strip():
+                    return self._extract_guideline_experiences(instructions, source_file=path)
+                return []
+        else:
+            return []
+
+        return [self._coerce_pack_entry(x, source_file=path, idx=i) for i, x in enumerate(items)]
+
+    def _coerce_pack_entry(self, entry: Dict[str, Any], source_file: Path, idx: int) -> Dict[str, Any]:
+        out = dict(entry)
+        out.setdefault("_readonly", True)
+        out.setdefault("kind", out.get("kind") or "case")
+        out.setdefault("source_file", str(source_file))
+        out.setdefault("source_pack", source_file.name)
+        out.setdefault("id", f"pack:{source_file.name}:{idx}")
+        out["components"] = _ensure_list_str(out.get("components"))
+        return out
+
+    def _extract_guideline_experiences(self, instructions: str, source_file: Path) -> List[Dict[str, Any]]:
+        guidelines = self._parse_guidelines(instructions)
+        experiences: List[Dict[str, Any]] = []
+        for rank, (gid, text) in enumerate(guidelines, 1):
+            title, content = self._split_title_content(text)
+            experiences.append(
+                {
+                    "id": f"pack:{source_file.name}:{gid}",
+                    "kind": "guideline",
+                    "_readonly": True,
+                    "source_file": str(source_file),
+                    "source_pack": source_file.name,
+                    "guideline_id": gid,
+                    "rank": rank,
+                    "title": title,
+                    "content": content,
+                    "components": [],
+                    "reaction_type": "GLOBAL",
+                }
+            )
+        return experiences
+
+    @staticmethod
+    def _parse_guidelines(instructions: str) -> List[Tuple[str, str]]:
         """
-        添加新经验
-        
-        Args:
-            experience: 经验字典，应包含以下字段:
-                - components: 化学组分列表
-                - reaction_type: 反应类型
-                - overpotential: 过电势
-                - reasoning: 推理过程
-                - debate_rounds: 辩论轮数
-                - confidence: 置信度
+        Extract blocks that start with "[G0].", "[G1].", ... from an instructions string.
+        Returns: [(guideline_id, text), ...]
         """
-        # 添加时间戳和唯一ID
-        experience['id'] = self._generate_experience_id()
-        experience['timestamp'] = datetime.now().isoformat()
-        
-        # 添加到经验列表
-        self.experiences.append(experience)
-        
-        # 如果超过最大容量，移除最旧的经验
-        if len(self.experiences) > self.max_experiences:
-            self.experiences = self.experiences[-self.max_experiences:]
-            print(f"经验库已满，移除最旧的经验，当前保留 {len(self.experiences)} 条")
-        
-        # 保存到磁盘
-        self._save_experiences()
-        
-        print(f"新经验已添加: {experience.get('reaction_type', '未知')} "
-              f"(组分数: {len(experience.get('components', []))})")
-    
-    def _generate_experience_id(self) -> str:
-        """
-        生成经验的唯一ID
-        
-        Returns:
-            str: 唯一ID
-        """
+        lines = instructions.splitlines()
+        current_id: Optional[str] = None
+        current_text: List[str] = []
+        out: List[Tuple[str, str]] = []
+
+        pat = re.compile(r"^\s*\[(G\d+)\]\.\s*(.*)\s*$")
+        for line in lines:
+            m = pat.match(line)
+            if m:
+                if current_id is not None:
+                    out.append((current_id, " ".join(current_text).strip()))
+                current_id = m.group(1)
+                current_text = [m.group(2).strip()]
+                continue
+
+            if current_id is None:
+                continue
+
+            cont = line.strip()
+            if cont:
+                current_text.append(cont)
+
+        if current_id is not None:
+            out.append((current_id, " ".join(current_text).strip()))
+
+        return out
+
+    @staticmethod
+    def _split_title_content(text: str) -> Tuple[str, str]:
+        if not text:
+            return "Guideline", ""
+        if ":" in text:
+            title, rest = text.split(":", 1)
+            title = title.strip() or "Guideline"
+            rest = rest.strip()
+            return title, rest
+        return "Guideline", text.strip()
+
+    # -------------------------
+    # CRUD (dynamic JSON only)
+    # -------------------------
+
+    def _save_dynamic(self) -> None:
+        if self._json_path is None:
+            return
+        try:
+            self._json_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self._json_path, "w", encoding="utf-8") as f:
+                json.dump(self._dynamic_experiences, f, ensure_ascii=False, indent=2)
+        except Exception:
+            # Best-effort: do not crash.
+            return
+
+    def add_experience(self, experience: Dict[str, Any]) -> None:
+        """Append an experience to the dynamic JSON store (if configured)."""
+        exp = dict(experience or {})
+        exp.setdefault("_readonly", False)
+        exp.setdefault("id", self._generate_experience_id())
+        exp.setdefault("timestamp", datetime.now().isoformat())
+        exp["components"] = _ensure_list_str(exp.get("components"))
+
+        self._dynamic_experiences.append(exp)
+        if len(self._dynamic_experiences) > self.max_experiences:
+            self._dynamic_experiences = self._dynamic_experiences[-self.max_experiences :]
+
+        self._save_dynamic()
+        self.experiences = self._pack_experiences + self._dynamic_experiences
+
+    @staticmethod
+    def _generate_experience_id() -> str:
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
         return f"exp_{timestamp}"
-    
+
+    # -------------------------
+    # Query
+    # -------------------------
+
     def query_experiences(
         self,
         components: List[str],
         top_k: int = 3,
-        min_similarity: Optional[float] = None
-    ) -> List[Dict]:
+        min_similarity: Optional[float] = None,
+    ) -> List[Dict[str, Any]]:
         """
-        查询相关经验
-        
-        Args:
-            components: 化学组分列表
-            top_k: 返回top-k个最相关的经验
-            min_similarity: 最小相似度阈值（可选）
-        
-        Returns:
-            List[Dict]: 相关经验列表
+        Query experiences by component overlap (Jaccard similarity).
+
+        Behavior:
+        - Returns component-matched experiences first (above threshold).
+        - If there are not enough matches, fills the remainder with global guideline experiences.
         """
+        comps_norm = [_normalize_component(c) for c in (components or []) if _normalize_component(c)]
+        top_k = max(1, int(top_k))
+
         if not self.experiences:
             return []
-        
-        # 计算每个经验与查询的相似度
-        scored_experiences = []
+
+        threshold = float(min_similarity) if min_similarity is not None else self.relevance_threshold
+
+        matched: List[Dict[str, Any]] = []
+        global_guides: List[Dict[str, Any]] = []
+
         for exp in self.experiences:
-            similarity = self._calculate_similarity(
-                components,
-                exp.get('components', [])
-            )
-            
-            # 应用相似度阈值
-            threshold = min_similarity if min_similarity is not None else self.relevance_threshold
-            if similarity >= threshold:
-                exp_with_score = exp.copy()
-                exp_with_score['similarity'] = similarity
-                scored_experiences.append(exp_with_score)
-        
-        # 按相似度排序
-        scored_experiences.sort(key=lambda x: x['similarity'], reverse=True)
-        
-        # 返回top-k结果
-        return scored_experiences[:top_k]
-    
-    def _calculate_similarity(
-        self,
-        components1: List[str],
-        components2: List[str]
-    ) -> float:
-        """
-        计算两个组分列表的相似度
-        使用Jaccard相似度（可以替换为更复杂的方法）
-        
-        Args:
-            components1: 组分列表1
-            components2: 组分列表2
-        
-        Returns:
-            float: 相似度（0-1）
-        """
-        # 转换为集合
-        set1 = set(c.lower() for c in components1)
-        set2 = set(c.lower() for c in components2)
-        
-        # 计算Jaccard相似度
+            exp_components = _ensure_list_str(exp.get("components"))
+            if exp_components:
+                # If the model didn't provide query components, avoid returning arbitrary
+                # component-specific cases; fall back to global guideline experiences.
+                if not comps_norm:
+                    continue
+                similarity = self._calculate_similarity(comps_norm, exp_components)
+                exp_with_score = dict(exp)
+                exp_with_score["similarity"] = similarity
+                if similarity >= threshold:
+                    matched.append(exp_with_score)
+            else:
+                if exp.get("kind") == "guideline":
+                    global_guides.append(dict(exp))
+
+        matched.sort(key=lambda x: float(x.get("similarity", 0.0)), reverse=True)
+        global_guides.sort(key=lambda x: int(x.get("rank", 10_000)))
+
+        results: List[Dict[str, Any]] = matched[:top_k]
+        if len(results) < top_k:
+            results.extend(global_guides[: (top_k - len(results))])
+
+        # Last-resort fallback: if nothing passed threshold but we have scored candidates,
+        # return the best matches anyway.
+        if not results and comps_norm:
+            scored_all: List[Dict[str, Any]] = []
+            for exp in self.experiences:
+                exp_components = _ensure_list_str(exp.get("components"))
+                if not exp_components:
+                    continue
+                similarity = self._calculate_similarity(comps_norm, exp_components)
+                exp_with_score = dict(exp)
+                exp_with_score["similarity"] = similarity
+                scored_all.append(exp_with_score)
+            scored_all.sort(key=lambda x: float(x.get("similarity", 0.0)), reverse=True)
+            return scored_all[:top_k]
+
+        return results
+
+    @staticmethod
+    def _calculate_similarity(components1: List[str], components2: List[str]) -> float:
+        set1 = set(_normalize_component(c) for c in (components1 or []) if _normalize_component(c))
+        set2 = set(_normalize_component(c) for c in (components2 or []) if _normalize_component(c))
+
         if not set1 and not set2:
             return 1.0
-        
-        intersection = len(set1 & set2)
-        union = len(set1 | set2)
-        
-        return intersection / union if union > 0 else 0.0
-    
-    def get_statistics(self) -> Dict:
-        """
-        获取经验库统计信息
-        
-        Returns:
-            Dict: 统计信息
-        """
-        if not self.experiences:
-            return {
-                "total_experiences": 0,
-                "reaction_type_distribution": {},
-                "avg_debate_rounds": 0,
-                "avg_overpotential": 0
-            }
-        
-        # 统计反应类型分布
-        reaction_counts = {}
-        for exp in self.experiences:
-            reaction = exp.get('reaction_type', '未知')
-            reaction_counts[reaction] = reaction_counts.get(reaction, 0) + 1
-        
-        # 计算平均辩论轮数
-        rounds = [exp.get('debate_rounds', 0) for exp in self.experiences]
-        avg_rounds = sum(rounds) / len(rounds) if rounds else 0
-        
-        # 计算平均过电势
-        potentials = [
-            exp.get('overpotential', 0) for exp in self.experiences
-            if exp.get('overpotential') is not None
-        ]
-        avg_potential = sum(potentials) / len(potentials) if potentials else 0
-        
-        return {
-            "total_experiences": len(self.experiences),
-            "reaction_type_distribution": reaction_counts,
-            "avg_debate_rounds": round(avg_rounds, 2),
-            "avg_overpotential": round(avg_potential, 4)
-        }
-    
-    def search_by_reaction_type(self, reaction_type: str) -> List[Dict]:
-        """
-        按反应类型搜索经验
-        
-        Args:
-            reaction_type: 反应类型
-        
-        Returns:
-            List[Dict]: 匹配的经验列表
-        """
-        return [
-            exp for exp in self.experiences
-            if exp.get('reaction_type') == reaction_type
-        ]
-    
+
+        union = set1 | set2
+        if not union:
+            return 0.0
+
+        intersection = set1 & set2
+        return len(intersection) / len(union)
+
+    # -------------------------
+    # Compatibility helpers
+    # -------------------------
+
+    def get_statistics(self) -> Dict[str, Any]:
+        total = len(self.experiences or [])
+        reaction_counts: Dict[str, int] = {}
+        for exp in self.experiences or []:
+            rt = exp.get("reaction_type") or "unknown"
+            reaction_counts[rt] = reaction_counts.get(rt, 0) + 1
+        return {"total_experiences": total, "reaction_type_distribution": reaction_counts}
+
+    def search_by_reaction_type(self, reaction_type: str) -> List[Dict[str, Any]]:
+        return [e for e in (self.experiences or []) if (e.get("reaction_type") == reaction_type)]
+
     def delete_experience(self, experience_id: str) -> bool:
-        """
-        删除指定经验
-        
-        Args:
-            experience_id: 经验ID
-        
-        Returns:
-            bool: 是否删除成功
-        """
-        initial_count = len(self.experiences)
-        self.experiences = [
-            exp for exp in self.experiences
-            if exp.get('id') != experience_id
-        ]
-        
-        if len(self.experiences) < initial_count:
-            self._save_experiences()
-            print(f"经验 {experience_id} 已删除")
-            return True
-        else:
-            print(f"未找到经验 {experience_id}")
+        """Delete from the dynamic store only."""
+        before = len(self._dynamic_experiences)
+        self._dynamic_experiences = [e for e in self._dynamic_experiences if e.get("id") != experience_id]
+        if len(self._dynamic_experiences) == before:
             return False
-    
+        self._save_dynamic()
+        self.experiences = self._pack_experiences + self._dynamic_experiences
+        return True
+
     def clear_all(self) -> None:
-        """
-        清空所有经验
-        警告：此操作不可逆
-        """
-        self.experiences = []
-        self._save_experiences()
-        print("所有经验已清空")
-    
+        """Clear the dynamic store only."""
+        self._dynamic_experiences = []
+        self._save_dynamic()
+        self.experiences = list(self._pack_experiences)
+
     def export_to_file(self, export_path: str) -> None:
-        """
-        导出经验库到文件
-        
-        Args:
-            export_path: 导出文件路径
-        """
+        """Export the full experience view (packs + dynamic) as JSON."""
         try:
-            with open(export_path, 'w', encoding='utf-8') as f:
+            out_path = Path(export_path)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(out_path, "w", encoding="utf-8") as f:
                 json.dump(self.experiences, f, ensure_ascii=False, indent=2)
-            print(f"经验库已导出到: {export_path}")
-        except Exception as e:
-            print(f"导出失败: {str(e)}")
-    
+        except Exception:
+            return
+
     def import_from_file(self, import_path: str, merge: bool = True) -> None:
-        """
-        从文件导入经验
-        
-        Args:
-            import_path: 导入文件路径
-            merge: 是否合并到现有经验（True）还是替换（False）
-        """
+        """Import into the dynamic store only."""
         try:
-            with open(import_path, 'r', encoding='utf-8') as f:
-                imported_experiences = json.load(f)
-            
+            with open(import_path, "r", encoding="utf-8") as f:
+                imported = json.load(f)
+            if not isinstance(imported, list):
+                return
+            imported_dicts = [self._coerce_dynamic_entry(x) for x in imported if isinstance(x, dict)]
             if merge:
-                self.experiences.extend(imported_experiences)
+                self._dynamic_experiences.extend(imported_dicts)
             else:
-                self.experiences = imported_experiences
-            
-            # 限制最大数量
-            if len(self.experiences) > self.max_experiences:
-                self.experiences = self.experiences[-self.max_experiences:]
-            
-            self._save_experiences()
-            print(f"成功导入 {len(imported_experiences)} 条经验")
-            
-        except Exception as e:
-            print(f"导入失败: {str(e)}")
-
-
-# ===================================
-# 使用示例
-# ===================================
-if __name__ == "__main__":
-    # 初始化经验库
-    store = ExperienceStore(
-        storage_path="./data/experience_db.json",
-        max_experiences=1000
-    )
-    
-    # 添加测试经验
-    test_experience = {
-        "components": ["硫酸", "氢氧化钠", "氯化钠", "硝酸", "碳酸钙"],
-        "reaction_type": "氧化还原反应",
-        "overpotential": 0.45,
-        "reasoning": "基于组分的氧化还原特性...",
-        "debate_rounds": 3,
-        "confidence": 0.9
-    }
-    
-    store.add_experience(test_experience)
-    
-    # 查询相关经验
-    results = store.query_experiences(
-        components=["硫酸", "氢氧化钠", "氯化钠"],
-        top_k=3
-    )
-    
-    print(f"\n查询结果: {len(results)} 条相关经验")
-    for exp in results:
-        print(f"  - {exp['reaction_type']} (相似度: {exp['similarity']:.2f})")
-    
-    # 打印统计信息
-    stats = store.get_statistics()
-    print(f"\n经验库统计:")
-    print(f"  总经验数: {stats['total_experiences']}")
-    print(f"  平均辩论轮数: {stats['avg_debate_rounds']}")
+                self._dynamic_experiences = imported_dicts
+            if len(self._dynamic_experiences) > self.max_experiences:
+                self._dynamic_experiences = self._dynamic_experiences[-self.max_experiences :]
+            self._save_dynamic()
+            self.experiences = self._pack_experiences + self._dynamic_experiences
+        except Exception:
+            return

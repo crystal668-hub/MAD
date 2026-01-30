@@ -244,14 +244,12 @@ agent.react_engine.register_tool(
 ### Agent类继承关系
 
 ```
-BaseAgent (基类)
-    ↓
-ReActAgent (ReAct能力)
+ReActAgent (基类, ReAct能力)
     ↓
 ├── OpenAIAgent
-├── XAIAgent
+├── DeepSeekAgent
 ├── GoogleAgent
-└── DeepSeekAgent
+└── QwenAgent
 ```
 
 所有具体的LLM Agent都已集成ReAct能力。
@@ -404,4 +402,4 @@ ReAct推理能力为Agent系统带来了：
 - 更灵活的扩展性
 - 更便于调试和优化
 
-所有现有的Agent (OpenAI, xAI, Google, DeepSeek) 都已支持ReAct推理，可以通过`generate_response_with_react()`方法直接使用。
+所有现有的Agent (OpenAI, DeepSeek, Google, Qwen) 都已支持ReAct推理，可以通过`generate_response_with_react()`方法直接使用。

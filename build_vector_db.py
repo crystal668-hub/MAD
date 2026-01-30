@@ -174,7 +174,7 @@ def build_vector_database(
     vector_store = VectorStore(
         persist_directory=vector_config.get('persist_directory', './data/chroma_db'),
         collection_name=collection_name,  
-        embedding_function=None  
+        embedding_function=None  # 使用预生成的向量 
     )
     
     # 清空已有数据（可选）

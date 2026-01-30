@@ -54,9 +54,9 @@ MAD/
 
 ### 3. Agent Definition (agents/)
 - **Agent 1**: Based on OpenAI GPT-5.2
-- **Agent 2**: Based on xAI Grok-4
+- **Agent 2**: Based on DeepSeek V3.2
 - **Agent 3**: Based on Google Gemini-3-pro
-- **Agent 4**: Based on DeepSeek V3.2
+- **Agent 4**: Based on Qwen3-Max
 - Each Agent is equipped with an independent RAG system for retrieval augmentation
 - Specialized in analyzing metal catalyst performance and electrochemical reactions
 - **🆕 ReAct Capability**: All Agents support ReAct (Reasoning + Acting) reasoning mode
@@ -107,9 +107,9 @@ pip install -r requirements.txt
 创建 `.env` 文件并填入API密钥：
 ```
 OPENAI_API_KEY=your_openai_api_key
-XAI_API_KEY=your_xai_api_key
 GOOGLE_API_KEY=your_google_api_key
-DEEPSEEK_API_KEY=your_deepseek_api_key
+DEEPSEEK_API_KEY=your_openrouter_api_key_for_deepseek
+QWEN_API_KEY=your_qwen_api_key
 ```
 
 5. 准备数据
@@ -127,6 +127,10 @@ python build_vector_db.py
 ```bash
 # 传统方式：使用多Agent辩论
 python main.py --components "Pt,Pd,Ru,Ir,Rh"
+
+# 选择辩论引擎（默认：langgraph；可选：autogen）
+python main.py --components "Pt,Pd,Ru,Ir,Rh" --engine langgraph
+python main.py --components "Pt,Pd,Ru,Ir,Rh" --engine autogen
 
 # 🆕 ReAct方式：使用ReAct推理
 python example_react.py

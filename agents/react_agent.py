@@ -1,437 +1,720 @@
 """
-===================================
-ReAct Agent实现模块
-功能：集成ReAct推理能力的Agent
-支持通过Thought→Action→Observation循环进行推理
-===================================
+LangChain-based ReAct Agent.
+
+Goal:
+- Keep explicit "Thought -> Action -> Observation" trajectories.
+- Avoid manual OpenAI tool message formatting by using LangChain message classes.
+- Keep the original 4 tools: search_rag, search_experience, analyze, conclude.
+
+Design:
+Each ReAct iteration runs TWO LLM calls:
+1) THOUGHT call (no tools): force explicit reasoning text.
+2) ACTION call (with tools): model emits tool calls; we execute them and record observations.
+
+Notes:
+- The project currently uses OpenAI-compatible chat APIs (OpenRouter/DashScope). This agent
+  builds a ChatOpenAI instance from config.yaml fields: model/api_key/base_url/temperature/max_tokens.
+- LangChain is imported lazily so the codebase stays importable in minimal environments.
 """
 
-from typing import Dict, List, Optional, Any
-from agents.base_agent import BaseAgent, AgentResponse
-from agents.react_reasoning import (
-    ReActEngine,
-    ReActTrajectory,
-    ReActStep,
-    ActionType
-)
+from __future__ import annotations
+
+import inspect
+import os
+import re
+from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional, Tuple
+
+from agents.react_reasoning import ReActTrajectory, ReActStep, ActionType, ToolCallRecord
+from utils.source_id import build_chroma_source_id
 
 
-class ReActAgent(BaseAgent):
+@dataclass
+class AgentResponse:
+    """Agent response payload."""
+
+    content: str
+    reasoning: Optional[str] = None
+    confidence: Optional[float] = None
+    sources: Optional[List[Dict[str, Any]]] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class ToolResult:
+    """Return type for tools that keeps raw data while displaying a compact observation."""
+
+    observation: str
+    data: Any = None
+
+    def __str__(self) -> str:  # ToolMessage content
+        return self.observation
+
+
+def _resolve_env_var(value: Optional[str]) -> Optional[str]:
+    if value and value.startswith("${") and value.endswith("}"):
+        return os.getenv(value[2:-1])
+    return value
+
+
+def _lazy_langchain_imports():
+    try:
+        from langchain_openai import ChatOpenAI  # type: ignore
+        from langchain_core.messages import (  # type: ignore
+            SystemMessage,
+            HumanMessage,
+            AIMessage,
+            ToolMessage,
+        )
+        from langchain_core.tools import StructuredTool  # type: ignore
+    except Exception as e:  
+        raise ImportError(
+            "LangChain dependencies not found. Install: langchain-core langchain-openai."
+        ) from e
+
+    return ChatOpenAI, SystemMessage, HumanMessage, AIMessage, ToolMessage, StructuredTool
+
+
+def _build_chat_model_from_config(model_config: Dict[str, Any]):
+    ChatOpenAI, *_rest = _lazy_langchain_imports()
+
+    api_key = _resolve_env_var(model_config.get("api_key"))
+    if not api_key:
+        raise ValueError("API key not provided (or env var not set) in model_config")
+
+    base_url = model_config.get("base_url") or "https://openrouter.ai/api/v1"
+    model = model_config.get("model") or "gpt-4"
+    temperature = float(model_config.get("temperature", 0.9))
+    max_tokens = int(model_config.get("max_tokens", 2000))
+
+    sig = inspect.signature(ChatOpenAI)
+    kwargs: Dict[str, Any] = {
+        "model": model,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+
+    # Support both old/new param names across langchain_openai versions.
+    if "api_key" in sig.parameters:
+        kwargs["api_key"] = api_key
+    elif "openai_api_key" in sig.parameters:
+        kwargs["openai_api_key"] = api_key
+
+    if "base_url" in sig.parameters:
+        kwargs["base_url"] = base_url
+    elif "openai_api_base" in sig.parameters:
+        kwargs["openai_api_base"] = base_url
+
+    return ChatOpenAI(**kwargs)
+
+
+class ReActAgent:
     """
-    具备ReAct推理能力的Agent
-    将推理过程分解为明确的思考、行动和观察步骤
+    Memoryless-per-call agent that produces explicit ReAct trajectories.
+
+    Compatibility:
+    - Keeps generate_response_with_react(...) signature used by debate coordinators.
+    - Keeps generate_response(...) for legacy callers.
     """
-    
+
     def __init__(
         self,
         agent_id: str,
         name: str,
-        model_config: Dict,
+        model_config: Dict[str, Any],
         rag_system: Optional[Any] = None,
         experience_store: Optional[Any] = None,
+        system_prompt: Optional[str] = None,
         max_react_steps: int = 10,
-        verbose: bool = True
-    ):
-        """
-        初始化ReAct Agent
-        
-        Args:
-            agent_id: Agent唯一标识符
-            name: Agent名称
-            model_config: 模型配置字典
-            rag_system: RAG系统实例
-            experience_store: 经验库实例
-            max_react_steps: ReAct推理的最大步骤数
-            verbose: 是否输出详细日志
-        """
-        super().__init__(agent_id, name, model_config, rag_system, experience_store)
-        
-        # 初始化ReAct引擎
-        self.react_engine = ReActEngine(max_steps=max_react_steps, verbose=verbose)
-        
-        # 注册工具
-        self._register_tools()
-        
-        # 当前推理轨迹
+        verbose: bool = True,
+    ) -> None:
+        self.agent_id = agent_id
+        self.name = name
+        self.model_config = dict(model_config or {})
+        self.rag_system = rag_system
+        self.experience_store = experience_store
+        self.system_prompt = system_prompt or ""
+        self.max_react_steps = int(max_react_steps)
+        self.verbose = bool(verbose)
+
         self.current_trajectory: Optional[ReActTrajectory] = None
-    
-    def _register_tools(self) -> None:
-        """注册ReAct可用的工具"""
-        # 注册RAG检索工具
-        self.react_engine.register_tool(
-            ActionType.SEARCH_RAG,
-            self._tool_search_rag
+
+        # Lazy init
+        self._llm = None
+
+    # -------------------------
+    # Tools (raw retrieval)
+    # -------------------------
+
+    def retrieve_knowledge(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+        if self.rag_system is None:
+            raise RuntimeError("RAG System is not configured.")
+        try:
+            results = self.rag_system.retrieve(query)
+            return (results or [])[: int(top_k)]
+        except Exception as e:
+            return [{"text": "", "score": 0.0, "metadata": {}, "error": str(e)}]
+
+    def retrieve_experience(self, components: List[str], top_k: int = 5) -> List[Dict[str, Any]]:
+        if self.experience_store is None:
+            return []
+        try:
+            return self.experience_store.query_experiences(components=components, top_k=int(top_k)) or []
+        except Exception as e:
+            return [{"error": str(e), "components": components}]
+
+    # -------------------------
+    # LangChain tool wrappers
+    # -------------------------
+
+    def _tool_search_rag(self, query: str, top_k: int = 5) -> ToolResult:
+        results = self.retrieve_knowledge(query=query, top_k=top_k)
+
+        # Enrich with stable source_id for later verification.
+        collection = getattr(self.rag_system, "collection_name", "unknown")
+        for item in results or []:
+            meta = item.get("metadata") or {}
+            doc_id = meta.get("doc_id") or meta.get("doi") or meta.get("id")
+            chunk_id = meta.get("chunk_id")
+            if doc_id is None or chunk_id is None:
+                continue
+            try:
+                item["source_id"] = build_chroma_source_id(str(collection), str(doc_id), int(chunk_id))
+            except Exception:
+                continue
+
+        observation = _format_rag_observation(results)
+        return ToolResult(observation=observation, data=results)
+
+    def _tool_search_experience(self, components: List[str], top_k: int = 3) -> ToolResult:
+        experiences = self.retrieve_experience(components=components, top_k=top_k)
+        observation = _format_experience_observation(experiences)
+        return ToolResult(observation=observation, data=experiences)
+
+    def _tool_analyze(self, gap_analysis: str, next_step_plan: str) -> ToolResult:
+        payload = {"gap_analysis": gap_analysis, "next_step_plan": next_step_plan}
+        observation = (
+            "Analysis Recorded:\n"
+            f"- Gaps/Findings: {gap_analysis}\n"
+            f"- Next Strategic Move: {next_step_plan}"
         )
-        
-        # 注册经验库查询工具
-        self.react_engine.register_tool(
-            ActionType.QUERY_EXPERIENCE,
-            self._tool_query_experience
+        return ToolResult(observation=observation, data=payload)
+
+    def _tool_conclude(self, conclusion: str) -> ToolResult:
+        return ToolResult(observation=conclusion, data=conclusion)
+
+    def _build_tools(self):
+        _ChatOpenAI, _SystemMessage, _HumanMessage, _AIMessage, _ToolMessage, StructuredTool = _lazy_langchain_imports()
+
+        tools = [
+            StructuredTool.from_function(
+                func=self._tool_search_rag,
+                name=ActionType.SEARCH_RAG.value,
+                description=(
+                    "Search the local literature database (Chroma-backed RAG) and return relevant chunks. "
+                    "Use AFTER `search_experience` when you need verifiable citations; cite source_id from results."
+                ),
+            ),
+            StructuredTool.from_function(
+                func=self._tool_search_experience,
+                name=ActionType.SEARCH_EXPERIENCE.value,
+                description="Search the experience database for similar past cases / guidelines (preferred before `search_rag`).",
+            ),
+            StructuredTool.from_function(
+                func=self._tool_analyze,
+                name=ActionType.ANALYZE.value,
+                description="Stop searching and synthesize what is known/unknown; plan next step.",
+            ),
+            StructuredTool.from_function(
+                func=self._tool_conclude,
+                name=ActionType.CONCLUDE.value,
+                description="Submit the final answer and stop.",
+            ),
+        ]
+        tools_by_name = {t.name: t for t in tools}
+        return tools, tools_by_name
+
+    # -------------------------
+    # LLM helpers
+    # -------------------------
+
+    def _get_llm(self):
+        if self._llm is None:
+            self._llm = _build_chat_model_from_config(self.model_config)
+        return self._llm
+
+    @staticmethod
+    def _get_thought_phase_instruction() -> str:
+        return (
+            "CURRENT PHASE: THOUGHT\n"
+            "Output ONLY your reasoning in plain text.\n"
+            "- Do NOT call tools.\n"
+            "- Do NOT include any tool-call markup/tags (e.g. <invoke ...>, <tool_call ...>, <|...|>, DSML blocks).\n"
+            "- Do NOT output JSON or markdown.\n"
         )
-        
-        # 注册分析工具
-        self.react_engine.register_tool(
-            ActionType.ANALYZE,
-            self._tool_analyze
+
+    @staticmethod
+    def _get_action_phase_instruction() -> str:
+        return (
+            "CURRENT PHASE: ACTION\n"
+            "You MUST call one or more tools.\n"
+            "Do NOT output normal text answers in this phase; use tool calls.\n"
+            "Critical constraint:\n"
+            "- In a single ACTION step, do NOT mix search tools (`search_rag`, `search_experience`) with "
+            "analysis tools (`analyze`, `conclude`).\n"
+            "  - If you need evidence: call one or more search tools first.\n"
+            "  - After you receive observations, in the NEXT step you may call `analyze` or `conclude`.\n"
+            "Rules:\n"
+            "- Tool priority: prefer `search_experience` FIRST; then use `search_rag` for verifiable citations.\n"
+            "- Prefer using tools over guessing.\n"
+            "- If you have enough evidence, call `conclude`.\n"
         )
-        
-        # 注册结论工具
-        self.react_engine.register_tool(
-            ActionType.CONCLUDE,
-            self._tool_conclude
-        )
-    
-    def _tool_search_rag(self, query: str, top_k: int = 5) -> List[Dict]:
-        """
-        RAG检索工具
-        
-        Args:
-            query: 检索查询
-            top_k: 返回结果数量
-        
-        Returns:
-            List[Dict]: 检索结果
-        """
-        return self.retrieve_knowledge(query, top_k)
-    
-    def _tool_query_experience(self, components: List[str]) -> List[Dict]:
-        """
-        经验库查询工具
-        
-        Args:
-            components: 化学组分列表
-        
-        Returns:
-            List[Dict]: 相关经验列表
-        """
-        return self.retrieve_experience(components)
-    
-    def _tool_analyze(self, context: str) -> str:
-        """
-        分析工具
-        
-        Args:
-            context: 需要分析的上下文
-        
-        Returns:
-            str: 分析结果
-        """
-        return f"已记录待分析内容: {context[:100]}..."
-    
-    def _tool_conclude(self, conclusion: str) -> str:
-        """
-        结论工具
-        
-        Args:
-            conclusion: 结论内容
-        
-        Returns:
-            str: 确认信息
-        """
-        return conclusion
-    
+
+    # -------------------------
+    # Public API
+    # -------------------------
+
+    def generate_response(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> AgentResponse:
+        components = None
+        if context:
+            components = context.get("components")
+        response, _trajectory = self.generate_response_with_react(query=prompt, components=components, context=context)
+        return response
+
     def generate_response_with_react(
         self,
         query: str,
         components: Optional[List[str]] = None,
-        context: Optional[Dict] = None
-    ) -> tuple[AgentResponse, ReActTrajectory]:
-        """
-        使用ReAct推理生成响应
-        
-        Args:
-            query: 输入查询
-            components: 化学组分列表
-            context: 额外上下文
-        
-        Returns:
-            tuple: (AgentResponse, ReActTrajectory)
-        """
-        # 创建新的推理轨迹
-        trajectory = ReActTrajectory(query=query)
-        self.current_trajectory = trajectory
-        
-        # 构建初始上下文
-        if components:
-            query_with_context = f"{query}\n\n分析的金属催化剂元素: {', '.join(components)}"
-        else:
-            query_with_context = query
-        
-        # ReAct推理循环
-        step_number = 0
-        last_action = None
-        final_answer = None
+        context: Optional[Dict[str, Any]] = None,
+        system_prompt_override: Optional[str] = None,
+    ) -> Tuple[AgentResponse, ReActTrajectory]:
+        ChatOpenAI, SystemMessage, HumanMessage, AIMessage, ToolMessage, _StructuredTool = _lazy_langchain_imports()
 
-        system_prompt = (
-            f"{self.get_system_prompt()}\n"
-            "你是一个使用ReAct推理模式的AI助手。"
-            "请在调用工具前先在content中输出Thought。"
-        )
-        messages = trajectory.to_context_messages(system_prompt=system_prompt)
-        if messages and len(messages) > 1:
-            messages[1]["content"] = query_with_context
-        
-        tools_schema = self.react_engine.get_tool_schemas()
-        
-        while self.react_engine.should_continue(step_number, last_action):
-            response_message = self._call_llm(
-                messages=messages,
-                tools=tools_schema,
-                tool_choice="auto"
-            )
-            
-            thought = response_message.content or ""
-            tool_calls = response_message.tool_calls or []
-            
-            if not tool_calls:
-                final_answer = thought.strip()
-                if final_answer:
-                    step_number += 1
-                    final_step = ReActStep(
-                        step_number=step_number,
-                        thought=final_answer,
-                        action=ActionType.CONCLUDE,
-                        action_input={},
-                        observation=final_answer,
-                        tool_call_id=None,
-                        observation_data=None
+        full_query = query
+        if components:
+            full_query = f"{query}\n\nComponents: {', '.join(components)}"
+
+        trajectory = ReActTrajectory(query=full_query)
+        self.current_trajectory = trajectory
+
+        llm = self._get_llm()
+        tools, tools_by_name = self._build_tools()
+
+        # Bind tools to enable tool-calling.
+        if hasattr(llm, "bind_tools"):
+            llm_with_tools = llm.bind_tools(tools)
+        else:  # pragma: no cover
+            llm_with_tools = llm.bind(tools=tools)
+
+        system_prompt = system_prompt_override if system_prompt_override is not None else self.system_prompt
+        messages: List[Any] = [SystemMessage(content=system_prompt), HumanMessage(content=full_query)]
+
+        step_number = 0
+        final_answer: Optional[str] = None
+
+        while step_number < self.max_react_steps:
+            # ----- THOUGHT -----
+            thought_msg = llm.invoke(messages + [SystemMessage(content=self._get_thought_phase_instruction())])
+            thought_content = getattr(thought_msg, "content", "") or ""
+            thought_content = thought_content.strip()
+            if not thought_content:
+                thought_content = "I need to gather evidence and decide the next action."
+            thought_content = _sanitize_thought(thought_content)
+
+            # ----- ACTION (tool calls) -----
+            tool_calls: List[Dict[str, Any]] = []
+            action_msg = None
+            raw_action_text = ""
+            for attempt in range(2):
+                retry_hint = ""
+                if attempt > 0:
+                    retry_hint = (
+                        "\nERROR: You did not call any tools in the previous ACTION attempt.\n"
+                        "You MUST call at least one tool now (no free-form answers).\n"
                     )
-                    trajectory.add_step(final_step)
-                    self.react_engine.log_step(final_step)
-                last_action = ActionType.CONCLUDE
-                break
-            
-            assistant_message = {
-                "role": "assistant",
-                "content": response_message.content,
-                "tool_calls": [
-                    {
-                        "id": tool_call.id,
-                        "type": tool_call.type,
-                        "function": {
-                            "name": tool_call.function.name,
-                            "arguments": tool_call.function.arguments
-                        }
-                    }
-                    for tool_call in tool_calls
-                ]
-            }
-            messages.append(assistant_message)
-            
-            for tool_call in tool_calls:
-                step_number += 1
-                function_name = tool_call.function.name
-                action_input = self.react_engine.parse_tool_arguments(
-                    tool_call.function.arguments
+
+                action_msg = llm_with_tools.invoke(
+                    messages
+                    + [
+                        SystemMessage(content=self._get_action_phase_instruction() + retry_hint),
+                        SystemMessage(content=f"THOUGHT (plan; do not repeat):\n{thought_content}"),
+                    ]
                 )
-                
-                try:
-                    action = self.react_engine.resolve_action_type(function_name)
-                    observation, observation_data = self.react_engine.execute_action(
-                        action,
-                        action_input
+                tool_calls = _extract_tool_calls(action_msg)
+                raw_action_text = (getattr(action_msg, "content", "") or "").strip()
+                if tool_calls:
+                    break
+
+            if not tool_calls:
+                # Record an explicit failure step, but DO NOT accept this as the final answer.
+                # Also do NOT append the raw assistant content to the chat history, as it can be off-topic/noisy.
+                step_number += 1
+                observation = (
+                    "ACTION FAILED: model did not emit any tool calls. "
+                    "Retry in next step.\n"
+                    f"Raw content (truncated): {(raw_action_text[:500] + '...') if len(raw_action_text) > 500 else raw_action_text}"
+                )
+                trajectory.add_step(
+                    ReActStep(
+                        step_number=step_number,
+                        thought=thought_content,
+                        action="no_tool_call",
+                        action_input={},
+                        observation=observation,
+                        tool_calls=[],
                     )
-                except Exception as e:
-                    action = ActionType.ANALYZE
-                    observation = f"工具调用失败: {str(e)}"
-                    observation_data = None
-                
-                step = ReActStep(
+                )
+                continue
+
+            # Only keep the ACTION assistant message in history if it actually issued tool calls.
+            messages.append(action_msg)
+
+            normalized_calls: List[Tuple[str, Dict[str, Any], str]] = [
+                _normalize_tool_call(call) for call in tool_calls
+            ]
+            search_tools = {ActionType.SEARCH_RAG.value, ActionType.SEARCH_EXPERIENCE.value}
+            analysis_tools = {ActionType.ANALYZE.value, ActionType.CONCLUDE.value}
+            has_search = any(name in search_tools for name, _args, _id in normalized_calls)
+            has_analysis = any(name in analysis_tools for name, _args, _id in normalized_calls)
+            mixed_search_and_analysis = has_search and has_analysis
+            mixed_error = (
+                "Policy violation: mixed search and analysis in one ACTION step. "
+                "Call only search tools first; after receiving observations, call `analyze`/`conclude` in the next step."
+            )
+
+            tool_call_records: List[ToolCallRecord] = []
+            observation_sections: List[str] = []
+
+            for tool_name, tool_args, tool_call_id in normalized_calls:
+
+                # If the model tried to both search and analyze/conclude in the same ACTION step,
+                # refuse the analysis/conclude calls (they wouldn't be grounded in the fresh observations).
+                blocked = mixed_search_and_analysis and tool_name in analysis_tools
+                if blocked:
+                    result = ToolResult(observation=mixed_error, data={"error": "mixed_search_and_analysis"})
+                else:
+                    tool = tools_by_name.get(tool_name)
+                    if tool is None:
+                        result = ToolResult(observation=f"Error: Unknown tool '{tool_name}'", data=None)
+                    else:
+                        try:
+                            result = tool.invoke(tool_args)
+                            if not isinstance(result, ToolResult):
+                                result = ToolResult(observation=str(result), data=result)
+                        except Exception as e:
+                            result = ToolResult(observation=f"Tool error: {str(e)}", data=None)
+
+                observation_text = str(result)
+                messages.append(ToolMessage(content=observation_text, tool_call_id=tool_call_id))
+
+                tool_call_records.append(
+                    ToolCallRecord(
+                        tool_name=tool_name,
+                        tool_call_id=tool_call_id,
+                        tool_args=tool_args,
+                        observation=observation_text,
+                        observation_data=result.data,
+                    )
+                )
+                observation_sections.append(f"--- Observation ({tool_name}) ---\n{observation_text}")
+
+                if tool_name == ActionType.CONCLUDE.value and not blocked:
+                    final_answer = observation_text
+                    break
+
+            step_number += 1
+            aggregated_observation = "\n\n".join(observation_sections).strip()
+            if not aggregated_observation:
+                aggregated_observation = "(no observation)"
+
+            # Keep legacy single-action fields populated for compatibility/debugging,
+            # but the authoritative per-call details live in `tool_calls`.
+            if len(tool_call_records) == 1:
+                action = tool_call_records[0].tool_name
+                action_input = tool_call_records[0].tool_args
+                tool_call_id = tool_call_records[0].tool_call_id
+                observation_data = tool_call_records[0].observation_data
+            else:
+                action = "multi_tool"
+                action_input = {"tool_calls": [{"tool_name": c.tool_name, "tool_args": c.tool_args} for c in tool_call_records]}
+                tool_call_id = None
+                observation_data = None
+
+            trajectory.add_step(
+                ReActStep(
                     step_number=step_number,
-                    thought=thought,
+                    thought=thought_content,
                     action=action,
                     action_input=action_input,
-                    observation=observation,
-                    tool_call_id=tool_call.id,
-                    observation_data=observation_data
+                    observation=aggregated_observation,
+                    tool_call_id=tool_call_id,
+                    observation_data=observation_data,
+                    tool_calls=tool_call_records,
                 )
-                trajectory.add_step(step)
-                self.react_engine.log_step(step)
-                
-                messages.append({
-                    "role": "tool",
-                    "tool_call_id": tool_call.id,
-                    "name": function_name,
-                    "content": str(observation)
-                })
-                
-                if action == ActionType.CONCLUDE:
-                    final_answer = observation
-                    last_action = ActionType.CONCLUDE
-                    break
-            
-            if last_action == ActionType.CONCLUDE:
+            )
+
+            if final_answer is not None:
                 break
-        
-        # 如果循环结束但没有明确结论，生成最终答案
+
         if final_answer is None:
-            final_answer = self._generate_final_answer(trajectory)
-        
-        # 完成轨迹
+            # Hard fallback: ask for a final answer text, then record it via the `conclude` tool
+            # so downstream callers (tests / debate protocol) see a proper CONCLUDE action.
+            retrieved = _collect_retrieved_source_ids_from_trajectory(trajectory)
+            sid_hint = ""
+            if retrieved:
+                sid_hint = (
+                    "\nYou MUST cite at least one of these source_id values verbatim in your final answer:\n"
+                    + "\n".join(f"- {sid}" for sid in sorted(list(retrieved))[:10])
+                )
+
+            forced = llm.invoke(
+                messages
+                + [
+                    SystemMessage(
+                        content=(
+                            "FINAL PHASE: Write the best possible final answer now.\n"
+                            "- Include the reaction type explicitly.\n"
+                            "- Summarize key performance metrics.\n"
+                            "- If you used literature evidence, cite source_id exactly as provided.\n"
+                            + sid_hint
+                        )
+                    )
+                ]
+            )
+            draft = (getattr(forced, "content", "") or "").strip() or "No conclusion generated."
+
+            # If the model forgot to include a verifiable source_id, attach a minimal evidence line.
+            if retrieved and not any(sid in draft for sid in retrieved):
+                draft = draft.rstrip() + "\n\nEvidence (retrieved source_id): " + ", ".join(sorted(list(retrieved))[:3])
+
+            final_answer = draft
+
+            # Record a final CONCLUDE step.
+            step_number += 1
+            tool_call = ToolCallRecord(
+                tool_name=ActionType.CONCLUDE.value,
+                tool_call_id="forced_conclude",
+                tool_args={"conclusion": final_answer},
+                observation=final_answer,
+                observation_data=final_answer,
+            )
+            trajectory.add_step(
+                ReActStep(
+                    step_number=step_number,
+                    thought="Forced conclusion (model failed to call conclude tool).",
+                    action=ActionType.CONCLUDE.value,
+                    action_input={"conclusion": final_answer},
+                    observation=final_answer,
+                    tool_call_id="forced_conclude",
+                    observation_data=final_answer,
+                    tool_calls=[tool_call],
+                )
+            )
+
         trajectory.finalize(final_answer)
-        
-        # 构建AgentResponse
         response = AgentResponse(
             content=final_answer,
             reasoning=trajectory.get_trajectory_summary(),
-            sources=self._extract_sources(trajectory)
+            sources=_extract_sources(trajectory),
         )
-        
         return response, trajectory
-    
-    def _call_llm(
-        self,
-        messages: List[Dict[str, Any]],
-        tools: Optional[List[Dict[str, Any]]] = None,
-        tool_choice: Optional[str] = None
-    ) -> Any:
-        """
-        调用LLM（需要在子类中实现具体的调用逻辑）
-        
-        Args:
-            messages: 消息列表
-            tools: 工具定义列表
-            tool_choice: 工具选择策略
-        
-        Returns:
-            Any: LLM响应消息对象
-        """
-        # 这是一个抽象方法，将在具体的Agent子类中实现
-        # 例如在OpenAIReActAgent中调用OpenAI API
-        raise NotImplementedError("子类必须实现_call_llm方法")
-    
-    def _smart_default_action(
-        self,
-        step_number: int,
-        previous_steps: List[ReActStep],
-        components: Optional[List[str]]
-    ) -> tuple[str, ActionType, Dict[str, Any]]:
-        """
-        智能默认动作策略
-        当LLM未返回有效动作时，根据当前状态选择合适的默认动作
-        
-        Args:
-            step_number: 当前步骤编号
-            previous_steps: 之前的步骤
-            components: 化学组分
-        
-        Returns:
-            tuple: (thought, action, action_input)
-        """
-        # 检查已执行的动作类型
-        executed_actions = {step.action for step in previous_steps}
-        
-        # 步骤1-2: 优先检索RAG知识
-        if ActionType.SEARCH_RAG not in executed_actions and step_number <= 2:
-            thought = "需要从文献知识库中检索相关的催化剂性能数据"
-            action = ActionType.SEARCH_RAG
-            action_input = {
-                "query": f"催化剂性能 过电势 {' '.join(components) if components else ''}",
-                "top_k": 5
-            }
-        
-        # 步骤3-4: 查询经验库
-        elif ActionType.QUERY_EXPERIENCE not in executed_actions and components:
-            thought = "需要查询历史经验库，寻找类似催化剂的应用案例"
-            action = ActionType.QUERY_EXPERIENCE
-            action_input = {"components": components}
-        
-        # 步骤5+: 分析或得出结论
-        elif step_number >= 5:
-            thought = "基于收集的信息，可以得出最终结论"
-            action = ActionType.CONCLUDE
-            action_input = {"conclusion": "需要综合分析所有信息得出结论"}
-        
-        # 默认: 分析
-        else:
-            thought = "需要分析当前收集到的信息"
-            action = ActionType.ANALYZE
-            action_input = {"context": "分析已收集的文献和经验数据"}
-        
-        return thought, action, action_input
-    
-    def _generate_final_answer(self, trajectory: ReActTrajectory) -> str:
-        """
-        根据推理轨迹生成最终答案
-        
-        Args:
-            trajectory: 推理轨迹
-        
-        Returns:
-            str: 最终答案
-        """
-        # 收集所有观察结果
-        all_observations = "\n\n".join([
-            f"步骤{step.step_number}观察: {step.observation}"
-            for step in trajectory.steps
-        ])
-        
-        # 构建总结提示
-        summary_prompt = f"""
-Based on the following reasoning process, please provide the final answer:
 
-Original Question: {trajectory.query}
-
-Reasoning Process:
-{all_observations}
-
-Please synthesize the above information and provide a final conclusion about catalyst performance and the optimal reaction type.
-"""
-        
-        # 调用LLM生成最终答案
-        try:
-            messages = [
-                {"role": "system", "content": self.get_system_prompt()},
-                {"role": "user", "content": summary_prompt}
-            ]
-            response_message = self._call_llm(messages=messages)
-            return response_message.content or ""
-        except:
-            return "基于推理过程，需要进一步分析才能得出结论。"
-    
-    def _extract_sources(self, trajectory: ReActTrajectory) -> List[Dict]:
-        """
-        从推理轨迹中提取信息源
-        
-        Args:
-            trajectory: 推理轨迹
-        
-        Returns:
-            List[Dict]: 信息源列表
-        """
-        sources = []
-        
-        for step in trajectory.steps:
-            if step.action == ActionType.SEARCH_RAG and step.observation_data:
-                sources.extend(step.observation_data[:3])  # 每步最多3个来源
-            elif step.action == ActionType.QUERY_EXPERIENCE and step.observation_data:
-                for exp in step.observation_data[:2]:  # 每步最多2个经验
-                    sources.append({
-                        "type": "experience",
-                        "components": exp.get("components", []),
-                        "reaction_type": exp.get("reaction_type", ""),
-                    })
-        
-        return sources
-    
-    def get_trajectory(self) -> Optional[ReActTrajectory]:
-        """获取当前的推理轨迹"""
-        return self.current_trajectory
-    
     def save_trajectory(self, output_path: str) -> None:
-        """
-        保存推理轨迹到文件
-        
-        Args:
-            output_path: 输出文件路径
-        """
-        if self.current_trajectory is None:
-            print("没有可保存的推理轨迹")
+        if not self.current_trajectory:
             return
-        
-        try:
-            with open(output_path, 'w', encoding='utf-8') as f:
-                f.write(self.current_trajectory.to_json())
-            print(f"推理轨迹已保存到: {output_path}")
-        except Exception as e:
-            print(f"保存推理轨迹失败: {str(e)}")
+        with open(output_path, "w", encoding="utf-8") as handle:
+            handle.write(self.current_trajectory.to_json())
+
+
+def _extract_tool_calls(action_msg: Any) -> List[Dict[str, Any]]:
+    # LangChain AIMessage typically exposes .tool_calls
+    tool_calls = getattr(action_msg, "tool_calls", None)
+    if isinstance(tool_calls, list):
+        return tool_calls
+
+    # Fallback: additional_kwargs
+    add = getattr(action_msg, "additional_kwargs", {}) or {}
+    tool_calls = add.get("tool_calls")
+    if isinstance(tool_calls, list):
+        return tool_calls
+
+    return []
+
+
+def _normalize_tool_call(call: Any) -> Tuple[str, Dict[str, Any], str]:
+    """
+    Normalize tool call formats across LangChain/openai variants.
+    Returns (name, args, id).
+    """
+    if isinstance(call, dict):
+        call_id = call.get("id") or call.get("tool_call_id") or f"tool_{id(call)}"
+
+        # New style: {"name": "...", "args": {...}}
+        name = call.get("name")
+        args = call.get("args")
+        if name and isinstance(args, dict):
+            return str(name), args, str(call_id)
+
+        # OpenAI style: {"function": {"name": "...", "arguments": "..."}}
+        fn = call.get("function") or {}
+        fn_name = fn.get("name")
+        fn_args = fn.get("arguments")
+        if fn_name:
+            if isinstance(fn_args, dict):
+                return str(fn_name), fn_args, str(call_id)
+            if isinstance(fn_args, str):
+                try:
+                    import json
+
+                    return str(fn_name), json.loads(fn_args), str(call_id)
+                except Exception:
+                    return str(fn_name), {}, str(call_id)
+
+    # Unknown shape
+    return "unknown_tool", {}, f"tool_{id(call)}"
+
+
+def _sanitize_thought(text: str) -> str:
+    """
+    Some models emit tool-call markup in plain text (e.g. DSML/XML blocks) even when tools are disabled.
+    That text pollutes later calls if we feed it back. Keep only a readable thought.
+    """
+    if not text:
+        return ""
+
+    # Remove common tool-call block patterns (best-effort).
+    cleaned = re.sub(r"<[^>]*function_calls[^>]*>.*?</[^>]*function_calls[^>]*>", "", text, flags=re.DOTALL | re.IGNORECASE)
+    cleaned = re.sub(r"<[^>]*(invoke|tool_call)[^>]*>.*?</[^>]*(invoke|tool_call)[^>]*>", "", cleaned, flags=re.DOTALL | re.IGNORECASE)
+
+    # Drop standalone markup-like lines that usually appear with DSML (<|...|> or <｜...｜>).
+    kept: List[str] = []
+    for line in cleaned.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            kept.append(line)
+            continue
+        if stripped.startswith("<") and ("DSML" in stripped or "function_calls" in stripped or "invoke" in stripped):
+            continue
+        kept.append(line)
+    cleaned = "\n".join(kept).strip()
+    return cleaned
+
+
+def _collect_retrieved_source_ids_from_trajectory(trajectory: Optional[ReActTrajectory]) -> set[str]:
+    if trajectory is None:
+        return set()
+    sids: set[str] = set()
+    for step in getattr(trajectory, "steps", []) or []:
+        for call in getattr(step, "tool_calls", []) or []:
+            if getattr(call, "tool_name", "") != ActionType.SEARCH_RAG.value:
+                continue
+            data = getattr(call, "observation_data", None) or []
+            for item in data:
+                sid = item.get("source_id")
+                if sid:
+                    sids.add(sid)
+    # Backward-compatible fallback (legacy single-tool steps).
+    for step in getattr(trajectory, "steps", []) or []:
+        if getattr(step, "action_name", "") != ActionType.SEARCH_RAG.value:
+            continue
+        data = getattr(step, "observation_data", None) or []
+        for item in data:
+            sid = item.get("source_id")
+            if sid:
+                sids.add(sid)
+    return sids
+
+
+def _format_rag_observation(results: List[Dict[str, Any]]) -> str:
+    if not results:
+        return "No relevant literature knowledge found."
+
+    lines: List[str] = [f"Found {len(results)} relevant documents:"]
+    for i, r in enumerate(results[:5], 1):
+        score = r.get("score")
+        source_id = r.get("source_id")
+        meta = r.get("metadata") or {}
+        if not source_id:
+            doc_id = meta.get("doc_id")
+            chunk_id = meta.get("chunk_id")
+            if doc_id is not None and chunk_id is not None:
+                source_id = f"doi:{doc_id}#chunk:{chunk_id}"
+        text = (r.get("text") or "").strip()
+        if len(text) > 800:
+            text = text[:800] + "...(truncated)"
+        head = f"{i}."
+        if score is not None:
+            try:
+                head += f" [Relevance: {float(score):.3f}]"
+            except Exception:
+                pass
+        if source_id:
+            head += f" [Source: {source_id}]"
+        lines.append(head)
+        lines.append(text)
+    return "\n".join(lines)
+
+
+def _format_experience_observation(experiences: List[Dict[str, Any]]) -> str:
+    if not experiences:
+        return "No relevant historical experiences found."
+    lines: List[str] = [f"Found {len(experiences)} relevant experiences:"]
+    for i, exp in enumerate(experiences[:5], 1):
+        kind = (exp.get("kind") or "experience").strip()
+        gid = (exp.get("guideline_id") or "").strip()
+        comps = exp.get("components") or []
+        reaction = exp.get("reaction_type") or "unknown"
+        pack = exp.get("source_pack") or ""
+        sim = exp.get("similarity")
+
+        header_parts = [f"{i}.", f"[{kind}]"]
+        if gid:
+            header_parts.append(f"[{gid}]")
+        if sim is not None:
+            try:
+                header_parts.append(f"[Similarity: {float(sim):.3f}]")
+            except Exception:
+                pass
+        if comps:
+            header_parts.append(f"Components: {', '.join(comps)}")
+        header_parts.append(f"Reaction: {reaction}")
+        if pack:
+            header_parts.append(f"Pack: {pack}")
+        lines.append(" ".join(header_parts))
+
+        title = (exp.get("title") or exp.get("products") or exp.get("id") or "").strip()
+        if title:
+            lines.append(f"Title: {title}")
+
+        perf = exp.get("performance")
+        if perf:
+            lines.append(f"Performance: {str(perf).strip()}")
+
+        notes = exp.get("content") or exp.get("reasoning") or exp.get("key_arguments")
+        if notes and notes != perf:
+            snippet = str(notes).strip()
+            if len(snippet) > 600:
+                snippet = snippet[:600] + "...(truncated)"
+            lines.append(f"Notes: {snippet}")
+    return "\n".join(lines)
+
+
+def _extract_sources(trajectory: ReActTrajectory) -> List[Dict[str, Any]]:
+    sources: List[Dict[str, Any]] = []
+    for step in trajectory.steps:
+        # New: multi-tool step support.
+        for call in getattr(step, "tool_calls", []) or []:
+            if call.tool_name == ActionType.SEARCH_RAG.value and isinstance(call.observation_data, list):
+                sources.extend(call.observation_data[:3])
+            if call.tool_name == ActionType.SEARCH_EXPERIENCE.value and isinstance(call.observation_data, list):
+                sources.extend(call.observation_data[:2])
+
+        # Backward-compatible fallback (legacy single-tool steps).
+        action_name = getattr(step, "action_name", "")
+        if action_name == ActionType.SEARCH_RAG.value and isinstance(getattr(step, "observation_data", None), list):
+            sources.extend(getattr(step, "observation_data")[:3])
+        if action_name == ActionType.SEARCH_EXPERIENCE.value and isinstance(getattr(step, "observation_data", None), list):
+            sources.extend(getattr(step, "observation_data")[:2])
+    return sources

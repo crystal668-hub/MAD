@@ -67,7 +67,7 @@ class VectorStore:
     
     def _get_or_create_collection(self):
         """
-        获取已存在的集合或创建新集合
+        尝试获取已存在的集合，若不存在，则创建新集合
         
         Returns:
             chromadb.Collection: Chroma集合对象
@@ -128,6 +128,7 @@ class VectorStore:
             assert len(documents) == len(embeddings) == len(metadatas) == len(ids), \
                 "documents, embeddings, metadatas, ids长度必须一致"
             
+            # 批量添加
             batch_size = 100
             for i in range(0, len(documents), batch_size):
                 batch_documents = documents[i:i + batch_size]
@@ -142,10 +143,8 @@ class VectorStore:
                     ids=batch_ids
                 )
             
-            logger.info(f"[OK] 添加 {len(documents)} 个文档到集合 '{self.collection_name}'")
             return
-
-        logger.info(f"成功添加 {len(documents)} 个文档到向量数据库")
+        logger.info(f"[OK] 添加 {len(documents)} 个文档到集合 '{self.collection_name}'")
 
 
     def update_documents(
@@ -218,7 +217,7 @@ class VectorStore:
         where_document: Optional[Dict] = None
     ) -> List[Dict]:
         """
-        相似度搜索（支持文本或预生成向量）
+        相似度搜索（支持使用文本或预生成向量）
         
         Args:
             query_text: 查询文本

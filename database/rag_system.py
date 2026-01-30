@@ -39,8 +39,8 @@ logger = Logger.get_logger(
 
 class RAGSystem:
     """
-    检索增强生成（RAG）系统
-    集成LlamaIndex和Chroma向量数据库，提供文档索引和检索功能
+    RAG System
+    Integrates LlamaIndex and Chroma vector database to provide document indexing and retrieval capabilities
     """
     
     def __init__(
@@ -92,6 +92,7 @@ class RAGSystem:
         # 初始化索引（如果存在则加载，否则创建）
         self.index = None
         self.query_engine = None
+        self.retriever = None
         
         # 尝试加载已存在的索引
         if self._index_exists():
@@ -254,13 +255,13 @@ class RAGSystem:
             return
         
         # 创建检索器
-        retriever = VectorIndexRetriever(
+        self.retriever = VectorIndexRetriever(
             index=self.index,
             similarity_top_k=self.top_k
         )
         
         # 创建查询引擎
-        self.query_engine = RetrieverQueryEngine(retriever=retriever)
+        self.query_engine = RetrieverQueryEngine(retriever=self.retriever)
         
         logger.info("查询引擎创建完成")
     
@@ -309,15 +310,12 @@ class RAGSystem:
         """
         if self.index is None:
             raise ValueError("索引未初始化")
-        
-        # 创建检索器
-        retriever = VectorIndexRetriever(
-            index=self.index,
-            similarity_top_k=self.top_k
-        )
-        
+
+        if self.retriever is None:
+            self._create_query_engine()
+
         # 执行检索
-        nodes = retriever.retrieve(query_text)
+        nodes = self.retriever.retrieve(query_text)
         
         # 整理结果
         results = []
@@ -371,28 +369,3 @@ class RAGSystem:
         }
 
 
-# ===================================
-# 使用示例
-# ===================================
-if __name__ == "__main__":
-    # 初始化RAG系统
-    rag = RAGSystem(
-        data_dir="./data/raw",
-        persist_dir="./data/chroma_db",
-        collection_name="chemical_reactions",
-        top_k=5
-    )
-    
-    # 构建索引（首次运行）
-    rag.build_index()
-    
-    # 执行查询
-    if rag.query_engine:
-        result = rag.query("什么是氧化还原反应的过电势？")
-        logger.info(f"\n查询结果: {result['answer']}")
-        
-        # 打印来源文档
-        logger.info("\n来源文档:")
-        for i, node in enumerate(result['source_nodes'], 1):
-            logger.info(f"{i}. (相关度: {node['score']:.4f})")
-            logger.info(f"   {node['text'][:100]}...")

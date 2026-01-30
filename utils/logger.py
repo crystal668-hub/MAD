@@ -182,16 +182,16 @@ class DebateLogger:
         self,
         agent_name: str,
         response: str,
-        reaction_type: str = None,
-        overpotential: float = None
+        products: str = None,
+        performance: str = None
     ):
         """记录Agent响应"""
         self.logger.info(f"\n[{agent_name}]")
         self.logger.info(f"响应: {response[:200]}..." if len(response) > 200 else f"响应: {response}")
-        if reaction_type:
-            self.logger.info(f"推荐反应: {reaction_type}")
-        if overpotential:
-            self.logger.info(f"过电势: {overpotential}")
+        if products:
+            self.logger.info(f"产物: {products}")
+        if performance:
+            self.logger.info(f"性能: {performance}")
     
     def log_consensus_check(self, consensus: bool, details: str):
         """记录共识检查结果"""
@@ -205,8 +205,8 @@ class DebateLogger:
         self.logger.info("=" * 80)
         self.logger.info("辩论结束")
         self.logger.info("=" * 80)
-        self.logger.info(f"最终结果: {result.get('final_reaction_type', '未确定')}")
-        self.logger.info(f"过电势: {result.get('final_overpotential', '未估算')}")
+        self.logger.info(f"产物: {result.get('final_products', '未确定')}")
+        self.logger.info(f"性能: {result.get('final_performance', '未估算')}")
         self.logger.info(f"辩论轮数: {result.get('debate_rounds', 0)}")
         self.logger.info(f"耗时: {result.get('time_elapsed', 0):.2f}秒")
         self.logger.info(f"共识达成: {'是' if result.get('consensus_reached') else '否'}")
@@ -236,8 +236,9 @@ if __name__ == "__main__":
     )
     debate_logger.log_agent_response(
         agent_name="Agent1",
-        response="我认为应该选择反应类型A",
-        reaction_type="氧化还原反应"
+        response="我认为主要产物是 CO，性能较好",
+        products="CO",
+        performance="低过电位/高选择性"
     )
     
     print(f"辩论日志保存在: {debate_logger.get_log_file_path()}")

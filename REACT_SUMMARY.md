@@ -56,9 +56,9 @@
 所有LLM Agent已升级为ReActAgent子类：
 
 - ✅ **OpenAIAgent** → 继承`ReActAgent`
-- ✅ **XAIAgent** → 继承`ReActAgent`  
-- ✅ **GoogleAgent** → 继承`ReActAgent`
 - ✅ **DeepSeekAgent** → 继承`ReActAgent`
+- ✅ **GoogleAgent** → 继承`ReActAgent`
+- ✅ **QwenAgent** → 继承`ReActAgent`
 
 每个Agent都新增了`_call_llm()`方法以支持ReAct推理循环。
 
@@ -294,6 +294,6 @@ Agent系统现已具备完整的ReAct推理能力，实现了：
 - **Observation**: 清晰的观察结果
 - **Trajectory**: 完整的推理轨迹
 
-所有4个LLM Agent (OpenAI, xAI, Google, DeepSeek) 都已支持ReAct推理，可通过`generate_response_with_react()`方法使用。
+所有4个LLM Agent (OpenAI, DeepSeek, Google, Qwen) 都已支持ReAct推理，可通过`generate_response_with_react()`方法使用。
 
 推理过程透明、可追溯、可解释，完美契合RAG和经验库场景的需求。

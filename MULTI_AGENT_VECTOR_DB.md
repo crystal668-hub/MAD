@@ -41,7 +41,7 @@ python build_vector_db.py
 if __name__ == "__main__":
     build_vector_database(
         config_path="./config/config.yaml",
-        agent_name="agent2"  # 改为agent2、agent3或agent4
+        agent_name="agent2"  
     )
 ```
 
@@ -58,10 +58,10 @@ python build_all_agent_dbs.py
 
 | Agent | 使用的Embedding模型 | 向量数据库集合名称 |
 |-------|-------------------|------------------|
-| agent1 (GPT-4) | openai/text-embedding-3-large | chemical_reactions_agent1 |
-| agent2 (Grok) | voyage-3-large | chemical_reactions_agent2 |
-| agent3 (Gemini) | google/gemini-embedding-001 | chemical_reactions_agent3 |
-| agent4 (DeepSeek) | openai/text-embedding-3-large | chemical_reactions_agent4 |
+| agent1 (GPT 5.2) | openai/text-embedding-3-large | chemical_reactions_agent1 |
+| agent2 (DeepSeek V3.2) | voyage-3-large | chemical_reactions_agent2 |
+| agent3 (Gemini 3 pro) | google/gemini-embedding-001 | chemical_reactions_agent3 |
+| agent4 (Qwen3 Max) | text-embedding-v4 | chemical_reactions_agent4 |
 
 ## 数据库存储位置
 
@@ -87,7 +87,7 @@ python build_all_agent_dbs.py
 
 [步骤 1/5] 加载配置...
 ✓ 使用Agent: agent2
-✓ LLM模型: x-ai/grok-4
+✓ LLM模型: deepseek/deepseek-v3.2
 ✓ 向量模型: voyage-3-large
 ✓ 向量数据库集合: chemical_reactions_agent2    <-- 注意这里
 ...

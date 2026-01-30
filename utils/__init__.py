@@ -18,6 +18,12 @@ from utils.helpers import (
     print_section,
     dict_to_table
 )
+from utils.source_id import (
+    ChromaSourceRef,
+    build_chroma_source_id,
+    parse_chroma_source_id,
+    is_valid_chroma_source_id,
+)
 
 __all__ = [
     'Logger',
@@ -35,5 +41,9 @@ __all__ = [
     'create_experiment_id',
     'print_header',
     'print_section',
-    'dict_to_table'
+    'dict_to_table',
+    'ChromaSourceRef',
+    'build_chroma_source_id',
+    'parse_chroma_source_id',
+    'is_valid_chroma_source_id',
 ]

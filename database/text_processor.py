@@ -476,15 +476,15 @@ class TextProcessor:
                 
                 processed_documents.append(doc)
                 
-                logger.info(f"✓ 加载 {file_name}")
-                logger.info(f"  反应类型: {doc.metadata['reaction_type']}")
+                logger.info(f"✓ Loaded {file_name}")
+                logger.info(f"  Reaction Type: {doc.metadata['reaction_type']}")
                 logger.info(f"  DOI: {doc.metadata['doc_id']}")
             
-            logger.info(f"\n共加载 {len(processed_documents)} 个Document对象")
+            logger.info(f"\nLoaded a total of {len(processed_documents)} Document objects")
             return processed_documents
             
         except Exception as e:
-            logger.error(f"✗ 加载文档失败: {str(e)}")
+            logger.error(f"✗ Failed to load documents: {str(e)}")
             return []
     
     def load_reaction_documents(
@@ -511,7 +511,7 @@ class TextProcessor:
         for reaction_type, config in reaction_configs.items():
             reaction_path = base_path / config.get("path", reaction_type)
             
-            logger.info(f"\n--- 加载 {reaction_type} ---")
+            logger.info(f"\n--- Loading {reaction_type} ---")
             docs = self.load_documents(
                 data_dir=str(reaction_path),
                 reaction_type=reaction_type
@@ -580,5 +580,5 @@ class TextProcessor:
                 )
                 chunked_documents.append(chunk_doc)
         
-        logger.info(f"\n分块完成: {len(documents)} 个文档 -> {len(chunked_documents)} 个chunks")
+        logger.info(f"\nChunk Completed: {len(documents)} documents -> {len(chunked_documents)} chunks")
         return chunked_documents

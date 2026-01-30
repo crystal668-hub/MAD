@@ -1,15 +1,13 @@
 """
 ===================================
-Multi-Agent Metal Catalyst Overpotential Prediction System - Main Program
+Multi-Agent Debate System 
 ===================================
 
 Functionality:
-1. Initialize system components (RAG, Agents, experience store, etc.)
+1. Initialize system components 
 2. Execute multi-agent debate
-3. Extract and save experience
-4. Generate result reports
+3. Generate result reports
 
-Version: 1.0.0
 ===================================
 """
 
@@ -17,18 +15,15 @@ import os
 import sys
 import argparse
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict
 
-# 添加项目根目录到Python路径
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 from dotenv import load_dotenv
 
-# 加载环境变量
 load_dotenv()
 
-# 导入项目模块
 from utils import (
     load_config,
     setup_logging,
@@ -44,8 +39,25 @@ from utils import (
 )
 from database import RAGSystem
 from agents import AgentConfig
-from debate.autogen_coordinator import AutoGenDebateCoordinator
-from experience import ExperienceStore, ExperienceExtractor
+from agents.llm_agents import create_agent
+from experience import ExperienceStore
+try:
+    from debate.autogen_coordinator import AutoGenDebateCoordinator
+except Exception:  # optional dependency (pyautogen -> autogen)
+    AutoGenDebateCoordinator = None  
+from debate.langgraph_coordinator import LangGraphDebateCoordinator
+ 
+class MockExperienceStore:
+    """Mock experience store placeholder (no-op)."""
+
+    def query_experiences(self, components: List[str], top_k: int = 3):
+        return []
+
+    def add_experience(self, experience: Dict) -> None:
+        return
+
+    def get_statistics(self) -> Dict:
+        return {"total_experiences": 0}
 
 
 class MADSystem:
@@ -55,7 +67,7 @@ class MADSystem:
     Analyzes metal catalyst elements to predict reaction types with lowest overpotential.
     """
     
-    def __init__(self, config_path: str = "./config/config.yaml"):
+    def __init__(self, config_path: str = "./config/config.yaml", default_engine: str = "langgraph"):
         """
         初始化系统
         
@@ -65,142 +77,181 @@ class MADSystem:
         print_header("Multi-Agent Metal Catalyst Overpotential Prediction System")
         print("Initializing system...")
         
-        # 加载配置
         self.config = load_config(config_path)
         
-        # 初始化日志
+        # Initialize logging
         self.logger = setup_logging(self.config)
-        self.logger.info("系统初始化开始")
+        self.logger.info("System initialization started")
         
-        # 初始化各个组件
+        # Initialize components
         self.rag_systems = {}
         self.agents = []
-        self.experience_store = None
+        self.experience_store = MockExperienceStore()
         self.debate_coordinator = None
+        self.autogen_debate_coordinator = None
+        self.langgraph_debate_coordinator = None
+        self.default_engine = default_engine
         
-        # 初始化标志
+        # Initialization flag
         self._initialized = False
     
-    def initialize(self, skip_rag: bool = False) -> None:
+    def initialize(self) -> None:
         """
-        初始化所有系统组件
-        
-        Args:
-            skip_rag: 是否跳过RAG系统初始化（用于快速测试）
+        Initialize all system components
         """
         if self._initialized:
-            self.logger.warning("系统已经初始化，跳过重复初始化")
+            self.logger.warning("System already initialized, skipping re-initialization")
             return
         
         try:
-            # 1. 初始化经验库
+            # 1. Initialize RAG systems (required)
+            self._init_rag_systems()
+
+            # 2. Initialize Experience Store (for `search_experience`)
             self._init_experience_store()
             
-            # 2. 初始化RAG系统（可选）
-            if not skip_rag:
-                self._init_rag_systems()
-            else:
-                self.logger.info("跳过RAG系统初始化")
-            
-            # 3. 初始化Agents
+            # 3. Initialize Agents
             self._init_agents()
             
-            # 4. 初始化AutoGen辩论协调器
-            self._init_debate_coordinator()
+            # 4. Initialize debate coordinators
+            self._init_debate_coordinators()
             
             self._initialized = True
-            self.logger.info("系统初始化完成")
-            print("\n✓ 系统初始化成功\n")
+            self.logger.info("System initialization completed")
+            print("\n✓ System initialized successfully\n")
             
         except Exception as e:
-            self.logger.error(f"系统初始化失败: {str(e)}", exc_info=True)
-            print(f"\n✗ 系统初始化失败: {str(e)}\n")
+            self.logger.error(f"System initialization failed: {str(e)}", exc_info=True)
+            print(f"\n✗ System initialization failed: {str(e)}\n")
             raise
     
     def _init_experience_store(self) -> None:
-        """初始化经验库"""
-        print("正在初始化经验库...")
-        exp_config = self.config.get('experience', {})
-        
-        self.experience_store = ExperienceStore(
-            storage_path=exp_config.get('storage_path', './data/experience_db.json'),
-            max_experiences=exp_config.get('max_experiences', 1000),
-            relevance_threshold=exp_config.get('relevance_threshold', 0.8)
-        )
-        
-        self.logger.info("经验库初始化完成")
+        """Initialize experience store (YAML packs + optional JSON dynamic store)."""
+        exp_cfg = self.config.get("experience", {}) or {}
+        storage_path = exp_cfg.get("storage_path", "./data/experience_db.json")
+        packs_path = exp_cfg.get("packs_path", "./experience")
+        max_exps = int(exp_cfg.get("max_experiences", 1000))
+        threshold = float(exp_cfg.get("relevance_threshold", 0.8))
+
+        try:
+            self.experience_store = ExperienceStore(
+                storage_path=storage_path,
+                packs_path=packs_path,
+                max_experiences=max_exps,
+                relevance_threshold=threshold,
+            )
+            self.logger.info(
+                "ExperienceStore initialized: storage_path=%s packs_path=%s total=%s",
+                storage_path,
+                packs_path,
+                len(getattr(self.experience_store, "experiences", []) or []),
+            )
+        except Exception as e:
+            # Keep system usable even if experience loading fails.
+            self.logger.warning("ExperienceStore init failed; fallback to MockExperienceStore: %s", str(e))
+            self.experience_store = MockExperienceStore()
     
     def _init_rag_systems(self) -> None:
-        """初始化RAG系统 - 为每个Agent创建独立的RAG系统"""
-        print("正在初始化RAG系统...")
+        """Initialize RAG systems - create independent RAG systems for each Agent"""
+        print("Initializing RAG systems...")
         rag_config = self.config.get('rag', {})
         vector_config = self.config.get('vector_store', {})
         
-        # 为每个Agent创建独立的RAG系统
+        # Create independent RAG systems for each Agent
         data_dir = self.config.get('paths', {}).get('raw_data', './data/raw')
         persist_dir = vector_config.get('persist_directory', './data/chroma_db')
         base_collection_name = vector_config.get('collection_name', 'chemical_reactions')
         
-        # 检查数据目录是否有文件
+        # Check if data directory has files
         if not any(Path(data_dir).iterdir()):
-            self.logger.warning(f"数据目录为空: {data_dir}，RAG系统可能无法正常工作")
-            print(f"  警告：数据目录为空，请将化学文献数据放入 {data_dir}")
+            self.logger.warning(f"Data directory is empty: {data_dir}, RAG systems may not function properly")
+            print(f"  Warning: Data directory is empty, please place chemical literature data in {data_dir}")
         
-        # 为每个Agent创建独立的RAG系统，使用不同的collection_name
+        # Create independent RAG systems for each Agent, using different collection_names
         self.rag_systems = {}
-        agent_names = ['agent1', 'agent2', 'agent3', 'agent4']
-        
-        for agent_name in agent_names:
-            collection_name = f"{base_collection_name}_{agent_name}"
-            print(f"  为 {agent_name} 创建RAG系统，使用集合: {collection_name}")
+        provider_keys = ['openai', 'deepseek', 'gemini', 'qwen']
+
+        for provider_key in provider_keys:
+            collection_name = f"{base_collection_name}_{provider_key}"
+            print(f"  Creating RAG system for {provider_key}, using collection: {collection_name}")
             
             rag_system = RAGSystem(
                 data_dir=data_dir,
                 persist_dir=persist_dir,
                 collection_name=collection_name,
-                chunk_size=rag_config.get('chunk_size', 512),
+                chunk_size=rag_config.get('chunk_size', 256),
                 chunk_overlap=rag_config.get('chunk_overlap', 50),
                 top_k=rag_config.get('top_k', 5)
             )
-            self.rag_systems[agent_name] = rag_system
+            self.rag_systems[provider_key] = rag_system
         
-        self.logger.info("RAG系统初始化完成")
+        self.logger.info("RAG systems initialization completed")
     
     def _init_agents(self) -> None:
-        """初始化Agent"""
-        print("正在初始化Agents...")
-        
+        """Initialize Agents"""
+        print("Initializing Agents...")
+
         agent_config = AgentConfig(self.config)
-        
-        # 创建所有Agent
-        self.agents = agent_config.create_all_agents(
-            rag_systems=self.rag_systems,
-            experience_store=self.experience_store
-        )
-        
+
+        agent_specs = [
+            ("agent1", "GPT Researcher", "openai"),
+            ("agent2", "DeepSeek Researcher", "deepseek"),
+            ("agent3", "Gemini Researcher", "gemini"),
+            ("agent4", "Qwen Researcher", "qwen")
+        ]
+
+        self.agents = []
+        for agent_key, agent_name, provider_key in agent_specs:
+            model_config = agent_config.get_llm_config(agent_key)
+            rag_system = self.rag_systems.get(provider_key)
+
+            agent = create_agent(
+                agent_type=model_config.get("provider", provider_key),
+                agent_id=agent_key,
+                name=agent_name,
+                model_config=model_config,
+                rag_system=rag_system,
+                experience_store=self.experience_store
+            )
+
+            self.agents.append(agent)
+            print(f"✓ Successfully created Agent: {agent_name} ({provider_key})")
+
         if not self.agents:
-            raise RuntimeError("没有成功创建任何Agent")
-        
-        self.logger.info(f"成功初始化 {len(self.agents)} 个Agent")
+            raise RuntimeError("No Agents were successfully created")
+
+        self.logger.info(f"Successfully initialized {len(self.agents)} Agents")
     
-    def _init_debate_coordinator(self) -> None:
-        """初始化AutoGen辩论协调器"""
-        print("正在初始化AutoGen辩论协调器...")
+    def _init_debate_coordinators(self) -> None:
+        """Initialize AutoGen debate coordinators"""
+        print("Initializing AutoGen debate coordinators...")
         
         debate_config = self.config.get('debate', {})
         
-        self.debate_coordinator = AutoGenDebateCoordinator(
+        if AutoGenDebateCoordinator is not None:
+            self.autogen_debate_coordinator = AutoGenDebateCoordinator(
+                agents=self.agents,
+                config=debate_config
+            )
+        else:
+            self.autogen_debate_coordinator = None
+
+        # Default LangGraph-style coordinator
+        self.langgraph_debate_coordinator = LangGraphDebateCoordinator(
             agents=self.agents,
-            config=debate_config,
-            use_autogen=False  # 默认使用手动模式，更容易调试
+            config=debate_config
         )
+
+        # Default engine points to LangGraph coordinator
+        self.debate_coordinator = self.langgraph_debate_coordinator
         
-        self.logger.info("AutoGen辩论协调器初始化完成")
     
     def run_debate(
         self,
         components: List[str],
-        save_result: bool = True
+        reaction_type: Optional[str] = None,
+        save_result: bool = True,
+        engine: Optional[str] = None
     ) -> dict:
         """
         Run debate
@@ -220,54 +271,49 @@ class MADSystem:
         if not is_valid:
             raise ValueError(f"Component validation failed: {error_msg}")
         
-        self.logger.info(f"Starting debate with metal catalysts: {components}")
+        if reaction_type:
+            self.logger.info(f"Starting debate with reaction type {reaction_type} and catalysts: {components}")
+        else:
+            self.logger.info(f"Starting debate with metal catalysts: {components}")
         
-        # 创建辩论日志器
+        # Create debate logger
         debate_logger = DebateLogger()
         debate_logger.log_debate_start(components, self.config.get('debate', {}))
         
-        # 执行辩论（使用AutoGen协调器）
-        result = self.debate_coordinator.start_debate(components)
+        # Select debate engine (default: langgraph)
+        selected_engine = (engine or self.default_engine or "langgraph").strip().lower()
+        if selected_engine == "langgraph":
+            coordinator = self.langgraph_debate_coordinator or self.debate_coordinator
+        elif selected_engine == "autogen":
+            coordinator = self.autogen_debate_coordinator
+        else:
+            raise ValueError(f"Unknown debate engine: {selected_engine}")
+
+        if coordinator is None:
+            raise RuntimeError(f"Debate coordinator for engine '{selected_engine}' is not initialized")
+
+        # Run debate
+        result = coordinator.start_debate(components, reaction_type=reaction_type)
+        result_dict = result.to_dict()
+        result_dict["engine"] = selected_engine
         
-        # 记录辩论结束
-        debate_logger.log_debate_end(result.to_dict())
+        # Log debate end
+        debate_logger.log_debate_end(result_dict)
         
-        # 提取经验
-        if result.consensus_reached:
-            self._extract_and_save_experience(result, components)
-        
-        # 保存结果
+        # Save results
         if save_result:
-            self._save_result(result, components)
+            self._save_result(result, components, engine=selected_engine)
         
-        self.logger.info("辩论完成")
+        self.logger.info("Debate completed")
         
-        return result.to_dict()
+        return result_dict
     
-    def _extract_and_save_experience(self, debate_result, components: List[str]) -> None:
-        """提取并保存经验"""
-        print("\n正在提取经验...")
-        
-        extractor = ExperienceExtractor()
-        experience = extractor.extract_from_debate(debate_result, components)
-        
-        # 验证经验
-        is_valid, msg = extractor.validate_experience(experience)
-        if not is_valid:
-            self.logger.warning(f"经验验证失败: {msg}")
-            return
-        
-        # 保存到经验库
-        self.experience_store.add_experience(experience)
-        
-        # 打印经验摘要
-        summary = extractor.format_experience_summary(experience)
-        print(summary)
-        
-        self.logger.info("经验提取和保存完成")
+    def _extract_and_save_experience(self, debate_result, components: List[str], reaction_type: Optional[str] = None) -> None:
+        """Experience extraction interface reserved (currently disabled)"""
+        return
     
-    def _save_result(self, result, components: List[str]) -> None:
-        """保存辩论结果到文件"""
+    def _save_result(self, result, components: List[str], engine: Optional[str] = None) -> None:
+        """Save debate results to file"""
         output_dir = ensure_dir(self.config.get('paths', {}).get('outputs', './outputs'))
         
         from utils.helpers import create_experiment_id, generate_timestamp
@@ -280,89 +326,105 @@ class MADSystem:
         result_data = {
             "experiment_id": exp_id,
             "timestamp": timestamp,
+            "engine": engine,
             "components": components,
             "result": result.to_dict()
         }
         
         save_json(result_data, filepath)
-        
-        print(f"\n结果已保存到: {filepath}")
-        self.logger.info(f"结果已保存: {filepath}")
+        self.logger.info(f"Results saved: {filepath}")
     
     def print_system_status(self) -> None:
-        """打印系统状态"""
-        print_header("系统状态")
-        
+        """Print system status"""
+        print_header("System Status")
+
+        exp_total = 0
+        try:
+            if self.experience_store:
+                exp_total = int(self.experience_store.get_statistics().get("total_experiences", 0))
+        except Exception:
+            exp_total = 0
+
         status = {
-            "初始化状态": "已初始化" if self._initialized else "未初始化",
-            "Agent数量": len(self.agents) if self.agents else 0,
-            "经验库大小": len(self.experience_store.experiences) if self.experience_store else 0,
-            "RAG系统": "已加载" if self.rag_systems else "未加载"
+            "Initialization Status": "Initialized" if self._initialized else "Not Initialized",
+            "Number of Agents": len(self.agents) if self.agents else 0,
+            "Experience Store Size": exp_total,
+            "RAG Systems": "Loaded" if self.rag_systems else "Not Loaded"
         }
         
-        print(dict_to_table(status, headers=("项目", "状态")))
+        print(dict_to_table(status, headers=("Item", "Status")))
         
         if self.experience_store:
             stats = self.experience_store.get_statistics()
-            print_section("经验库统计", dict_to_table(stats, headers=("指标", "值")))
-
+            print_section("Experience Store Statistics", dict_to_table(stats, headers=("Metric", "Value")))
 
 def main():
-    """主程序入口"""
-    # 解析命令行参数
+    """Main program entry point"""
+    valid_reaction_types = [
+        "CO2RR", "EOR", "HER", "HOR", "HZOR", "O5H", "OER", "ORR", "UOR"
+    ]
+    # Parse command-line arguments
     parser = argparse.ArgumentParser(
-        description="多Agent化学反应过电势预测系统"
+        description="Multi-Agent Debate System"
     )
     parser.add_argument(
         '--components',
         type=str,
-        help='化学组分，用逗号或顿号分隔（例如：硫酸,氢氧化钠,氯化钠,硝酸,碳酸钙）'
+        help='Metal components, separated by commas or Chinese commas, e.g., "Pt,Pd,Ru,Ir,Rh"'
+    )
+    parser.add_argument(
+        '--reaction-type',
+        type=str,
+        choices=valid_reaction_types,
+        help='Specify Reaction Type (choose one): CO2RR/EOR/HER/HOR/HZOR/O5H/OER/ORR/UOR'
+    )
+    parser.add_argument(
+        '--engine',
+        type=str,
+        choices=["langgraph", "autogen"],
+        default="langgraph",
+        help='Select Debate Engine: langgraph(default) or autogen'
     )
     parser.add_argument(
         '--config',
         type=str,
         default='./config/config.yaml',
-        help='配置文件路径'
-    )
-    parser.add_argument(
-        '--skip-rag',
-        action='store_true',
-        help='跳过RAG系统初始化（快速测试模式）'
+        help='Path to configuration file'
     )
     parser.add_argument(
         '--status',
         action='store_true',
-        help='显示系统状态'
+        help='Show system status'
     )
     
     args = parser.parse_args()
     
     try:
-        # 创建系统实例
-        system = MADSystem(config_path=args.config)
+        # Create system instance
+        system = MADSystem(config_path=args.config, default_engine=args.engine)
         
-        # 初始化系统
-        system.initialize(skip_rag=args.skip_rag)
+        # Initialize system
+        system.initialize()
         
-        # 显示状态
+        # Show system status
         if args.status:
             system.print_system_status()
             return
         
-        # 运行辩论
+        # Run debate
         if args.components:
             components = parse_component_string(args.components)
             print(f"\nAnalyzing metal catalyst elements: {', '.join(components)}\n")
             
-            result = system.run_debate(components)
+            result = system.run_debate(components, reaction_type=args.reaction_type, engine=args.engine)
             
             # Print result summary
             print_header("Debate Result Summary")
             
             summary = {
                 "Consensus Reached": "Yes" if result['consensus_reached'] else "No",
-                "Reaction Type": result['final_reaction_type'] or "Not Determined",
-                "Overpotential": f"{result['final_overpotential']}V" if result['final_overpotential'] else "Not Estimated",
+                "Products": result.get('final_products') or "Not Determined",
+                "Performance": result.get('final_performance') or "Not Estimated",
                 "Debate Rounds": result['debate_rounds'],
                 "Time Elapsed": format_duration(result['time_elapsed'])
             }
@@ -371,18 +433,15 @@ def main():
         else:
             print("\nNo metal catalyst elements specified.")
             print("Usage: python main.py --components 'Pt,Pd,Ru,Ir,Rh'")
-            print("使用 --components 参数指定组分，例如：")
-            print("  python main.py --components '硫酸,氢氧化钠,氯化钠,硝酸,碳酸钙'")
-            print("\n或使用 --status 查看系统状态")
-            
+         
             system.print_system_status()
     
     except KeyboardInterrupt:
-        print("\n\n程序被用户中断")
+        print("\n\nProgram interrupted by user")
         sys.exit(0)
     
     except Exception as e:
-        print(f"\n错误: {str(e)}")
+        print(f"\nError: {str(e)}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

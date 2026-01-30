@@ -1,51 +1,53 @@
 # ===================================
-# 多Agent化学反应过电势预测系统依赖包
+#  System Dependencies
 # ===================================
 
-# 核心框架 - LlamaIndex (新版本需要分包安装)
+# LlamaIndex 
 llama-index-core>=0.10.0
 llama-index-embeddings-openai>=0.1.0
 llama-index-vector-stores-chroma>=0.1.0
 llama-index>=0.10.0
 
-# 向量数据库
+# Vector Store - ChromaDB
 chromadb>=0.4.22
 
-# 多Agent框架
-pyautogen==0.2.30
+# LangChain (tool-calling agent runtime)
+langchain>=0.2.0
+langchain-core>=0.2.0
+langchain-openai>=0.1.0
 
-# LLM提供商
+# Multi-Agent Framework
+# pyautogen==0.2.30
+
+# LLM Providers
 openai>=1.10.0
 
-# 数据处理 
+# Data Processing 
 pandas>=2.1.0
 numpy>=1.24.0
 pydantic>=2.5.0
 
-# HTTP请求
+# HTTP Requests
 requests>=2.31.0
 
 # Voyage AI Embedding
 voyageai>=0.2.0
 
-# 配置管理
+# Configuration and YAML 
 pyyaml>=6.0.1
 python-dotenv>=1.0.0
 
-# 实用工具
+# Utility Tools
 tqdm>=4.66.0
-tenacity>=8.2.3  # 重试机制
+tenacity>=8.2.3  
 
-# 可选：向量和嵌入 (如需本地embedding模型)
-# sentence-transformers>=2.3.0
-# torch>=2.0.0
-# transformers>=4.36.0
-
-# 可选：科学计算和化学相关
-# rdkit>=2023.9.1  # 化学信息学工具包
+# Optional: Scientific Computing and Chemistry
+# rdkit>=2023.9.1  # Cheminformatics toolkit
 # scipy>=1.11.0
 
-# 可选：开发工具
+# Optional: Development Tools
 # pytest>=7.4.0
 # black>=23.12.0
 # flake8>=7.0.0
+
+

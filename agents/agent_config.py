@@ -9,7 +9,7 @@ import yaml
 from pathlib import Path
 from typing import Dict, List, Union
 from agents.llm_agents import create_agent
-from agents.base_agent import BaseAgent
+from agents.react_agent import ReActAgent
 
 
 class AgentConfig:
@@ -26,11 +26,9 @@ class AgentConfig:
             config: 配置文件路径（str）或配置字典（Dict）
         """
         if isinstance(config, dict):
-            # 如果传入的是字典，直接使用
             self.config = config
             self.config_path = None
         else:
-            # 如果传入的是路径，加载配置文件
             self.config_path = Path(config)
             self.config = self._load_config()
         
@@ -42,7 +40,7 @@ class AgentConfig:
             Dict: 配置字典
         """
         if not self.config_path.exists():
-            raise FileNotFoundError(f"配置文件不存在: {self.config_path}")
+            raise FileNotFoundError(f"Config file not found: {self.config_path}")
         
         with open(self.config_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
@@ -54,16 +52,16 @@ class AgentConfig:
         获取指定Agent的LLM配置
         
         Args:
-            agent_name: Agent名称 ("agent1", "agent2", "agent3")
+            agent_name: Agent Name
         
         Returns:
-            Dict: LLM配置
+            Dict: LLM Configuration
         """
         llm_config = self.config.get('llm', {})
         agent_config = llm_config.get(agent_name)
         
         if agent_config is None:
-            raise ValueError(f"找不到Agent配置: {agent_name}")
+            raise ValueError(f"Agent configuration not found: {agent_name}")
         
         return agent_config
     
@@ -71,7 +69,7 @@ class AgentConfig:
         self,
         rag_systems: Dict = None,
         experience_store = None
-    ) -> List[BaseAgent]:
+    ) -> List[ReActAgent]:
         """
         创建所有配置的Agent
         
@@ -80,32 +78,30 @@ class AgentConfig:
             experience_store: 经验库实例
         
         Returns:
-            List[BaseAgent]: Agent列表
+            List[ReActAgent]: Agent列表
         """
         agents = []
         
-        # 默认的RAG系统字典
         if rag_systems is None:
             rag_systems = {}
         
-        # Agent配置映射
+        # Agent configuration mapping
         agent_configs = [
-            ("agent1", "GPT-5.2 Agent", "agent1"),
-            ("agent2", "Grok4.1 Agent", "agent2"),
-            ("agent3", "Gemini 3.0 Agent", "agent3"),
-            ("agent4", "Qwen3 Agent", "agent4")
+            ("agent1", "GPT Researcher", "agent1"),
+            ("agent2", "DeepSeek Researcher", "agent2"),
+            ("agent3", "Gemini Researcher", "agent3"),
+            ("agent4", "Qwen Researcher", "agent4")
         ]
         
         for agent_key, agent_name, agent_id in agent_configs:
             try:
-                # 获取配置
                 model_config = self.get_llm_config(agent_key)
                 provider = model_config.get('provider')
                 
-                # 获取对应的RAG系统
+                # Get corresponding RAG system
                 rag_system = rag_systems.get(agent_id)
                 
-                # 创建Agent
+                # Create Agent
                 agent = create_agent(
                     agent_type=provider,
                     agent_id=agent_id,
@@ -116,69 +112,56 @@ class AgentConfig:
                 )
                 
                 agents.append(agent)
-                print(f"✓ 成功创建Agent: {agent_name}")
+                print(f"✓ Successfully created Agent: {agent_name}")
                 
             except Exception as e:
-                print(f"✗ 创建Agent失败 ({agent_name}): {str(e)}")
+                print(f"✗ Failed to create Agent ({agent_name}): {str(e)}")
         
         return agents
     
     def get_debate_config(self) -> Dict:
         """
-        获取辩论配置
+        Get debate configuration
         
         Returns:
-            Dict: 辩论配置
+            Dict: Debate configuration
         """
         return self.config.get('debate', {})
     
     def get_rag_config(self) -> Dict:
         """
-        获取RAG配置
+        Get RAG configuration
         
         Returns:
-            Dict: RAG配置
+            Dict: RAG configuration
         """
         return self.config.get('rag', {})
     
     def get_vector_store_config(self) -> Dict:
         """
-        获取向量数据库配置
+        Get vector store configuration
         
         Returns:
-            Dict: 向量数据库配置
+            Dict: Vector store configuration
         """
         return self.config.get('vector_store', {})
     
     def get_experience_config(self) -> Dict:
         """
-        获取经验库配置
+        Get experience configuration
         
         Returns:
-            Dict: 经验库配置
+            Dict: Experience configuration
         """
         return self.config.get('experience', {})
     
     def get_chemistry_config(self) -> Dict:
         """
-        获取化学反应配置
+        Get Reaction configuration
         
         Returns:
-            Dict: 化学反应配置
+            Dict: Reaction configuration
         """
         return self.config.get('chemistry', {})
 
 
-# ===================================
-# 使用示例
-# ===================================
-if __name__ == "__main__":
-    # 加载配置
-    config = AgentConfig("../config/config.yaml")
-    
-    # 创建所有Agent
-    agents = config.create_all_agents()
-    
-    print(f"\n共创建 {len(agents)} 个Agent:")
-    for agent in agents:
-        print(f"  - {agent}")

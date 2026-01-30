@@ -39,8 +39,9 @@ class ExperienceExtractor:
         # 基本信息
         experience = {
             "components": components,
-            "reaction_type": debate_result.final_reaction_type,
-            "overpotential": debate_result.final_overpotential,
+            "reaction_type": None,
+            "products": debate_result.final_products,
+            "performance": debate_result.final_performance,
             "reasoning": debate_result.reasoning_trajectory,
             "debate_rounds": debate_result.debate_rounds,
             "consensus_reached": debate_result.consensus_reached,
@@ -153,9 +154,9 @@ class ExperienceExtractor:
             agents_info[agent_name]["total_messages"] += 1
             
             # 记录该agent的立场
-            reaction = record.get('reaction_type')
-            if reaction:
-                agents_info[agent_name]["positions"].append(reaction)
+            products = record.get('products')
+            if products:
+                agents_info[agent_name]["positions"].append(products)
         
         # 统计每个agent的最终立场
         for agent in agents_info.values():
@@ -186,8 +187,8 @@ class ExperienceExtractor:
             "=" * 60,
             "",
             f"**Metal Catalyst Elements**: {', '.join(experience.get('components', []))}",
-            f"**Reaction Type**: {experience.get('reaction_type', 'Unknown')}",
-            f"**Overpotential**: {experience.get('overpotential', 'Not Estimated')}",
+            f"**Products**: {experience.get('products', 'Unknown')}",
+            f"**Performance**: {experience.get('performance', 'Not Estimated')}",
             f"**Confidence**: {experience.get('confidence', 0):.2f}",
             f"**Debate Rounds**: {experience.get('debate_rounds', 0)}",
             f"**Consensus Reached**: {'Yes' if experience.get('consensus_reached') else 'No'}",
@@ -226,7 +227,8 @@ class ExperienceExtractor:
         # 必需字段
         required_fields = [
             "components",
-            "reaction_type",
+            "products",
+            "performance",
             "reasoning",
             "debate_rounds",
             "consensus_reached"
@@ -244,9 +246,9 @@ class ExperienceExtractor:
                 if not isinstance(value, list) or len(value) == 0:
                     return False, "components必须是非空列表"
             
-            elif field == "reaction_type":
-                if not value or value == "未知":
-                    return False, "reaction_type不能为空或未知"
+            elif field in {"products", "performance"}:
+                if not value:
+                    return False, f"{field}不能为空"
             
             elif field == "debate_rounds":
                 if not isinstance(value, int) or value <= 0:
@@ -315,9 +317,10 @@ class ExperienceExtractor:
         Returns:
             bool: 是否相似
         """
-        # 反应类型必须相同
-        if exp1.get('reaction_type') != exp2.get('reaction_type'):
-            return False
+        # 若两者均有反应类型且不一致，则视为不相似
+        if exp1.get('reaction_type') and exp2.get('reaction_type'):
+            if exp1.get('reaction_type') != exp2.get('reaction_type'):
+                return False
         
         # 计算组分的相似度（使用Jaccard相似度）
         components1 = set(exp1.get('components', []))
@@ -349,13 +352,12 @@ class ExperienceExtractor:
             all_components.update(exp.get('components', []))
         merged['components'] = list(all_components)
         
-        # 平均过电势
-        potentials = [
-            exp.get('overpotential') for exp in group
-            if exp.get('overpotential') is not None
-        ]
-        if potentials:
-            merged['overpotential'] = sum(potentials) / len(potentials)
+        # 合并性能描述（取最后一个非空）
+        for exp in reversed(group):
+            performance = exp.get('performance')
+            if performance:
+                merged['performance'] = performance
+                break
         
         # 平均置信度
         confidences = [exp.get('confidence', 0.5) for exp in group]
@@ -376,16 +378,16 @@ if __name__ == "__main__":
     # 创建模拟辩论结果
     mock_result = DebateResult(
         consensus_reached=True,
-        final_reaction_type="氧化还原反应",
-        final_overpotential=0.45,
+        final_products="CO, H2",
+        final_performance="低过电位/高选择性",
         reasoning_trajectory="详细的推理过程...",
         debate_rounds=3,
         debate_history=[
             {
                 "round": 1,
-                "agent": "GPT-4 Agent",
-                "content": "根据文献证据，氧化还原反应最合适",
-                "reaction_type": "氧化还原反应"
+                "agent": "GPT Researcher",
+                "content": "产物为 CO 与 H2，性能指标表现良好",
+                "products": "CO, H2"
             }
         ],
         time_elapsed=120.5

@@ -71,10 +71,10 @@ MAD/
 
 **config.yaml**: 系统主配置文件
 - LLM配置：四个Agent的模型、API密钥、参数
-  - Agent1: OpenAI GPT-4o-mini
-  - Agent2: xAI Grok-4.1-fast
-  - Agent3: Google Gemini-3-pro
-  - Agent4: DeepSeek V3.2
+   - Agent1: OpenAI GPT-4o-mini
+   - Agent2: DeepSeek V3.2
+   - Agent3: Google Gemini-3-pro
+   - Agent4: Qwen3-Max
   - 每个Agent配置独立的embedding模型
 - 向量数据库配置：Chroma设置
 - RAG配置：检索与分块参数（top_k、相似度阈值、chunk_size、chunk_overlap）
@@ -150,7 +150,7 @@ MAD/
 
 **react_agent.py** 🆕 (约350行)
 - `ReActAgent`基类：具备ReAct推理能力的Agent
-- 继承自`BaseAgent`，集成`ReActEngine`
+- 直接作为抽象基类（ABC），集成`ReActEngine`
 - 实现4个工具函数：
   - `_tool_search_rag()`: RAG检索工具
   - `_tool_query_experience()`: 经验查询工具
@@ -162,9 +162,9 @@ MAD/
 
 **llm_agents.py** (约500行，已升级)
 - `OpenAIAgent`: 基于OpenAI GPT的Agent（支持ReAct）
-- `XAIAgent`: 基于xAI Grok的Agent（支持ReAct）
+- `DeepSeekAgent`: 基于DeepSeek 的Agent（支持ReAct）
 - `GoogleAgent`: 基于Google Gemini的Agent（支持ReAct）
-- `DeepSeekAgent`: 基于DeepSeek的Agent（支持ReAct）
+- `QwenAgent`: 基于Qwen3-Max的Agent（支持ReAct）
 - 所有Agent继承自`ReActAgent`
 - 每个Agent实现`_call_llm()`方法支持ReAct循环
 - `create_agent()`: Agent工厂函数
@@ -258,11 +258,11 @@ MAD/
 MADSystem
 ├── RAGSystem (database/)
 │   └── VectorStore
-├── BaseAgent (agents/)
+├── ReActAgent (agents/)
 │   ├── OpenAIAgent
-│   ├── XAIAgent
+│   ├── DeepSeekAgent
 │   ├── GoogleAgent
-│   └── DeepSeekAgent
+│   └── QwenAgent
 ├── AutoGenDebateCoordinator (debate/)
 │   ├── ConversableAgent (AutoGen)
 │   ├── GroupChat (AutoGen)
@@ -276,7 +276,7 @@ MADSystem
 ### 易于扩展的部分
 
 1. **添加新的Agent**
-   - 继承`BaseAgent`
+   - 继承`ReActAgent`
    - 实现`_init_llm_client()`和`generate_response()`
    - 在`llm_agents.py`中注册
 
